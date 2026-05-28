@@ -3,10 +3,10 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { X, Calendar, Clock, User, Scissors, CreditCard, MessageSquare, CheckCircle, AlertCircle, Loader2, ChevronRight, Sparkles } from "lucide-react";
 import { useCreateBooking } from "../../profile/hooks/useCreateBooking";
-import { useSalonServices } from "../hooks/useSalonServices";
 import { useSalonStaff } from "../hooks/useSalonStaff";
 import { useSalonTimings } from "../hooks/useSalonTimings";
 import { useStaffSlots } from "../hooks/useStaffSlots";
+import { getBusinessCategoriesWithDetails, getServicesByCategoryForBusiness } from "../services/salonService";
 
 const PAYMENT_METHODS = [
     { value: "CASH", label: "Pay After Service", icon: "💶" },
@@ -14,11 +14,21 @@ const PAYMENT_METHODS = [
 
 const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelectedService, preSelectedStaff }) => {
     const { submitBooking, loading: submitting, error: submitError, success, bookingResult, reset } = useCreateBooking();
-    const { services, loading: servicesLoading } = useSalonServices({ id: salonId });
+    
+    // Category & Service states
+    const [categories, setCategories] = useState([]);
+    const [loadingCategories, setLoadingCategories] = useState(false);
+    const [categoriesError, setCategoriesError] = useState(null);
+    const [selectedCategory, setSelectedCategory] = useState(null);
+    
+    const [categoryServices, setCategoryServices] = useState([]);
+    const [loadingCategoryServices, setLoadingCategoryServices] = useState(false);
+    const [categoryServicesError, setCategoryServicesError] = useState(null);
+
     const [selectedServices, setSelectedServices] = useState([]);
     const { staff: allStaff, loading: staffLoading } = useSalonStaff({
         id: salonId,
-        serviceId: null // Force fetching all staff (we removed service-based fetching here)
+        serviceId: null // Force fetching all staff
     });
 
     // Filter out Receptionist/Front Desk
@@ -50,7 +60,6 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
     }, []);
 
     // Form state
-    // Form state - Initialize with pre-selected values if available
     const [selectedStaff, setSelectedStaff] = useState(preSelectedStaff || null);
     const [bookingDate, setBookingDate] = useState("");
     const [startTime, setStartTime] = useState("");
@@ -66,14 +75,49 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
         };
     }, [validationTimeout]);
 
-    // Step logic: If we have a pre-selected service, jump to step 2. Otherwise start at 1.
-    const [step, setStep] = useState(preSelectedService ? 2 : 1); // 1: Services, 2: Staff & Time, 3: Review
+    // Step logic: If we have a pre-selected service, jump directly to step 3 (Schedule). Otherwise start at 1.
+    const [step, setStep] = useState(preSelectedService ? 3 : 1); // 1: Categories, 2: Services, 3: Schedule, 4: Review
     const [activeDate, setActiveDate] = useState(todayStr);
+
+    // Initial load: fetch business categories
+    useEffect(() => {
+        if (!isOpen || !salonId) return;
+
+        const fetchCategories = async () => {
+            setLoadingCategories(true);
+            setCategoriesError(null);
+            try {
+                const data = await getBusinessCategoriesWithDetails(salonId);
+                setCategories(data || []);
+            } catch (err) {
+                console.error("Error fetching categories for modal:", err);
+                setCategoriesError("Failed to fetch categories.");
+            } finally {
+                setLoadingCategories(false);
+            }
+        };
+
+        fetchCategories();
+    }, [isOpen, salonId]);
+
+    // Pre-select category if preSelectedService changes and categories are loaded
+    useEffect(() => {
+        if (preSelectedService && categories.length > 0) {
+            const matchedCat = categories.find(
+                (c) => c.name?.toLowerCase() === preSelectedService.categoryName?.toLowerCase() ||
+                       c.id === preSelectedService.categoryId
+            );
+            if (matchedCat) {
+                setSelectedCategory(matchedCat);
+            }
+        }
+    }, [preSelectedService, categories]);
 
     // Initialize services
     useEffect(() => {
         if (preSelectedService) {
             setSelectedServices([preSelectedService]);
+            setStep(3); // Direct to Schedule
         }
     }, [preSelectedService]);
 
@@ -105,9 +149,13 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                 setValidationTimeout(null);
             }
             setActiveDate(todayStr);
-            setStep(preSelectedService ? 2 : 1);
+            setStep(preSelectedService ? 3 : 1);
             if (!preSelectedStaff) setSelectedStaff(null);
-            if (!preSelectedService) setSelectedServices([]);
+            if (!preSelectedService) {
+                setSelectedServices([]);
+                setSelectedCategory(null);
+                setCategoryServices([]);
+            }
             reset();
         }
     }, [isOpen, todayStr, reset, preSelectedService, preSelectedStaff, validationTimeout]);
@@ -151,7 +199,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
         const start = service.startPrice || service.price || 0;
         const end = service.endPrice || service.price || 0;
         
-        if (step === 1) {
+        if (step <= 2) {
             if (start === end) {
                 return `AED ${start}`;
             }
@@ -170,7 +218,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
 
     // Format totals/subtotals depending on step and chosen staff
     const getTotalsPriceString = () => {
-        if (step === 1) {
+        if (step <= 2) {
             if (totals.totalStart === totals.totalEnd) {
                 return `AED ${totals.totalStart}`;
             }
@@ -195,7 +243,27 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
         });
     };
 
-    const canProceedStep1 = selectedServices.length > 0;
+    // Handle Category selection
+    const handleSelectCategory = async (category) => {
+        setSelectedCategory(category);
+        setStep(2); // Move to Services step
+        setLoadingCategoryServices(true);
+        setCategoryServicesError(null);
+        try {
+            const data = await getServicesByCategoryForBusiness(salonId, category.id);
+            setCategoryServices(data || []);
+        } catch (err) {
+            console.error("Error fetching services for category:", err);
+            setCategoryServicesError("Failed to fetch services.");
+        } finally {
+            setLoadingCategoryServices(false);
+        }
+    };
+
+    const canProceedStep1 = selectedCategory !== null;
+    const canProceedStep2 = selectedServices.length > 0;
+    const canProceedStep3 = (selectedStaff || !selectedStaff) && bookingDate && startTime;
+    const canSubmit = canProceedStep2 && canProceedStep3;
 
     // --- Timings Validation ---
     const getSelectedDayLabel = (dateStr) => {
@@ -213,7 +281,6 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
 
     const availableTimeSlots = useMemo(() => {
         if (!staffSlots) return [];
-        // Group slots by date
         const grouped = staffSlots.reduce((acc, slot) => {
             if (!acc[slot.date]) acc[slot.date] = [];
             acc[slot.date].push({
@@ -231,7 +298,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
         for (let i = 0; i < 4; i++) {
             const d = new Date();
             d.setDate(d.getDate() + i);
-            const dateStr = d.toLocaleDateString('en-CA'); // YYYY-MM-DD in local time
+            const dateStr = d.toLocaleDateString('en-CA');
             dates.push({
                 date: dateStr,
                 label: i === 0 ? "Today" : d.toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" })
@@ -240,14 +307,10 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
         return dates;
     }, []);
 
-    const canProceedStep2 = (selectedStaff || !selectedStaff) && bookingDate && startTime;
-    const canSubmit = canProceedStep1 && canProceedStep2;
-
     const handleSubmit = async () => {
         if (paymentMethod !== "CASH") {
             setValidationError("Choose Payment method!");
             
-            // Clear any existing timeout
             if (validationTimeout) clearTimeout(validationTimeout);
             
             const timer = setTimeout(() => {
@@ -274,7 +337,6 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
             paymentMethod,
         };
 
-        // Remove null staffId if not selected
         if (!bookingData.staffId) delete bookingData.staffId;
 
         try {
@@ -303,7 +365,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                     </p>
                     <div className="bg-[#628EB8]/5 border border-[#628EB8]/20 rounded-2xl p-4 my-4 text-[#1F355E] text-xs sm:text-sm font-semibold leading-relaxed">
                          Please arrive <strong className="font-extrabold text-[#628EB8]">5 minutes early</strong> and show your <strong className="font-extrabold text-[#628EB8]">service code</strong> to the barber.
-                    </div>
+                     </div>
                     {bookingResult?.bookingNumber && (
                         <div className="bg-[#F8FAFC] rounded-2xl p-4 my-6 border border-[#E0E0E0]">
                             <span className="text-[10px] uppercase tracking-[0.3em] text-[#628EB8] font-bold block mb-1">Booking Number</span>
@@ -349,16 +411,18 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                 {/* Step Indicators */}
                 <div className="px-3 py-3 sm:px-8 sm:py-4 bg-white border-b border-[#E0E0E0] flex items-center gap-1 sm:gap-3 shrink-0 overflow-x-auto no-scrollbar">
                     {[
-                        { num: 1, label: "Services" },
-                        { num: 2, label: "Schedule" },
-                        { num: 3, label: "Review" },
+                        { num: 1, label: "Categories" },
+                        { num: 2, label: "Services" },
+                        { num: 3, label: "Schedule" },
+                        { num: 4, label: "Review" },
                     ].map((s, i) => (
                         <React.Fragment key={s.num}>
                             <button
                                 onClick={() => {
                                     if (s.num < step) setStep(s.num);
-                                    if (s.num === 2 && canProceedStep1) setStep(2);
-                                    if (s.num === 3 && canProceedStep1 && canProceedStep2) setStep(3);
+                                    if (s.num === 2 && selectedCategory) setStep(2);
+                                    if (s.num === 3 && selectedServices.length > 0) setStep(3);
+                                    if (s.num === 4 && selectedServices.length > 0 && bookingDate && startTime) setStep(4);
                                 }}
                                 className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.15em] transition-all whitespace-nowrap ${step === s.num ? "bg-[#628EB8] text-white" : step > s.num ? "bg-[#1F355E] text-white" : "bg-white text-[#9babb8] border border-[#E0E0E0]"}`}
                             >
@@ -367,36 +431,130 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                 </span>
                                 {s.label}
                             </button>
-                            {i < 2 && <ChevronRight size={14} className="text-[#628EB8]/30 shrink-0" />}
+                            {i < 3 && <ChevronRight size={14} className="text-[#628EB8]/30 shrink-0" />}
                         </React.Fragment>
                     ))}
                 </div>
 
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto p-4 sm:p-8">
-                    {/* ─── STEP 1: Select Services ───────────────────── */}
+                    {/* ─── STEP 1: Select Category ───────────────────── */}
                     {step === 1 && (
                         <div>
                             <div className="mb-4 sm:mb-6">
                                 <h3 className="font-[Cormorant_Garamond,Georgia,serif] text-xl sm:text-2xl text-[#1F355E] mb-1 leading-tight">
-                                    Select Services
+                                    Select Category
                                 </h3>
-                                <p className="text-[#628EB8] text-xs sm:text-sm">Choose one or more services for your appointment</p>
+                                <p className="text-[#628EB8] text-xs sm:text-sm">Choose a category of services to browse</p>
                             </div>
 
-                            {servicesLoading ? (
+                            {loadingCategories ? (
+                                <div className="flex items-center justify-center py-12">
+                                    <Loader2 className="w-6 h-6 text-[#1F355E] animate-spin" />
+                                    <span className="ml-3 text-[#628EB8] text-sm">Loading categories...</span>
+                                </div>
+                            ) : categoriesError ? (
+                                <div className="text-center py-12">
+                                    <p className="text-red-500 text-sm mb-3">{categoriesError}</p>
+                                    <button 
+                                        onClick={() => {
+                                            setCategoriesError(null);
+                                            setLoadingCategories(true);
+                                            getBusinessCategoriesWithDetails(salonId)
+                                                .then(data => setCategories(data || []))
+                                                .catch(() => setCategoriesError("Failed to load categories"))
+                                                .finally(() => setLoadingCategories(false));
+                                        }}
+                                        className="px-4 py-2 bg-[#1F355E] text-white text-xs font-bold rounded-xl"
+                                    >
+                                        Retry
+                                    </button>
+                                </div>
+                            ) : categories.length === 0 ? (
+                                <div className="text-center py-12">
+                                    <p className="text-[#628EB8] text-sm">No categories available at this time.</p>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {categories.map((category) => {
+                                        const isSelected = selectedCategory?.id === category.id;
+                                        return (
+                                            <button
+                                                key={category.id}
+                                                onClick={() => handleSelectCategory(category)}
+                                                className={`w-full text-left p-5 rounded-2xl border-2 transition-all duration-300 group flex flex-col justify-between h-40 ${isSelected ? "border-[#628EB8] bg-[#628EB8]/5 shadow-sm" : "border-[#E0E0E0] bg-white hover:border-[#628EB8]/30 hover:bg-[#F8FAFC]"}`}
+                                            >
+                                                <div className="w-full">
+                                                    <div className="flex justify-between items-center gap-2 mb-2">
+                                                        <span className="text-[9px] tracking-widest uppercase font-bold text-[#C5A566]">
+                                                            {category.serviceCount} Services
+                                                        </span>
+                                                        {isSelected && <CheckCircle size={16} className="text-[#628EB8]" />}
+                                                    </div>
+                                                    <h4 className="font-[Cormorant_Garamond,Georgia,serif] text-lg font-bold text-[#1F355E] group-hover:text-[#C5A566] transition-colors leading-tight">
+                                                        {category.name}
+                                                    </h4>
+                                                    <p className="text-gray-400 text-[11px] mt-1.5 line-clamp-2 leading-relaxed">
+                                                        {category.description || "Explore our premium styling rituals."}
+                                                    </p>
+                                                </div>
+
+                                                <div className="w-full pt-3 border-t border-[#E0E0E0]/30 mt-auto flex justify-between items-center text-[10px] text-gray-500 font-medium">
+                                                    <span>Range: AED {category.minPrice} - {category.maxPrice}</span>
+                                                    <span className="flex items-center gap-0.5 text-[#1F355E] font-bold group-hover:translate-x-1 transition-transform">
+                                                        View <ChevronRight size={10} />
+                                                    </span>
+                                                </div>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* ─── STEP 2: Select Services ───────────────────── */}
+                    {step === 2 && (
+                        <div>
+                            <div className="mb-4 sm:mb-6 flex justify-between items-end gap-4">
+                                <div>
+                                    <h3 className="font-[Cormorant_Garamond,Georgia,serif] text-xl sm:text-2xl text-[#1F355E] mb-1 leading-tight">
+                                        Select Services
+                                    </h3>
+                                    <p className="text-[#628EB8] text-xs sm:text-sm">
+                                        Category: <span className="font-bold text-[#1F355E]">{selectedCategory?.name}</span>
+                                    </p>
+                                </div>
+                                <button 
+                                    onClick={() => setStep(1)}
+                                    className="text-xs font-bold text-[#628EB8] hover:text-[#1F355E] underline flex items-center gap-1 cursor-pointer"
+                                >
+                                    Change Category
+                                </button>
+                            </div>
+
+                            {loadingCategoryServices ? (
                                 <div className="flex items-center justify-center py-12">
                                     <Loader2 className="w-6 h-6 text-[#1F355E] animate-spin" />
                                     <span className="ml-3 text-[#628EB8] text-sm">Loading services...</span>
                                 </div>
-                            ) : !services || services.length === 0 ? (
+                            ) : categoryServicesError ? (
                                 <div className="text-center py-12">
-                                    <Scissors className="w-10 h-10 text-[#628EB8]/30 mx-auto mb-3" />
-                                    <p className="text-[#628EB8] text-sm">No services available at this time.</p>
+                                    <p className="text-red-500 text-sm mb-3">{categoryServicesError}</p>
+                                    <button 
+                                        onClick={() => handleSelectCategory(selectedCategory)}
+                                        className="px-4 py-2 bg-[#1F355E] text-white text-xs font-bold rounded-xl"
+                                    >
+                                        Retry
+                                    </button>
+                                </div>
+                            ) : categoryServices.length === 0 ? (
+                                <div className="text-center py-12">
+                                    <p className="text-[#628EB8] text-sm">No services available under this category.</p>
                                 </div>
                             ) : (
                                 <div className="space-y-3">
-                                    {services.map((service) => {
+                                    {categoryServices.map((service) => {
                                         const isSelected = selectedServices.some((s) => s.id === service.id);
                                         return (
                                             <button
@@ -418,6 +576,11 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                                                     <Clock size={10} /> {service.durationMinutes} min
                                                                 </span>
                                                             )}
+                                                            {service.description && (
+                                                                <p className="text-gray-400 text-[10px] mt-1 truncate">
+                                                                    {service.description}
+                                                                </p>
+                                                            )}
                                                         </div>
                                                     </div>
                                                     <div className="text-right shrink-0">
@@ -434,8 +597,8 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                         </div>
                     )}
 
-                    {/* ─── STEP 2: Staff, Date & Time ───────────────── */}
-                    {step === 2 && (
+                    {/* ─── STEP 3: Staff, Date & Time ───────────────── */}
+                    {step === 3 && (
                         <div className="space-y-6 sm:space-y-8">
                             {/* Staff Selection (Optional) */}
                             <div>
@@ -496,26 +659,26 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
 
                             {/* Date Selection Pills */}
                             <div>
-                                    <h3 className="font-[Cormorant_Garamond,Georgia,serif] text-xl text-[#1F355E] mb-1 flex items-center gap-2">
-                                        <Calendar size={18} className="text-[#628EB8]" />
-                                        Select Date
-                                    </h3>
-                                    <div className="flex gap-2 overflow-x-auto pb-2 mt-3 no-scrollbar">
-                                        {availableDates.map((d) => (
-                                            <button
-                                                key={d.date}
-                                                onClick={() => {
-                                                    setActiveDate(d.date);
-                                                    setStartTime("");
-                                                    setBookingDate("");
-                                                }}
-                                                className={`flex-shrink-0 px-5 py-3 rounded-xl border-2 text-[10px] font-bold uppercase tracking-wider transition-all ${activeDate === d.date ? "border-[#628EB8] bg-[#628EB8] text-white shadow-md" : "border-[#E0E0E0] bg-white text-[#1F355E] hover:border-[#628EB8]/20"}`}
-                                            >
-                                                {d.label}
-                                            </button>
-                                        ))}
-                                    </div>
+                                <h3 className="font-[Cormorant_Garamond,Georgia,serif] text-xl text-[#1F355E] mb-1 flex items-center gap-2">
+                                    <Calendar size={18} className="text-[#628EB8]" />
+                                    Select Date
+                                </h3>
+                                <div className="flex gap-2 overflow-x-auto pb-2 mt-3 no-scrollbar">
+                                    {availableDates.map((d) => (
+                                        <button
+                                            key={d.date}
+                                            onClick={() => {
+                                                setActiveDate(d.date);
+                                                setStartTime("");
+                                                setBookingDate("");
+                                            }}
+                                            className={`flex-shrink-0 px-5 py-3 rounded-xl border-2 text-[10px] font-bold uppercase tracking-wider transition-all ${activeDate === d.date ? "border-[#628EB8] bg-[#628EB8] text-white shadow-md" : "border-[#E0E0E0] bg-white text-[#1F355E] hover:border-[#628EB8]/20"}`}
+                                        >
+                                            {d.label}
+                                        </button>
+                                    ))}
                                 </div>
+                            </div>
 
                             {/* Time Selection */}
                             <div>
@@ -586,14 +749,13 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                         </div>
                     )}
 
-                    {/* ─── STEP 3: Review & Confirm ────────────────── */}
-                    {step === 3 && (
+                    {/* ─── STEP 4: Review & Confirm ────────────────── */}
+                    {step === 4 && (
                         <div className="space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                             <div>
                                 <h3 className="font-[Cormorant_Garamond,Georgia,serif] text-xl sm:text-2xl text-[#1F355E] mb-1 leading-tight">
                                     Final Review
                                 </h3>
-                                {/* <p className="text-[#628EB8] text-xs sm:text-sm">One last look before we confirm your appointment.</p> */}
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -626,7 +788,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                                 <img src={selectedStaff.userProfileImageUrl || selectedStaff.profileImageUrl} alt="" className="w-8 h-8 rounded-full object-cover border border-[#628EB8]/20" />
                                             ) : (
                                                 <div className="w-8 h-8 rounded-full bg-[#1F355E] text-white flex items-center justify-center text-[10px] font-bold">
-                                                    {selectedStaff ? (selectedStaff.userFullName || selectedStaff.fullName)?.substring(0, 2).toUpperCase() : "AA"}
+                                                    {selectedStaff ? (selectedStaff.userFullName || selectedStaff.fullName)?.substring(0, 2).toUpperCase() : "Any"}
                                                 </div>
                                             )}
                                             <p className="text-sm text-[#1F355E] font-semibold">
@@ -660,7 +822,6 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                                         }}
                                                         className={`w-full sm:flex-1 flex items-center justify-start gap-4 p-4 rounded-2xl border-2 transition-all group ${isSelected ? "border-[#1F355E] bg-[#1F355E] text-white shadow-md" : "border-[#E0E0E0] bg-white text-[#1F355E] hover:border-[#628EB8]/30"}`}
                                                     >
-                                                        {/* Tick Box UI (Exactly like Step 1) */}
                                                         <div className={`w-5 h-5 rounded-md border-2 shrink-0 flex items-center justify-center transition-all duration-300 ${isSelected ? "bg-white border-white" : "border-[#E0E0E0] bg-white group-hover:border-[#628EB8]/50"}`}>
                                                             {isSelected && <CheckCircle size={14} className="text-[#1F355E]" strokeWidth={3} />}
                                                         </div>
@@ -773,10 +934,14 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                             </button>
                         )}
 
-                        {step < 3 ? (
+                        {step < 4 ? (
                             <button
                                 onClick={() => setStep((s) => s + 1)}
-                                disabled={(step === 1 && !canProceedStep1) || (step === 2 && !canProceedStep2)}
+                                disabled={
+                                    (step === 1 && !canProceedStep1) ||
+                                    (step === 2 && !canProceedStep2) ||
+                                    (step === 3 && !canProceedStep3)
+                                }
                                 className="px-6 sm:px-8 py-2.5 sm:py-3 rounded-xl bg-[#1F355E] text-white text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.15em] hover:bg-[#628EB8] transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                             >
                                 Continue

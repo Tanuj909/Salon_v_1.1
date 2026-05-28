@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect, useState } from "react";
+import { getBusinessCategoriesWithDetails, getServicesByCategoryForBusiness } from "../services/salonService";
 
 // ─── Reveal Animation ──────────────────────────────────────────────────────────
 function useReveal() {
@@ -86,10 +87,6 @@ const SERVICE_IMAGE_MAP = [
     { keywords: ["nail"],                    image: "/services/nailart.png" },
 ];
 
-/**
- * Returns the matching service image path, or null if no match is found.
- * When null is returned the image section will be hidden on the card.
- */
 function getServiceImage(serviceName) {
     if (!serviceName) return null;
     const name = serviceName.toLowerCase();
@@ -101,41 +98,104 @@ function getServiceImage(serviceName) {
     return null;
 }
 
+// ─── Skeletons ─────────────────────────────────────────────────────────────────
+function SkeletonCard() {
+    return (
+        <div className="w-full max-w-[340px] mx-auto bg-white border border-[#E2E8F0] rounded-[18px] p-6 h-64 flex flex-col justify-between animate-pulse">
+            <div>
+                <div className="flex justify-between items-center mb-4">
+                    <div className="h-3 bg-[#E2E8F0] rounded w-1/4" />
+                    <div className="h-4 bg-[#E2E8F0] rounded-full w-12" />
+                </div>
+                <div className="h-6 bg-[#E2E8F0] rounded w-3/4 mb-3" />
+                <div className="h-3 bg-[#E2E8F0] rounded w-5/6 mb-2" />
+                <div className="h-3 bg-[#E2E8F0] rounded w-2/3" />
+            </div>
+            <div className="h-10 bg-[#E2E8F0] rounded-xl w-full mt-6" />
+        </div>
+    );
+}
+
+// ─── Category Card ─────────────────────────────────────────────────────────────
+function CategoryCard({ category, index, onClick }) {
+    return (
+        <Reveal delay={index * 80}>
+            <div 
+                onClick={onClick}
+                className="group w-full max-w-[340px] mx-auto bg-white rounded-[18px] border border-[#E2E8F0] overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 h-full flex flex-col cursor-pointer relative"
+            >
+                {/* Visual Top Highlight */}
+                <div className="h-2 bg-[#1C3152] w-full" />
+                
+                <div className="p-6 flex flex-col flex-1">
+                    <div className="mb-4">
+                        <div className="flex justify-between items-start gap-2 mb-2">
+                            <span className="text-[10px] tracking-[0.18em] uppercase font-bold text-[#C49B66]">
+                                Category
+                            </span>
+                            <span className="bg-[#1C3152]/10 text-[#1C3152] text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                                {category.serviceCount} Services
+                            </span>
+                        </div>
+                        <h3 className="text-[24px] font-bold text-[#1C3152] tracking-[-0.3px] leading-tight font-[Cormorant_Garamond,serif] group-hover:text-[#C49B66] transition-colors duration-200">
+                            {category.name}
+                        </h3>
+                    </div>
+
+                    <p className="text-[13px] text-[#6B6B6B] leading-relaxed mb-6 line-clamp-2">
+                        {category.description || "Explore our premium selection of services tailored for you."}
+                    </p>
+
+                    <div className="mt-auto pt-4 border-t border-[#E2E8F0]">
+                        <div className="flex justify-between items-center text-[12px]">
+                            <span className="text-[#6B6B6B]">Price Range:</span>
+                            <span className="font-bold text-[#1C3152]">
+                                AED {category.minPrice} - {category.maxPrice}
+                            </span>
+                        </div>
+                        <div className="flex justify-between items-center text-[12px] mt-1">
+                            <span className="text-[#6B6B6B]">Avg. Price:</span>
+                            <span className="font-semibold text-[#C49B66]">
+                                AED {category.avgPrice}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="mt-6">
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onClick(); }}
+                            className="rec-btn-primary w-full py-3 rounded-xl border-0 text-xs font-bold cursor-pointer tracking-[0.06em] uppercase flex items-center justify-center gap-2 group-hover:bg-[#16263F] transition-all duration-300"
+                        >
+                            View Services
+                            <svg className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </Reveal>
+    );
+}
+
 // ─── Service Card ──────────────────────────────────────────────────────────────
-function ServiceCard({ service, index, onBookNow, salon }) {
+function ServiceCard({ service, index, onBookNow, salon, onOpenSlider }) {
     const salonName = salon?.name || "Glamour Studio";
     const salonCategory = salon?.category?.name || "Premium Salon";
-    const serviceImage = getServiceImage(service.name);
-    const [showPreview, setShowPreview] = useState(false);
+    
+    // Choose service image using priority: imageUrls[0] -> imageUrl -> helper mapped fallback
+    const serviceImage = (service.imageUrls && service.imageUrls.length > 0)
+        ? service.imageUrls[0]
+        : (service.imageUrl || getServiceImage(service.name));
+    
+    // Fallback list of slider images if imageUrls is null
+    const sliderImages = (service.imageUrls && service.imageUrls.length > 0)
+        ? service.imageUrls
+        : (service.imageUrl ? [service.imageUrl] : (serviceImage ? [serviceImage] : []));
 
     return (
         <Reveal delay={index * 80}>
-            <div className="group w-full max-w-[340px] mx-auto service-card-bg rounded-[18px] border overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 h-full flex flex-col relative">
-
-                {/* Image Preview Overlay */}
-                {showPreview && serviceImage && (
-                    <div
-                        className="absolute inset-0 z-20 flex items-center justify-center rounded-[18px]"
-                        style={{ backgroundColor: "rgba(0,0,0,0.85)", animation: "servicePreviewFadeIn 0.2s ease-out" }}
-                        onClick={() => setShowPreview(false)}
-                    >
-                        <button
-                            onClick={(e) => { e.stopPropagation(); setShowPreview(false); }}
-                            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-white/30 hover:scale-110 active:scale-95 z-30"
-                            aria-label="Close preview"
-                        >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
-                                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-                            </svg>
-                        </button>
-                        <img
-                            src={serviceImage}
-                            alt={service.name}
-                            className="max-w-[85%] max-h-[85%] object-contain rounded-2xl shadow-2xl"
-                            style={{ animation: "servicePreviewScaleIn 0.25s ease-out" }}
-                        />
-                    </div>
-                )}
+            <div className="group w-full max-w-[340px] mx-auto service-card-bg rounded-[18px] border border-[#E2E8F0] overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 h-full flex flex-col relative">
 
                 {/* Header */}
                 <div className="service-card-header-bg p-4 sm:p-[0.9rem_1.25rem] shrink-0">
@@ -167,18 +227,25 @@ function ServiceCard({ service, index, onBookNow, salon }) {
                 <div className="p-[1.25rem_1.25rem_1.4rem] flex flex-col flex-1">
 
                     {/* Service Label + Title + Image */}
-                    <div className="pb-4 mb-4 flex items-center gap-4">
+                    <div className="pb-4 mb-4 flex items-start gap-4">
                         <div className="flex-1 min-w-0">
                             <p className="rec-section-heading-accent text-[10px] tracking-[0.18em] uppercase font-bold mb-[5px]">Service</p>
                             <h2 className="rec-section-heading text-[24px] font-bold m-0 tracking-[-0.3px] leading-tight line-clamp-2 font-[Cormorant_Garamond,serif]">
                                 {service.name}
                             </h2>
+                            <p className="text-[#6B6B6B] text-[12px] mt-1.5 line-clamp-2 leading-relaxed">
+                                {service.description || "Premium styling ritual designed tailored to your needs."}
+                            </p>
                         </div>
                         {serviceImage && (
                             <div
-                                className="w-[72px] h-[72px] rounded-2xl overflow-hidden shrink-0 shadow-lg border border-white/10 cursor-pointer transition-transform duration-200 hover:scale-105 active:scale-95"
-                                onClick={() => setShowPreview(true)}
-                                title="Click to preview"
+                                className="w-[72px] h-[72px] rounded-2xl overflow-hidden shrink-0 shadow-lg border border-[#E2E8F0] cursor-pointer transition-transform duration-200 hover:scale-105 active:scale-95 relative group/img"
+                                onClick={() => {
+                                    if (sliderImages.length > 0) {
+                                        onOpenSlider(sliderImages, 0);
+                                    }
+                                }}
+                                title="Click to view images"
                             >
                                 <img
                                     src={serviceImage}
@@ -186,18 +253,42 @@ function ServiceCard({ service, index, onBookNow, salon }) {
                                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                                     loading="lazy"
                                 />
+                                {sliderImages.length > 1 && (
+                                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity duration-200">
+                                        <span className="text-[10px] text-white font-bold bg-black/60 px-1.5 py-0.5 rounded-md">
+                                            +{sliderImages.length - 1}
+                                        </span>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
 
                     {/* Price Section */}
-                    <div className="mb-6 flex items-center justify-between">
+                    <div className="mb-6 flex items-center justify-between border-t border-[#E2E8F0] pt-4 mt-auto">
                         <span className="text-[12px] font-bold rec-section-heading font-[Cormorant_Garamond,serif] uppercase tracking-wider">
                             Price
                         </span>
-                        <span className="text-[16px] font-bold rec-section-heading-accent font-[Cormorant_Garamond,serif]">
-                            AED ({service.startPrice || service.price} - {service.endPrice || service.price})
-                        </span>
+                        <div>
+                            {service.discountedPrice && service.discountedPrice < service.price ? (
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[12px] text-[#6B6B6B] line-through font-semibold">
+                                        AED {service.price}
+                                    </span>
+                                    <span className="text-[16px] font-bold text-[#C49B66]">
+                                        AED {service.discountedPrice}
+                                    </span>
+                                </div>
+                            ) : (
+                                <span className="text-[16px] font-bold text-[#C49B66] font-[Cormorant_Garamond,serif]">
+                                    {service.startPrice && service.endPrice && service.startPrice !== service.endPrice ? (
+                                        `AED ${service.startPrice} - ${service.endPrice}`
+                                    ) : (
+                                        `AED ${service.price || service.startPrice}`
+                                    )}
+                                </span>
+                            )}
+                        </div>
                     </div>
 
                     {/* CTA Button & Footer */}
@@ -216,17 +307,196 @@ function ServiceCard({ service, index, onBookNow, salon }) {
     );
 }
 
+// ─── Image Slider Lightbox Modal ───────────────────────────────────────────────
+function ImageSliderModal({ images, currentIndex, onClose, onPrev, onNext, onIndexSelect }) {
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === "Escape") onClose();
+            if (e.key === "ArrowLeft") onPrev();
+            if (e.key === "ArrowRight") onNext();
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [onClose, onPrev, onNext]);
+
+    if (!images || images.length === 0) return null;
+
+    return (
+        <div 
+            className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/95 backdrop-blur-md transition-opacity duration-300"
+            onClick={onClose}
+        >
+            {/* Close Button */}
+            <button 
+                onClick={onClose}
+                className="absolute top-6 right-6 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 z-[100000]"
+                aria-label="Close slider"
+            >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+            </button>
+
+            {/* Previous Button */}
+            {images.length > 1 && (
+                <button
+                    onClick={(e) => { e.stopPropagation(); onPrev(); }}
+                    className="absolute left-6 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 z-[100000]"
+                    aria-label="Previous image"
+                >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12" />
+                        <polyline points="12 19 5 12 12 5" />
+                    </svg>
+                </button>
+            )}
+
+            {/* Main Image Container */}
+            <div 
+                className="max-w-[90%] max-h-[80%] flex items-center justify-center select-none"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <img
+                    src={images[currentIndex]}
+                    alt={`Slider image ${currentIndex + 1}`}
+                    className="max-w-full max-h-[80vh] object-contain rounded-xl shadow-2xl transition-all duration-300"
+                    style={{ animation: "servicePreviewScaleIn 0.25s ease-out" }}
+                />
+            </div>
+
+            {/* Next Button */}
+            {images.length > 1 && (
+                <button
+                    onClick={(e) => { e.stopPropagation(); onNext(); }}
+                    className="absolute right-6 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 z-[100000]"
+                    aria-label="Next image"
+                >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                        <polyline points="12 5 19 12 12 19" />
+                    </svg>
+                </button>
+            )}
+
+            {/* Indicators */}
+            <div className="absolute bottom-6 flex flex-col items-center gap-2 text-white">
+                {images.length > 1 && (
+                    <div className="flex gap-2">
+                        {images.map((_, idx) => (
+                            <button
+                                key={idx}
+                                onClick={(e) => { e.stopPropagation(); onIndexSelect(idx); }}
+                                className={`w-2 h-2 rounded-full transition-all duration-200 ${idx === currentIndex ? "bg-[#C49B66] w-4" : "bg-white/30"}`}
+                                aria-label={`Go to slide ${idx + 1}`}
+                            />
+                        ))}
+                    </div>
+                )}
+                <span className="text-xs tracking-wider opacity-60 font-semibold uppercase">
+                    {currentIndex + 1} / {images.length}
+                </span>
+            </div>
+        </div>
+    );
+}
+
 // ─── Main Component ────────────────────────────────────────────────────────────
-const SalonServices = ({ services, salon, onBookService }) => {
-    if (!services || services.length === 0) {
-        return null;
+const SalonServices = ({ salon, onBookService }) => {
+    // Categories States
+    const [categories, setCategories] = useState([]);
+    const [loadingCategories, setLoadingCategories] = useState(true);
+    const [categoriesError, setCategoriesError] = useState(null);
+
+    // Selected Category Services States
+    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [categoryServices, setCategoryServices] = useState([]);
+    const [loadingServices, setLoadingServices] = useState(false);
+    const [servicesError, setServicesError] = useState(null);
+
+    // Image Slider Lightbox States
+    const [sliderImages, setSliderImages] = useState(null);
+    const [currentSliderIndex, setCurrentSliderIndex] = useState(0);
+
+    // Initial load: fetch business categories
+    useEffect(() => {
+        if (!salon?.id) {
+            setLoadingCategories(false);
+            return;
+        }
+
+        const fetchCategories = async () => {
+            setLoadingCategories(true);
+            setCategoriesError(null);
+            try {
+                const data = await getBusinessCategoriesWithDetails(salon.id);
+                setCategories(data || []);
+            } catch (err) {
+                console.error("Error fetching categories:", err);
+                setCategoriesError("Failed to fetch service categories.");
+            } finally {
+                setLoadingCategories(false);
+            }
+        };
+
+        fetchCategories();
+    }, [salon?.id]);
+
+    // Handle Category Card Click: fetch category-specific services
+    const handleSelectCategory = async (category) => {
+        setSelectedCategory(category);
+        setLoadingServices(true);
+        setServicesError(null);
+        try {
+            const data = await getServicesByCategoryForBusiness(salon.id, category.id);
+            setCategoryServices(data || []);
+        } catch (err) {
+            console.error("Error fetching category services:", err);
+            setServicesError("Failed to fetch services for this category.");
+        } finally {
+            setLoadingServices(false);
+        }
+    };
+
+    // Return to Categories Directory
+    const handleBackToCategories = () => {
+        setSelectedCategory(null);
+        setCategoryServices([]);
+        setServicesError(null);
+    };
+
+    // Image Slider handlers
+    const openSlider = (images, index) => {
+        setSliderImages(images);
+        setCurrentSliderIndex(index);
+    };
+
+    const handlePrevSlider = () => {
+        if (!sliderImages) return;
+        setCurrentSliderIndex((prev) => (prev === 0 ? sliderImages.length - 1 : prev - 1));
+    };
+
+    const handleNextSlider = () => {
+        if (!sliderImages) return;
+        setCurrentSliderIndex((prev) => (prev === sliderImages.length - 1 ? 0 : prev + 1));
+    };
+
+    const handleSelectSliderIndex = (idx) => {
+        setCurrentSliderIndex(idx);
+    };
+
+    // Determine content if API is completely empty
+    const hasCategories = categories.length > 0;
+
+    if (!loadingCategories && !hasCategories) {
+        return null; // hide if completely empty
     }
 
     return (
         <section className="py-6 sm:py-8 relative overflow-hidden" id="services">
             <div className="max-w-7xl mx-auto px-4 sm:px-8 relative z-10">
                 <Reveal>
-                    <div className="text-center mb-16 sm:mb-24 relative">
+                    <div className="text-center mb-16 sm:mb-20 relative">
                         <span className="rec-badge-top-rated-bg inline-block px-5 py-2 rounded-full text-[10px] sm:text-[11px] tracking-[0.2em] uppercase font-bold mb-5 shadow-sm">
                             Pricing &amp; Rituals
                         </span>
@@ -241,18 +511,125 @@ const SalonServices = ({ services, salon, onBookService }) => {
                     </div>
                 </Reveal>
 
-                <div className="grid grid-cols-1 min-[500px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-                    {services.map((service, i) => (
-                        <ServiceCard
-                            key={service.id || i}
-                            service={service}
-                            index={i}
-                            onBookNow={onBookService}
-                            salon={salon}
-                        />
-                    ))}
-                </div>
+                {/* Loader State for Categories */}
+                {loadingCategories && (
+                    <div className="grid grid-cols-1 min-[500px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                            <SkeletonCard key={i} />
+                        ))}
+                    </div>
+                )}
+
+                {/* Categories Grid (Selected Category is NULL) */}
+                {!loadingCategories && !categoriesError && !selectedCategory && hasCategories && (
+                    <div className="grid grid-cols-1 min-[500px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                        {categories.map((category, i) => (
+                            <CategoryCard
+                                key={category.id || i}
+                                category={category}
+                                index={i}
+                                onClick={() => handleSelectCategory(category)}
+                            />
+                        ))}
+                    </div>
+                )}
+
+                {/* Services Grid for Selected Category */}
+                {!loadingCategories && selectedCategory && (
+                    <div className="space-y-6">
+                        {/* Header controls for selected category */}
+                        <Reveal>
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-4 border-b border-[#E2E8F0]">
+                                <button
+                                    onClick={handleBackToCategories}
+                                    className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#1C3152] hover:text-[#C49B66] transition-colors duration-200 cursor-pointer self-start"
+                                >
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <line x1="19" y1="12" x2="5" y2="12" />
+                                        <polyline points="12 19 5 12 12 5" />
+                                    </svg>
+                                    Back to Categories
+                                </button>
+                                <div className="text-left sm:text-right">
+                                    <h3 className="text-2xl font-bold text-[#1C3152] tracking-tight font-[Cormorant_Garamond,serif]">
+                                        {selectedCategory.name}
+                                    </h3>
+                                    <p className="text-xs text-[#6B6B6B]">
+                                        {selectedCategory.description}
+                                    </p>
+                                </div>
+                            </div>
+                        </Reveal>
+
+                        {/* Loader State for Services */}
+                        {loadingServices && (
+                            <div className="grid grid-cols-1 min-[500px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                                {Array.from({ length: 4 }).map((_, i) => (
+                                    <SkeletonCard key={i} />
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Services Content */}
+                        {!loadingServices && !servicesError && (
+                            <div className="grid grid-cols-1 min-[500px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                                {categoryServices.map((service, i) => (
+                                    <ServiceCard
+                                        key={service.id || i}
+                                        service={service}
+                                        index={i}
+                                        onBookNow={onBookService}
+                                        salon={salon}
+                                        onOpenSlider={openSlider}
+                                    />
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Services Error */}
+                        {servicesError && (
+                            <div className="text-center py-12">
+                                <p className="text-red-500 font-medium mb-3">{servicesError}</p>
+                                <button onClick={() => handleSelectCategory(selectedCategory)} className="rec-btn-primary px-4 py-2 rounded-xl text-xs font-bold">
+                                    Retry
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Categories Error */}
+                {categoriesError && (
+                    <div className="text-center py-12">
+                        <p className="text-red-500 font-medium mb-3">{categoriesError}</p>
+                        <button
+                            onClick={() => {
+                                setCategoriesError(null);
+                                setLoadingCategories(true);
+                                getBusinessCategoriesWithDetails(salon.id)
+                                    .then((data) => setCategories(data || []))
+                                    .catch(() => setCategoriesError("Failed to fetch service categories."))
+                                    .finally(() => setLoadingCategories(false));
+                            }}
+                            className="rec-btn-primary px-4 py-2 rounded-xl text-xs font-bold"
+                        >
+                            Retry
+                        </button>
+                    </div>
+                )}
             </div>
+
+            {/* Slider Fullscreen Lightbox */}
+            {sliderImages && (
+                <ImageSliderModal
+                    images={sliderImages}
+                    currentIndex={currentSliderIndex}
+                    onClose={() => setSliderImages(null)}
+                    onPrev={handlePrevSlider}
+                    onNext={handleNextSlider}
+                    onIndexSelect={handleSelectSliderIndex}
+                />
+            )}
         </section>
     );
 };

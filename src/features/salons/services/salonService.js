@@ -61,9 +61,16 @@ export const getStaffProfile = async (staffId) => {
   return response.data.body;
 };
 
-export const getSalonServices = async (id) => {
+export const getBusinessCategoriesWithDetails = async (businessId) => {
   const response = await publicApiClient.get(
-    ENDPOINTS.SALON.SERVICES(id)
+    ENDPOINTS.SALON.CATEGORIES_WITH_DETAILS(businessId)
+  );
+  return response.data;
+};
+
+export const getServicesByCategoryForBusiness = async (businessId, categoryId) => {
+  const response = await publicApiClient.get(
+    ENDPOINTS.SALON.SERVICES_BY_CATEGORY(businessId, categoryId)
   );
   return response.data;
 };

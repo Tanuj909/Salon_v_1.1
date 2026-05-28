@@ -53,7 +53,8 @@ export const ENDPOINTS = {
     STAFF: (id) => `/staff/business/${id}`,
     STAFF_PROFILE: (id) => `/staff/${id}`,
     STAFF_BY_SERVICE: (serviceId) => `/staff/service/${serviceId}`,
-    SERVICES: (id) => `/services/business/${id}/active`,
+    CATEGORIES_WITH_DETAILS: (businessId) => `/services/business/${businessId}/categories-with-details`,
+    SERVICES_BY_CATEGORY: (businessId, categoryId) => `/services/business/${businessId}/category/${categoryId}/services`,
     TIMINGS: (id) => `/business-timings/business/${id}`,
   },
 

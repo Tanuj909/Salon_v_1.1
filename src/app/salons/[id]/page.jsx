@@ -10,14 +10,6 @@ async function getSalon(id) {
   return res.json();
 }
 
-async function getServices(id) {
-  const res = await fetch(`${API_BASE_URL}/services/business/${id}/active`, {
-    next: { revalidate: 300 }
-  });
-  if (!res.ok) return [];
-  return res.json();
-}
-
 async function getStaff(id) {
   const res = await fetch(`${API_BASE_URL}/staff/business/${id}`, {
     next: { revalidate: 300 }
@@ -47,9 +39,8 @@ async function getTimings(id) {
 export default async function Page({ params }) {
   const { id } = await params;
 
-  const [salon, services, staff, reviews, timings] = await Promise.all([
+  const [salon, staff, reviews, timings] = await Promise.all([
     getSalon(id),
-    getServices(id),
     getStaff(id),
     getReviews(id),
     getTimings(id)
@@ -62,7 +53,6 @@ export default async function Page({ params }) {
   return (
     <SalonDetailsPage
       salon={salon}
-      services={services}
       staff={staff}
       reviews={reviews}
       timings={timings}

@@ -52,7 +52,7 @@ function Reveal({ children, delay = 0, className = "" }) {
 
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
-export default function SalonDetailsPage({ salon, services, staff, reviews, timings, id }) {
+export default function SalonDetailsPage({ salon, staff, reviews, timings, id }) {
   const router = useRouter();
   const pathname = usePathname();
   const { user } = useAuth();
@@ -132,7 +132,7 @@ export default function SalonDetailsPage({ salon, services, staff, reviews, timi
       {/* ═══════════════════════════════════════════
           SERVICES SECTION (PAGINATED API)
       ═══════════════════════════════════════════ */}
-      <SalonServices services={services} salon={salon} onBookService={handleBookService} />
+      <SalonServices salon={salon} onBookService={handleBookService} />
 
       {/* ═══════════════════════════════════════════
           SALON STAFF SECTION

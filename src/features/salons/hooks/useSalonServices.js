@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getSalonServices } from "../services/salonService";
+import { getBusinessCategoriesWithDetails, getServicesByCategoryForBusiness } from "../services/salonService";
 
 export const useSalonServices = ({ id }) => {
     const [services, setServices] = useState(null);
@@ -18,10 +18,38 @@ export const useSalonServices = ({ id }) => {
             setLoading(true);
             setError(null);
             try {
-                const data = await getSalonServices(id);
-                setServices(data);
+                // 1. Fetch categories
+                const categories = await getBusinessCategoriesWithDetails(id);
+                
+                // 2. Fetch services for each category in parallel
+                if (categories && categories.length > 0) {
+                    const servicesPromises = categories.map((cat) =>
+                        getServicesByCategoryForBusiness(id, cat.id).catch((err) => {
+                            console.error(`Error fetching services for category ${cat.id}:`, err);
+                            return [];
+                        })
+                    );
+                    const servicesList = await Promise.all(servicesPromises);
+                    
+                    // 3. Flatten list
+                    const flatServices = servicesList.flat();
+                    
+                    // Filter duplicates just in case a service is under multiple categories
+                    const uniqueServices = [];
+                    const seenIds = new Set();
+                    for (const s of flatServices) {
+                        if (s && s.id && !seenIds.has(s.id)) {
+                            seenIds.add(s.id);
+                            uniqueServices.push(s);
+                        }
+                    }
+                    
+                    setServices(uniqueServices);
+                } else {
+                    setServices([]);
+                }
             } catch (err) {
-                console.error("Error fetching salon services:", err?.response?.status, err?.response?.data || err.message);
+                console.error("Error fetching category-based services:", err);
                 setError("Failed to fetch Salon Services!");
             } finally {
                 setLoading(false);
