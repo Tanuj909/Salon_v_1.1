@@ -631,11 +631,11 @@ export default function BecomePartnerPage() {
           )}
         </div>
 
-        <div className="mt-5">
+        {/* <div className="mt-5">
           <p className="mt-10 text-center rec-section-subtext text-xs font-medium tracking-widest uppercase">
           By submitting, you agree to Luxe's <span className="rec-section-heading-accent cursor-pointer hover:underline">Partner Terms of Service</span> and <span className="rec-section-heading-accent cursor-pointer hover:underline">Privacy Policy</span>.
         </p>
-        </div>
+        </div> */}
 
       </div>
  

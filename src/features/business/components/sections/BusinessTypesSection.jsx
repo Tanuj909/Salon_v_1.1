@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import {
     GiScissors,
     GiSparkles,
@@ -212,17 +213,18 @@ const BusinessTypesSection = () => {
                     whileInView={{ opacity: 1 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.5, delay: 0.8 }}
-                    className="mt-10 text-sm rec-section-subtext font-medium"
+                    className="mt-10 p-5 text-sm rec-section-subtext font-medium"
                 >
                     Don't see your category?{' '}
+                    <Link href="/partner" >
                     <motion.a
-                        href="/contact"
                         whileHover={{ x: 3 }}
                         transition={{ duration: 0.2 }}
                         className="rec-section-heading-accent font-bold hover:underline decoration-dashed transition-all"
                     >
                         Get in touch →
                     </motion.a>
+                    </Link>
                 </motion.p>
             </div>
         </section>
