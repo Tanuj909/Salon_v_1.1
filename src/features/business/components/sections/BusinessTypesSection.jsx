@@ -16,6 +16,8 @@ import {
 } from 'react-icons/gi';
 import { PiFlowerTulip } from 'react-icons/pi';
 
+const MotionLink = motion(Link);
+
 const BusinessTypesSection = () => {
     const businessTypes = [
         { label: 'Hair Salon', icon: <GiScissors size={16} /> },
@@ -216,15 +218,14 @@ const BusinessTypesSection = () => {
                     className="mt-10 p-5 text-sm rec-section-subtext font-medium"
                 >
                     Don't see your category?{' '}
-                    <Link href="/partner" >
-                    <motion.a
+                    <MotionLink
+                        href="/partner"
                         whileHover={{ x: 3 }}
                         transition={{ duration: 0.2 }}
                         className="rec-section-heading-accent font-bold hover:underline decoration-dashed transition-all"
                     >
                         Get in touch →
-                    </motion.a>
-                    </Link>
+                    </MotionLink>
                 </motion.p>
             </div>
         </section>

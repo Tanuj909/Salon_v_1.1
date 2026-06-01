@@ -233,9 +233,6 @@ function ServiceCard({ service, index, onBookNow, salon, onOpenSlider }) {
                             <h2 className="rec-section-heading text-[24px] font-bold m-0 tracking-[-0.3px] leading-tight line-clamp-2 font-[Cormorant_Garamond,serif]">
                                 {service.name}
                             </h2>
-                            <p className="text-[#6B6B6B] text-[12px] mt-1.5 line-clamp-2 leading-relaxed">
-                                {service.description || "Premium styling ritual designed tailored to your needs."}
-                            </p>
                         </div>
                         {serviceImage && (
                             <div
@@ -270,24 +267,13 @@ function ServiceCard({ service, index, onBookNow, salon, onOpenSlider }) {
                             Price
                         </span>
                         <div>
-                            {service.discountedPrice && service.discountedPrice < service.price ? (
-                                <div className="flex items-center gap-2">
-                                    <span className="text-[12px] text-[#6B6B6B] line-through font-semibold">
-                                        AED {service.price}
-                                    </span>
-                                    <span className="text-[16px] font-bold text-[#C49B66]">
-                                        AED {service.discountedPrice}
-                                    </span>
-                                </div>
-                            ) : (
-                                <span className="text-[16px] font-bold text-[#C49B66] font-[Cormorant_Garamond,serif]">
-                                    {service.startPrice && service.endPrice && service.startPrice !== service.endPrice ? (
-                                        `AED ${service.startPrice} - ${service.endPrice}`
-                                    ) : (
-                                        `AED ${service.price || service.startPrice}`
-                                    )}
-                                </span>
-                            )}
+                            <span className="text-[16px] font-bold text-[#C49B66] font-[Cormorant_Garamond,serif]">
+                                {service.startPrice && service.endPrice && service.startPrice !== service.endPrice ? (
+                                    `AED (${service.startPrice} - ${service.endPrice})`
+                                ) : (
+                                    `AED ${service.price || service.startPrice}`
+                                )}
+                            </span>
                         </div>
                     </div>
 
@@ -301,7 +287,6 @@ function ServiceCard({ service, index, onBookNow, salon, onOpenSlider }) {
                         </button>
                     </div>
                 </div>
-
             </div>
         </Reveal>
     );
@@ -539,24 +524,42 @@ const SalonServices = ({ salon, onBookService }) => {
                     <div className="space-y-6">
                         {/* Header controls for selected category */}
                         <Reveal>
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-4 border-b border-[#E2E8F0]">
+                            <div className="flex flex-col gap-6 mb-10 pb-6 border-b border-[#E2E8F0]">
                                 <button
                                     onClick={handleBackToCategories}
-                                    className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#1C3152] hover:text-[#C49B66] transition-colors duration-200 cursor-pointer self-start"
+                                    className="inline-flex items-center gap-2.5 text-[11px] font-bold uppercase tracking-widest text-[#1C3152] hover:text-[#C49B66] bg-white border border-[#E2E8F0] shadow-sm hover:shadow px-4 py-2.5 rounded-full transition-all duration-300 cursor-pointer self-start group/back"
                                 >
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <svg 
+                                        width="14" 
+                                        height="14" 
+                                        viewBox="0 0 24 24" 
+                                        fill="none" 
+                                        stroke="currentColor" 
+                                        strokeWidth="3" 
+                                        strokeLinecap="round" 
+                                        strokeLinejoin="round"
+                                        className="transform group-hover/back:-translate-x-0.5 transition-transform duration-200"
+                                    >
                                         <line x1="19" y1="12" x2="5" y2="12" />
                                         <polyline points="12 19 5 12 12 5" />
                                     </svg>
                                     Back to Categories
                                 </button>
-                                <div className="text-left sm:text-right">
-                                    <h3 className="text-2xl font-bold text-[#1C3152] tracking-tight font-[Cormorant_Garamond,serif]">
+                                <div className="text-left space-y-2">
+                                    <div className="inline-flex items-center gap-2">
+                                        <span className="h-[1px] w-6 bg-[#C49B66] opacity-60" />
+                                        <span className="text-[10px] tracking-[0.2em] uppercase font-bold text-[#C49B66]">
+                                            Selected Category
+                                        </span>
+                                    </div>
+                                    <h3 className="text-3xl sm:text-4xl font-bold text-[#1C3152] tracking-tight font-[Cormorant_Garamond,serif] leading-tight">
                                         {selectedCategory.name}
                                     </h3>
-                                    <p className="text-xs text-[#6B6B6B]">
-                                        {selectedCategory.description}
-                                    </p>
+                                    {selectedCategory.description && (
+                                        <p className="text-[13px] sm:text-sm text-[#6B6B6B] max-w-2xl leading-relaxed font-medium italic">
+                                            {selectedCategory.description}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
                         </Reveal>

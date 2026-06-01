@@ -20,6 +20,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
     const [loadingCategories, setLoadingCategories] = useState(false);
     const [categoriesError, setCategoriesError] = useState(null);
     const [selectedCategory, setSelectedCategory] = useState(null);
+    const [infoCategory, setInfoCategory] = useState(null);
     
     const [categoryServices, setCategoryServices] = useState([]);
     const [loadingCategoryServices, setLoadingCategoryServices] = useState(false);
@@ -384,7 +385,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
     }
 
     return (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4">
             {/* Backdrop */}
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
@@ -402,7 +403,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                     </div>
                     <button
                         onClick={onClose}
-                        className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0 text-white/70 hover:bg-white/20 hover:text-white transition-all border border-white/10"
+                        className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/15 flex items-center justify-center shrink-0 text-white/70 hover:bg-white/20 hover:text-white transition-all border border-white/10"
                     >
                         <X size={18} />
                     </button>
@@ -437,7 +438,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto p-4 sm:p-8">
+                <div className="flex-1 overflow-y-auto p-3 sm:p-8">
                     {/* ─── STEP 1: Select Category ───────────────────── */}
                     {step === 1 && (
                         <div>
@@ -479,33 +480,38 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                     {categories.map((category) => {
                                         const isSelected = selectedCategory?.id === category.id;
                                         return (
-                                            <button
+                                            <div
                                                 key={category.id}
                                                 onClick={() => handleSelectCategory(category)}
-                                                className={`w-full text-left p-5 rounded-2xl border-2 transition-all duration-300 group flex flex-col justify-between h-40 ${isSelected ? "border-[#628EB8] bg-[#628EB8]/5 shadow-sm" : "border-[#E0E0E0] bg-white hover:border-[#628EB8]/30 hover:bg-[#F8FAFC]"}`}
+                                                className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-300 group flex items-center justify-between gap-4 cursor-pointer ${isSelected ? "border-[#628EB8] bg-[#628EB8]/5 shadow-sm" : "border-[#E0E0E0] bg-white hover:border-[#628EB8]/30 hover:bg-[#F8FAFC]"}`}
                                             >
-                                                <div className="w-full">
-                                                    <div className="flex justify-between items-center gap-2 mb-2">
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-2 mb-0.5">
                                                         <span className="text-[9px] tracking-widest uppercase font-bold text-[#C5A566]">
                                                             {category.serviceCount} Services
                                                         </span>
-                                                        {isSelected && <CheckCircle size={16} className="text-[#628EB8]" />}
+                                                        {isSelected && <CheckCircle size={14} className="text-[#628EB8]" />}
                                                     </div>
-                                                    <h4 className="font-[Cormorant_Garamond,Georgia,serif] text-lg font-bold text-[#1F355E] group-hover:text-[#C5A566] transition-colors leading-tight">
+                                                    <h4 className="font-[Cormorant_Garamond,Georgia,serif] text-base sm:text-lg font-bold text-[#1F355E] group-hover:text-[#C5A566] transition-colors leading-tight truncate">
                                                         {category.name}
                                                     </h4>
-                                                    <p className="text-gray-400 text-[11px] mt-1.5 line-clamp-2 leading-relaxed">
-                                                        {category.description || "Explore our premium styling rituals."}
-                                                    </p>
                                                 </div>
 
-                                                <div className="w-full pt-3 border-t border-[#E0E0E0]/30 mt-auto flex justify-between items-center text-[10px] text-gray-500 font-medium">
-                                                    <span>Range: AED {category.minPrice} - {category.maxPrice}</span>
-                                                    <span className="flex items-center gap-0.5 text-[#1F355E] font-bold group-hover:translate-x-1 transition-transform">
-                                                        View <ChevronRight size={10} />
+                                                <div className="flex flex-col items-end gap-1.5 shrink-0 text-right">
+                                                    <span className="text-[11px] sm:text-[12px] text-[#1F355E] font-bold">
+                                                        AED {category.minPrice} - {category.maxPrice}
+                                                    </span>
+                                                    <span 
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setInfoCategory(category);
+                                                        }}
+                                                        className="flex items-center gap-0.5 text-[10px] sm:text-[11px] text-[#628EB8] hover:text-[#1F355E] font-bold group-hover:translate-x-0.5 transition-transform cursor-pointer"
+                                                    >
+                                                        View <ChevronRight size={12} />
                                                     </span>
                                                 </div>
-                                            </button>
+                                            </div>
                                         );
                                     })}
                                 </div>
@@ -516,9 +522,9 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                     {/* ─── STEP 2: Select Services ───────────────────── */}
                     {step === 2 && (
                         <div>
-                            <div className="mb-4 sm:mb-6 flex justify-between items-end gap-4">
+                            <div className="mb-4 sm:mb-6 flex justify-between items-end gap-4 pb-4 border-b border-[#E0E0E0]/30">
                                 <div>
-                                    <h3 className="font-[Cormorant_Garamond,Georgia,serif] text-xl sm:text-2xl text-[#1F355E] mb-1 leading-tight">
+                                    <h3 className="font-[Cormorant_Garamond,Georgia,serif] text-xl sm:text-2xl text-[#1F355E] mb-1 leading-tight font-bold">
                                         Select Services
                                     </h3>
                                     <p className="text-[#628EB8] text-xs sm:text-sm">
@@ -527,7 +533,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                 </div>
                                 <button 
                                     onClick={() => setStep(1)}
-                                    className="text-xs font-bold text-[#628EB8] hover:text-[#1F355E] underline flex items-center gap-1 cursor-pointer"
+                                    className="text-xs font-bold text-[#628EB8] hover:text-[#1F355E] bg-white border border-[#E0E0E0] shadow-sm hover:shadow px-3.5 py-2 rounded-full transition-all duration-300 flex items-center gap-1 cursor-pointer"
                                 >
                                     Change Category
                                 </button>
@@ -560,31 +566,26 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                             <button
                                                 key={service.id}
                                                 onClick={() => toggleService(service)}
-                                                className={`w-full text-left p-4 sm:p-5 rounded-2xl border-2 transition-all duration-300 group ${isSelected ? "border-[#628EB8] bg-[#628EB8]/5 shadow-sm" : "border-[#E0E0E0] bg-white hover:border-[#628EB8]/30 hover:bg-[#F8FAFC]"}`}
+                                                className={`w-full text-left p-3.5 sm:p-5 rounded-xl border-2 transition-all duration-300 group ${isSelected ? "border-[#628EB8] bg-[#628EB8]/5 shadow-sm" : "border-[#E0E0E0] bg-white hover:border-[#628EB8]/30 hover:bg-[#F8FAFC]"}`}
                                             >
-                                                <div className="flex items-center justify-between gap-4">
-                                                    <div className="flex items-center gap-3 sm:gap-4 shrink overflow-hidden min-w-0">
+                                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 w-full">
+                                                    <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                                                         {/* Tick Box UI */}
                                                         <div className={`w-5 h-5 rounded-md border-2 shrink-0 flex items-center justify-center transition-all duration-300 ${isSelected ? "bg-[#628EB8] border-[#628EB8]" : "border-[#E0E0E0] bg-white group-hover:border-[#628EB8]/50"}`}>
                                                             {isSelected && <CheckCircle size={14} className="text-white" strokeWidth={3} />}
                                                         </div>
 
-                                                        <div className="min-w-0 flex-1">
-                                                            <h4 className="font-semibold text-[#1F355E] text-xs sm:text-sm truncate">{service.name}</h4>
+                                                        <div className="min-w-0">
+                                                            <h4 className="font-semibold text-[#1F355E] text-xs sm:text-sm leading-snug break-words">{service.name}</h4>
                                                             {service.durationMinutes && (
                                                                 <span className="text-[#628EB8] text-[10px] sm:text-xs flex items-center gap-0.5 sm:gap-1 mt-0.5">
                                                                     <Clock size={10} /> {service.durationMinutes} min
                                                                 </span>
                                                             )}
-                                                            {service.description && (
-                                                                <p className="text-gray-400 text-[10px] mt-1 truncate">
-                                                                    {service.description}
-                                                                </p>
-                                                            )}
                                                         </div>
                                                     </div>
-                                                    <div className="text-right shrink-0">
-                                                        <span className="font-[Cormorant_Garamond] text-base sm:text-lg font-bold text-[#1F355E] block leading-none">
+                                                    <div className="text-left sm:text-right pl-8 sm:pl-0 shrink-0">
+                                                        <span className="font-[Cormorant_Garamond] text-sm sm:text-base font-bold text-[#1F355E] block leading-none">
                                                             {getServicePriceString(service)}
                                                         </span>
                                                     </div>
@@ -698,7 +699,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                 ) : availableTimeSlots.length === 0 ? (
                                     <p className="text-sm text-[#628EB8] mt-3">No time slots available for this date.</p>
                                 ) : (
-                                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mt-4">
+                                    <div className="grid grid-cols-2 min-[420px]:grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3 mt-4">
                                         {availableTimeSlots.map((slot) => {
                                             const isSelected = startTime === slot.time && bookingDate === activeDate;
 
@@ -906,17 +907,17 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                 </div>
 
                 {/* Footer */}
-                <div className="px-4 py-4 sm:px-8 sm:py-5 bg-white border-t border-[#E0E0E0] flex items-center justify-between shrink-0">
+                <div className="px-3.5 py-4 sm:px-8 sm:py-5 bg-white border-t border-[#E0E0E0] flex items-center justify-between gap-3 shrink-0">
                     {/* Total Pill */}
                     {selectedServices.length > 0 && (
-                        <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="flex items-center gap-1.5 sm:gap-3 whitespace-nowrap min-w-0">
                             <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-[#628EB8] font-bold hidden sm:inline">
                                 {selectedServices.length} {selectedServices.length === 1 ? "service" : "services"}
                             </span>
-                            <span className="text-[10px] sm:hidden uppercase tracking-[0.2em] text-[#628EB8] font-bold">
+                            <span className="text-[9px] sm:hidden uppercase tracking-[0.1em] text-[#628EB8] font-bold">
                                 Total:
                             </span>
-                            <span className="font-[Cormorant_Garamond] text-lg sm:text-xl font-bold text-[#1F355E]">
+                            <span className="font-[Cormorant_Garamond] text-[13px] sm:text-xl font-bold text-[#1F355E] whitespace-nowrap">
                                 {getTotalsPriceString()}
                             </span>
                         </div>
@@ -924,11 +925,11 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                     {selectedServices.length === 0 && <span />}
 
                     {/* Navigation Buttons */}
-                    <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
                         {step > 1 && (
                             <button
                                 onClick={() => setStep((s) => s - 1)}
-                                className="px-3 sm:px-6 py-2.5 sm:py-3 rounded-xl border border-[#E0E0E0] text-[#1F355E] text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.15em] hover:bg-gray-50 transition-all"
+                                className="px-2.5 sm:px-6 py-2 sm:py-3 rounded-xl border border-[#E0E0E0] text-[#1F355E] text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.15em] hover:bg-gray-50 transition-all cursor-pointer"
                             >
                                 Back
                             </button>
@@ -942,7 +943,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                     (step === 2 && !canProceedStep2) ||
                                     (step === 3 && !canProceedStep3)
                                 }
-                                className="px-6 sm:px-8 py-2.5 sm:py-3 rounded-xl bg-[#1F355E] text-white text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.15em] hover:bg-[#628EB8] transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                                className="px-4 sm:px-8 py-2 sm:py-3 rounded-xl bg-[#1F355E] text-white text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.15em] hover:bg-[#628EB8] transition-all disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
                             >
                                 Continue
                             </button>
@@ -957,7 +958,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                 <button
                                     onClick={handleSubmit}
                                     disabled={submitting || !canSubmit}
-                                    className={`px-5 sm:px-8 py-2.5 sm:py-3 rounded-xl text-white text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] hover:shadow-lg transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap bg-[#1F355E] ${
+                                    className={`px-4 sm:px-8 py-2 sm:py-3 rounded-xl text-white text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] hover:shadow-lg transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap bg-[#1F355E] ${
                                         (submitting || !canSubmit)
                                             ? "opacity-50 cursor-not-allowed"
                                             : paymentMethod !== "CASH"
@@ -967,7 +968,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                 >
                                     {submitting ? (
                                         <>
-                                            <Loader2 size={14} className="animate-spin" />
+                                            <Loader2 size={12} className="animate-spin" />
                                             <span>Booking...</span>
                                         </>
                                     ) : (
@@ -979,6 +980,74 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                     </div>
                 </div>
             </div>
+
+            {/* Category Info Popup Modal */}
+            {infoCategory && (
+                <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                    <div className="bg-white rounded-3xl max-w-md w-full border border-[#E0E0E0] shadow-2xl p-6 relative overflow-hidden animate-[tooltipFadeIn_0.2s_ease-out]">
+                        {/* Elegant top color band */}
+                        <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#C5A566]" />
+
+                        <button
+                            onClick={() => setInfoCategory(null)}
+                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors p-1 cursor-pointer"
+                        >
+                            <X size={18} />
+                        </button>
+
+                        <div className="space-y-4">
+                            <div>
+                                <span className="text-[9px] tracking-widest uppercase font-bold text-[#C5A566] block mb-1">
+                                    {infoCategory.serviceCount} Services
+                                </span>
+                                <h3 className="font-[Cormorant_Garamond,Georgia,serif] text-2xl font-bold text-[#1F355E] leading-tight">
+                                    {infoCategory.name}
+                                </h3>
+                            </div>
+
+                            {infoCategory.description ? (
+                                <p className="text-gray-600 text-sm leading-relaxed font-medium">
+                                    {infoCategory.description}
+                                </p>
+                            ) : (
+                                <p className="text-gray-400 text-sm italic font-medium">
+                                    No description available for this category.
+                                </p>
+                            )}
+
+                            <div className="pt-4 border-t border-[#E0E0E0]/30 space-y-2 text-xs text-gray-600 font-medium">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-400">Price Range</span>
+                                    <span className="text-[#1F355E] font-bold">AED {infoCategory.minPrice} - {infoCategory.maxPrice}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-400">Average Pricing</span>
+                                    <span className="text-[#C5A566] font-bold">AED {infoCategory.avgPrice}</span>
+                                </div>
+                            </div>
+
+                            <div className="pt-4 flex gap-3">
+                                <button
+                                    onClick={() => {
+                                        const cat = infoCategory;
+                                        setInfoCategory(null);
+                                        handleSelectCategory(cat);
+                                    }}
+                                    className="flex-1 py-3 bg-[#1F355E] hover:bg-[#16263F] text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all duration-300 shadow-md hover:shadow-lg text-center cursor-pointer"
+                                >
+                                    Select Category
+                                </button>
+                                <button
+                                    onClick={() => setInfoCategory(null)}
+                                    className="px-5 py-3 border border-[#E0E0E0] hover:bg-gray-50 text-gray-500 text-xs font-bold uppercase tracking-wider rounded-xl transition-all duration-300 text-center cursor-pointer"
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Slide up animation */}
             <style jsx>{`
