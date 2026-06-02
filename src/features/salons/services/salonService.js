@@ -76,14 +76,14 @@ export const getServicesByCategoryForBusiness = async (businessId, categoryId) =
 };
 
 export const fetchStaffSlots = async (staffId, startDate, endDate) => {
-  const response = await publicApiClient.get(
+  const response = await apiClient.get(
     ENDPOINTS.SLOTS.BY_STAFF(staffId, startDate, endDate)
   );
   return response.data;
 };
 
 export const fetchBusinessSlots = async (businessId, startDate, endDate) => {
-  const response = await publicApiClient.get(
+  const response = await apiClient.get(
     ENDPOINTS.SLOTS.BY_BUSINESS(businessId, startDate, endDate)
   );
   return response.data;
