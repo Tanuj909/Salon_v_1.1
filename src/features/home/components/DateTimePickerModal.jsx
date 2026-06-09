@@ -1,9 +1,16 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { useLanguage } from "@/context/LanguageContext";
 
-const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const DAYS = {
+  en: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+  ar: ["إثنين", "ثلاثاء", "أربعاء", "خميس", "جمعة", "سبت", "أحد"]
+};
+const MONTHS = {
+  en: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+  ar: ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"]
+};
 
 const TIME_SLOTS = Array.from({ length: 24 }, (_, i) => {
   const hour = i % 12 === 0 ? 12 : i % 12;
@@ -12,25 +19,30 @@ const TIME_SLOTS = Array.from({ length: 24 }, (_, i) => {
   return { label: `${hour}${ampm}`, value: label24 };
 });
 
-const PRESETS = [
-  { label: "Any time", startTime: "", endTime: "" },
-  { label: "Morning", sub: "8am - 12pm", startTime: "08:00", endTime: "12:00" },
-  { label: "Afternoon", sub: "12pm - 5pm", startTime: "12:00", endTime: "17:00" },
-  { label: "Evening", sub: "5pm - 10pm", startTime: "17:00", endTime: "22:00" },
-];
-
 function getToday() {
   const d = new Date();
   return new Date(d.getFullYear(), d.getMonth(), d.getDate());
 }
 
-function formatDateShort(d) {
-  return `${DAYS[((d.getDay() + 6) % 7)]}, ${d.getDate()} ${MONTHS[d.getMonth()].slice(0, 3)}`;
+function formatDateShort(d, language) {
+  const daysList = DAYS[language] || DAYS.en;
+  const monthsList = MONTHS[language] || MONTHS.en;
+  const dayStr = daysList[((d.getDay() + 6) % 7)];
+  const monthStr = monthsList[d.getMonth()].slice(0, 3);
+  return `${dayStr}, ${d.getDate()} ${monthStr}`;
 }
 
 export default function DateTimePickerModal({ isOpen, onClose, date, startTime, endTime, onApply }) {
+  const { t, language } = useLanguage();
   const today = useMemo(() => getToday(), []);
   const tomorrow = useMemo(() => { const d = new Date(today); d.setDate(d.getDate() + 1); return d; }, [today]);
+
+  const PRESETS = [
+    { label: t("home.any_time"), startTime: "", endTime: "" },
+    { label: t("home.morning"), sub: "8am - 12pm", startTime: "08:00", endTime: "12:00" },
+    { label: t("home.afternoon"), sub: "12pm - 5pm", startTime: "12:00", endTime: "17:00" },
+    { label: t("home.evening"), sub: "5pm - 10pm", startTime: "17:00", endTime: "22:00" },
+  ];
 
   // Calendar state
   const [viewMonth, setViewMonth] = useState(() => date ? new Date(date).getMonth() : today.getMonth());
@@ -136,6 +148,9 @@ export default function DateTimePickerModal({ isOpen, onClose, date, startTime, 
 
   if (!isOpen) return null;
 
+  const currentDaysList = DAYS[language] || DAYS.en;
+  const currentMonthsList = MONTHS[language] || MONTHS.en;
+
   return (
     <>
       {/* Modal Wrapper */}
@@ -155,7 +170,7 @@ export default function DateTimePickerModal({ isOpen, onClose, date, startTime, 
         >
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-2 border-b border-gray-100">
-            <h2 className="text-lg font-bold text-gray-900 font-[DM_Sans]">Date and time</h2>
+            <h2 className="text-lg font-bold text-gray-900 font-[DM_Sans]">{t("home.date_and_time")}</h2>
             <button 
               type="button"
               onClick={onClose} 
@@ -178,8 +193,8 @@ export default function DateTimePickerModal({ isOpen, onClose, date, startTime, 
                     : "bg-white text-gray-700 border-gray-200 hover:border-gray-300"
                 }`}
               >
-                <span className="block text-[10px] font-bold">Today</span>
-                <span className="block text-[9px] opacity-70 mt-0.5">{formatDateShort(today)}</span>
+                <span className="block text-[10px] font-bold">{t("home.today")}</span>
+                <span className="block text-[9px] opacity-70 mt-0.5">{formatDateShort(today, language)}</span>
               </button>
               <button
                 onClick={() => selectQuickDate(tomorrow)}
@@ -189,8 +204,8 @@ export default function DateTimePickerModal({ isOpen, onClose, date, startTime, 
                     : "bg-white text-gray-700 border-gray-200 hover:border-gray-300"
                 }`}
               >
-                <span className="block text-[10px] font-bold">Tomorrow</span>
-                <span className="block text-[9px] opacity-70 mt-0.5">{formatDateShort(tomorrow)}</span>
+                <span className="block text-[10px] font-bold">{t("home.tomorrow")}</span>
+                <span className="block text-[9px] opacity-70 mt-0.5">{formatDateShort(tomorrow, language)}</span>
               </button>
             </div>
 
@@ -205,7 +220,7 @@ export default function DateTimePickerModal({ isOpen, onClose, date, startTime, 
                 >
                   <span className="material-symbols-outlined text-gray-600 text-lg">chevron_left</span>
                 </button>
-                <span className="text-sm font-bold text-gray-800">{MONTHS[viewMonth].slice(0, 3)} {viewYear}</span>
+                <span className="text-sm font-bold text-gray-800">{currentMonthsList[viewMonth].slice(0, 3)} {viewYear}</span>
                 <button onClick={nextMonth} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">
                   <span className="material-symbols-outlined text-gray-600 text-lg">chevron_right</span>
                 </button>
@@ -213,7 +228,7 @@ export default function DateTimePickerModal({ isOpen, onClose, date, startTime, 
 
               {/* Day headers */}
               <div className="grid grid-cols-7 mb-1">
-                {DAYS.map(d => (
+                {currentDaysList.map(d => (
                   <div key={d} className="text-center text-[10px] font-bold text-gray-400 uppercase py-1">{d}</div>
                 ))}
               </div>
@@ -241,7 +256,7 @@ export default function DateTimePickerModal({ isOpen, onClose, date, startTime, 
 
             {/* Time Selection */}
             <div>
-              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Select time</h3>
+              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">{t("home.select_time_label")}</h3>
 
               {/* Preset chips */}
               <div className="flex flex-wrap gap-2 mb-4">
@@ -271,7 +286,7 @@ export default function DateTimePickerModal({ isOpen, onClose, date, startTime, 
                       : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"
                   }`}
                 >
-                  Custom
+                  {t("home.custom")}
                 </button>
               </div>
 
@@ -285,7 +300,7 @@ export default function DateTimePickerModal({ isOpen, onClose, date, startTime, 
                       className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-700 hover:border-gray-300 transition-all"
                     >
                       <span className={selectedStart ? "text-gray-900" : "text-gray-400"}>
-                        {selectedStart ? `From ${TIME_SLOTS.find(t => t.value === selectedStart)?.label || selectedStart}` : "Start time"}
+                        {selectedStart ? `From ${TIME_SLOTS.find(t => t.value === selectedStart)?.label || selectedStart}` : t("home.start_time")}
                       </span>
                       <span className="material-symbols-outlined text-gray-400 text-base">expand_more</span>
                     </button>
@@ -320,7 +335,7 @@ export default function DateTimePickerModal({ isOpen, onClose, date, startTime, 
                       className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm font-medium text-gray-700 hover:border-gray-300 transition-all"
                     >
                       <span className={selectedEnd ? "text-gray-900" : "text-gray-400"}>
-                        {selectedEnd ? `To ${TIME_SLOTS.find(t => t.value === selectedEnd)?.label || selectedEnd}` : "End time"}
+                        {selectedEnd ? `To ${TIME_SLOTS.find(t => t.value === selectedEnd)?.label || selectedEnd}` : t("home.end_time")}
                       </span>
                       <span className="material-symbols-outlined text-gray-400 text-base">expand_more</span>
                     </button>
@@ -358,13 +373,13 @@ export default function DateTimePickerModal({ isOpen, onClose, date, startTime, 
               onClick={handleClear}
               className="flex-1 py-3 rounded-2xl border border-gray-200 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all active:scale-[0.98]"
             >
-              Clear
+              {t("home.clear")}
             </button>
             <button
               onClick={handleDone}
               className="flex-1 py-3 rounded-2xl bg-[#1C3152] text-white text-sm font-bold shadow-lg hover:bg-[#1C3152]/90 transition-all active:scale-[0.98]"
             >
-              Done
+              {t("home.done")}
             </button>
           </div>
         </div>

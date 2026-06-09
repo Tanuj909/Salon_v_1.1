@@ -6,6 +6,7 @@ import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-lea
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { X, Check, MapPin, Globe, Search, Loader2 } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 // Fix Leaflet default icon issues
 const DefaultIcon = L.icon({
@@ -62,21 +63,21 @@ const BoundsTracker = ({ updateBounds }) => {
     return null;
 };
 
-const LocationMarker = ({ position, setPosition, setAddress }) => {
+const LocationMarker = ({ position, setPosition, setAddress, t }) => {
     useMapEvents({
         click(e) {
             setPosition(e.latlng);
-            reverseGeocode(e.latlng.lat, e.latlng.lng, setAddress);
+            reverseGeocode(e.latlng.lat, e.latlng.lng, setAddress, t);
         },
     });
 
     return position ? <Marker position={position} icon={DefaultIcon} /> : null;
 };
 
-const reverseGeocode = async (lat, lng, setAddress) => {
+const reverseGeocode = async (lat, lng, setAddress, t) => {
     if (!lat || !lng) return;
     try {
-        setAddress("Locating...");
+        setAddress(t("location.locating"));
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 5000);
 
@@ -97,21 +98,22 @@ const reverseGeocode = async (lat, lng, setAddress) => {
         clearTimeout(timeoutId);
 
         if (!res || !res.ok) {
-            setAddress(`Selected Location (${lat.toFixed(3)}, ${lng.toFixed(3)})`);
+            setAddress(`${t("location.selected_location_fallback")} (${lat.toFixed(3)}, ${lng.toFixed(3)})`);
             return;
         }
 
         const data = await res.json();
-        setAddress(data.display_name || `Selected Location (${lat.toFixed(3)}, ${lng.toFixed(3)})`);
+        setAddress(data.display_name || `${t("location.selected_location_fallback")} (${lat.toFixed(3)}, ${lng.toFixed(3)})`);
     } catch (err) {
         console.warn("Reverse geocoding suppressed:", err);
-        setAddress(`Selected Location (${lat.toFixed(3)}, ${lng.toFixed(3)})`);
+        setAddress(`${t("location.selected_location_fallback")} (${lat.toFixed(3)}, ${lng.toFixed(3)})`);
     }
 };
 
 const MapPickerModal = ({ isOpen, onClose, onSelect, initialPos }) => {
+    const { t } = useLanguage();
     const [position, setPosition] = useState(initialPos || COUNTRIES.UAE);
-    const [address, setAddress] = useState("Loading address...");
+    const [address, setAddress] = useState(t("location.loading_address"));
     const [isMounted, setIsMounted] = useState(false);
     const [isLocating, setIsLocating] = useState(false);
     const [selectedCountry, setSelectedCountry] = useState("");
@@ -336,14 +338,14 @@ const MapPickerModal = ({ isOpen, onClose, onSelect, initialPos }) => {
             const uae = COUNTRIES.UAE;
             setPosition(uae);
             setSelectedCountry("UAE");
-            reverseGeocode(uae.lat, uae.lng, setAddress).catch(() => { });
+            reverseGeocode(uae.lat, uae.lng, setAddress, t).catch(() => { });
         };
 
         // If we have an initial position, use it.
         // If not, and we aren't already initialized, attempt geolocation.
         if (initialPos && initialPos.lat && initialPos.lng) {
             setPosition(initialPos);
-            reverseGeocode(initialPos.lat, initialPos.lng, setAddress).catch(() => { });
+            reverseGeocode(initialPos.lat, initialPos.lng, setAddress, t).catch(() => { });
         } else if (navigator.geolocation) {
             setIsLocating(true);
             navigator.geolocation.getCurrentPosition(
@@ -352,7 +354,7 @@ const MapPickerModal = ({ isOpen, onClose, onSelect, initialPos }) => {
                     setPosition(prev => {
                         // Guard: Only overwrite the position if it's still at the default UAE capital
                         if (prev.lat === COUNTRIES.UAE.lat && prev.lng === COUNTRIES.UAE.lng) {
-                            reverseGeocode(newPos.lat, newPos.lng, setAddress).catch(() => { });
+                            reverseGeocode(newPos.lat, newPos.lng, setAddress, t).catch(() => { });
                             return newPos;
                         }
                         return prev;
@@ -380,8 +382,8 @@ const MapPickerModal = ({ isOpen, onClose, onSelect, initialPos }) => {
                 <div className="px-4 py-4 sm:px-8 sm:py-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#3c14320a]">
                     <div className="flex items-center justify-between w-full md:w-auto shrink-0">
                         <div>
-                            <h2 className="text-lg sm:text-xl font-bold text-[#1e0a18]">Pick Location</h2>
-                            <p className="text-xs sm:text-sm text-[#3c143260]">Select country, search or click on map</p>
+                            <h2 className="text-lg sm:text-xl font-bold text-[#1e0a18]">{t("location.pick_location_title")}</h2>
+                            <p className="text-xs sm:text-sm text-[#3c143260]">{t("location.pick_location_subtitle")}</p>
                         </div>
                         <button onClick={onClose} className="md:hidden p-1.5 hover:bg-[#f9f5f2] rounded-full transition-colors">
                             <X size={20} className="text-[#3c143280]" />
@@ -400,14 +402,14 @@ const MapPickerModal = ({ isOpen, onClose, onSelect, initialPos }) => {
                                     const coords = COUNTRIES[cName];
                                     if (coords) {
                                         setPosition(coords);
-                                        reverseGeocode(coords.lat, coords.lng, setAddress);
+                                        reverseGeocode(coords.lat, coords.lng, setAddress, t);
                                     }
                                 }}
                                 className="w-full pl-9 pr-4 py-2.5 bg-[#f9f5f2] border-none rounded-xl text-sm font-bold text-[#1e0a18] focus:ring-2 focus:ring-[#7a2860]/20 appearance-none cursor-pointer hover:bg-[#f0ece9] transition-colors"
                             >
-                                <option value="">Select Country</option>
+                                <option value="">{t("location.select_country")}</option>
                                 {Object.keys(COUNTRIES).map(country => (
-                                    <option key={country} value={country}>{country}</option>
+                                    <option key={country} value={country}>{t(`location.countries.${country}`)}</option>
                                 ))}
                             </select>
                         </div>
@@ -429,14 +431,14 @@ const MapPickerModal = ({ isOpen, onClose, onSelect, initialPos }) => {
                                             setShowSuggestions(true);
                                         }
                                     }}
-                                    placeholder="Search area, street, city..."
+                                    placeholder={t("location.search_map_placeholder")}
                                     className="w-full pl-9 pr-20 py-2.5 bg-[#f9f5f2] border-none rounded-xl text-sm font-medium text-[#1e0a18] focus:outline-none focus:ring-2 focus:ring-[#7a2860]/20 placeholder:text-[#3c143240]"
                                 />
                                 <button 
                                     type="submit"
                                     className="absolute right-1 top-1 bottom-1 px-4 bg-[#1e0a18] text-white rounded-lg text-xs font-bold hover:bg-[#7a2860] transition-colors"
                                 >
-                                    Search
+                                    {t("location.btn_search")}
                                 </button>
                             </form>
 
@@ -446,7 +448,7 @@ const MapPickerModal = ({ isOpen, onClose, onSelect, initialPos }) => {
                                     <ul className="py-2">
                                         {noResults ? (
                                             <li className="px-4 py-3 text-sm text-[#3c143280] text-center italic">
-                                                No results found
+                                                {t("location.no_results_found")}
                                             </li>
                                         ) : (
                                             suggestions.map((place, idx) => (
@@ -489,7 +491,7 @@ const MapPickerModal = ({ isOpen, onClose, onSelect, initialPos }) => {
                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                         />
-                        <LocationMarker position={position} setPosition={setPosition} setAddress={setAddress} />
+                        <LocationMarker position={position} setPosition={setPosition} setAddress={setAddress} t={t} />
                     </MapContainer>
                 </div>
 
@@ -501,7 +503,7 @@ const MapPickerModal = ({ isOpen, onClose, onSelect, initialPos }) => {
                                 <MapPin size={16} className="sm:w-5 sm:h-5" />
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="text-[0.6rem] sm:text-[0.65rem] font-black uppercase tracking-widest text-[#3c143250] mb-0.5 sm:mb-1">Selected Area</p>
+                                <p className="text-[0.6rem] sm:text-[0.65rem] font-black uppercase tracking-widest text-[#3c143250] mb-0.5 sm:mb-1">{t("location.selected_area")}</p>
                                 <p className="text-[0.8rem] sm:text-[0.9rem] font-bold text-[#1e0a18] line-clamp-2 sm:line-clamp-1 break-words">{address}</p>
                             </div>
                         </div>
@@ -511,14 +513,20 @@ const MapPickerModal = ({ isOpen, onClose, onSelect, initialPos }) => {
                                 onClick={onClose}
                                 className="flex-1 md:flex-none px-2 sm:px-8 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[0.8rem] sm:text-[0.9rem] font-bold text-[#3c143280] hover:bg-white hover:shadow-sm transition-all text-center whitespace-nowrap"
                             >
-                                Cancel
+                                {t("location.btn_cancel")}
                             </button>
                             <button
                                 onClick={() => onSelect({ ...position, address })}
                                 className="flex-[2] md:flex-none px-3 sm:px-10 py-2.5 sm:py-3 bg-[#1e0a18] text-white rounded-xl sm:rounded-2xl text-[0.8rem] sm:text-[0.9rem] font-bold hover:bg-[#7a2860] transition-all flex justify-center items-center gap-1.5 sm:gap-2 shadow-xl active:scale-95 whitespace-nowrap text-center"
                             >
                                 <Check size={14} className="sm:w-[18px] sm:h-[18px]" />
-                                <span>Confirm<span className="hidden sm:inline"> Location</span></span>
+                                <span>
+                                    {t("location.btn_confirm")}
+                                    <span className="hidden sm:inline">
+                                        {" "}
+                                        {t("location.btn_confirm_location").replace(t("location.btn_confirm"), "").trim()}
+                                    </span>
+                                </span>
                             </button>
                         </div>
                     </div>

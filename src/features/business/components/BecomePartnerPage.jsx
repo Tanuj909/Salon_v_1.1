@@ -309,7 +309,7 @@ export default function BecomePartnerPage() {
                   Application <em className="italic rec-section-heading-accent font-light">Received</em>
                 </h2>
                 <p className="rec-section-subtext text-lg max-w-lg mx-auto mb-10 font-medium leading-relaxed">
-                  Thank you for choosing Luxe. Please upload your business documents to complete the verification process.
+                  Thank you for choosing Fast Booking Service. Please upload your business documents to complete the verification process.
                 </p>
               </div>
               <button
@@ -630,12 +630,6 @@ export default function BecomePartnerPage() {
             </div>
           )}
         </div>
-
-        {/* <div className="mt-5">
-          <p className="mt-10 text-center rec-section-subtext text-xs font-medium tracking-widest uppercase">
-          By submitting, you agree to Luxe's <span className="rec-section-heading-accent cursor-pointer hover:underline">Partner Terms of Service</span> and <span className="rec-section-heading-accent cursor-pointer hover:underline">Privacy Policy</span>.
-        </p>
-        </div> */}
 
       </div>
  

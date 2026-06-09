@@ -6,6 +6,7 @@ import Link from "next/link";
 import { registerUser, sendOTP } from "@/features/auth/services/authService";
 import { useAuthContext } from "@/features/auth/providers/AuthProvider";
 import TermsAndCondition from "@/components/TermsAndCondition";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function SignupClient() {
   const router = useRouter();
@@ -18,6 +19,7 @@ export default function SignupClient() {
   const [showTerms, setShowTerms] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [termsError, setTermsError] = useState(false);
+  const { t } = useLanguage();
   const [form, setForm] = useState({
     fullName: "",
     email: "",
@@ -69,17 +71,17 @@ export default function SignupClient() {
           <Link href="/" className="inline-flex items-center justify-center mb-6 sm:mb-8">
             <img 
               src="/logo/fastbooking.png" 
-              alt="Fast Booking ServiceLogo" 
+              alt="Fast Booking Service Logo" 
               className="w-20 sm:w-28 h-auto object-contain" 
             />
           </Link>
           <h1 className="text-2xl sm:text-3xl font-bold rec-section-heading font-[Cormorant_Garamond,serif] tracking-tight">
-            {step === 1 ? <>Get <em className="italic font-light rec-section-heading-accent">Started</em></> : <>Complete <em className="italic font-light rec-section-heading-accent">Details</em></>}
+            {step === 1 ? t('signup.get_started') : t('signup.complete_details')}
           </h1>
           <p className="text-[10px] uppercase tracking-[0.4em] rec-section-subtext font-bold mt-2">
             {step === 1 
-              ? "Begin your journey to excellence" 
-              : "Refining your bespoke account"}
+              ? t('signup.journey_excellence') 
+              : t('signup.refining_account')}
           </p>
         </div>
 
@@ -89,13 +91,15 @@ export default function SignupClient() {
             <form onSubmit={handleGetOTP} className="space-y-6">
               {/* Email */}
               <div className="space-y-2">
-                <label className="text-[10px] uppercase tracking-widest font-bold rec-section-heading opacity-70 ml-1">Email Address</label>
+                <label className="text-[10px] uppercase tracking-widest font-bold rec-section-heading opacity-70 ml-1">
+                  {t('signup.email_address')}
+                </label>
                 <div className="relative">
                   <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#1C3152]/30 text-xl">mail</span>
                   <input
                     type="email"
                     required
-                    placeholder="john@example.com"
+                    placeholder={t('signup.email_placeholder')}
                     value={form.email}
                     className="w-full pl-12 pr-4 py-4 bg-[#1C3152]/5 border-transparent rounded-2xl text-sm focus:ring-2 focus:ring-[#1C3152]/10 transition-all placeholder-[#1C3152]/20 outline-none rec-section-heading font-medium"
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -112,7 +116,7 @@ export default function SignupClient() {
                   <span className="animate-spin material-symbols-outlined">progress_activity</span>
                 ) : (
                   <>
-                    <span>Get OTP</span>
+                    <span>{t('signup.get_otp')}</span>
                     <span className="material-symbols-outlined text-sm">send</span>
                   </>
                 )}
@@ -123,13 +127,15 @@ export default function SignupClient() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                  {/* Full Name */}
                  <div className="space-y-2">
-                   <label className="text-[10px] uppercase tracking-widest font-bold rec-section-heading opacity-70 ml-1">Full Name</label>
+                   <label className="text-[10px] uppercase tracking-widest font-bold rec-section-heading opacity-70 ml-1">
+                     {t('signup.full_name')}
+                   </label>
                    <div className="relative">
                      <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#1C3152]/30 text-xl">person</span>
                      <input
                        type="text"
                        required
-                       placeholder="John Doe"
+                       placeholder={t('signup.full_name_placeholder')}
                        value={form.fullName}
                        className="w-full pl-12 pr-4 py-4 bg-[#1C3152]/5 border-transparent rounded-2xl text-sm focus:ring-2 focus:ring-[#1C3152]/10 transition-all placeholder-[#1C3152]/20 outline-none rec-section-heading font-medium"
                        onChange={(e) => setForm({ ...form, fullName: e.target.value })}
@@ -139,45 +145,54 @@ export default function SignupClient() {
  
                  {/* Phone Number */}
                  <div className="space-y-2">
-                   <label className="text-[10px] uppercase tracking-widest font-bold rec-section-heading opacity-70 ml-1">Phone Number</label>
+                   <label className="text-[10px] uppercase tracking-widest font-bold rec-section-heading opacity-70 ml-1">
+                     {t('signup.phone_number')}
+                   </label>
                    <div className="relative">
                      <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#1C3152]/30 text-xl">call</span>
                      <input
                        type="tel"
                        required
-                       placeholder="+91 (123) 456-7890"
+                       placeholder={t('signup.phone_number_placeholder')}
                        value={form.phoneNumber}
                        className="w-full pl-12 pr-4 py-4 bg-[#1C3152]/5 border-transparent rounded-2xl text-sm focus:ring-2 focus:ring-[#1C3152]/10 transition-all placeholder-[#1C3152]/20 outline-none rec-section-heading font-medium"
                        onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })}
                      />
                    </div>
                  </div>
-
+ 
                  {/* OTP */}
                  <div className="space-y-2">
-                   <label className="text-[10px] uppercase tracking-widest font-bold rec-section-heading opacity-70 ml-1">OTP</label>
+                   <label className="text-[10px] uppercase tracking-widest font-bold rec-section-heading opacity-70 ml-1">
+                     {t('signup.otp')}
+                   </label>
                    <div className="relative">
                      <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#1C3152]/30 text-xl">verified_user</span>
                      <input
                        type="text"
                        required
-                       placeholder="Enter OTP"
+                       placeholder={t('signup.otp_placeholder')}
                        value={form.otp}
                        className="w-full pl-12 pr-4 py-4 bg-[#1C3152]/5 border-transparent rounded-2xl text-sm focus:ring-2 focus:ring-[#1C3152]/10 transition-all placeholder-[#1C3152]/20 outline-none rec-section-heading font-medium"
                        onChange={(e) => setForm({ ...form, otp: e.target.value })}
                      />
                    </div>
+                   <p className="text-[11px] text-[#C49B66] font-semibold ml-1 mt-1">
+                     * Please check OTP in spam/junk folder as well
+                   </p>
                  </div>
   
                   {/* Password */}
                   <div className="space-y-2">
-                    <label className="text-[10px] uppercase tracking-widest font-bold rec-section-heading opacity-70 ml-1">Password</label>
+                    <label className="text-[10px] uppercase tracking-widest font-bold rec-section-heading opacity-70 ml-1">
+                      {t('signup.password')}
+                    </label>
                     <div className="relative">
                       <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#1C3152]/30 text-xl">lock</span>
                       <input
                         type="password"
                         required
-                        placeholder="••••••••"
+                        placeholder={t('signup.password_placeholder')}
                         value={form.password}
                         className="w-full pl-12 pr-4 py-4 bg-[#1C3152]/5 border-transparent rounded-2xl text-sm focus:ring-2 focus:ring-[#1C3152]/10 transition-all placeholder-[#1C3152]/20 outline-none rec-section-heading font-medium"
                         onChange={(e) => setForm({ ...form, password: e.target.value })}
@@ -185,7 +200,7 @@ export default function SignupClient() {
                     </div>
                   </div>
                </div>
-
+ 
                {/* Terms & Conditions Checkbox */}
                <div className="space-y-3">
                  <div className="flex items-start gap-3 mt-4 px-1">
@@ -203,24 +218,24 @@ export default function SignupClient() {
                    </div>
                    <div className="text-xs sm:text-sm">
                      <label htmlFor="terms" className="rec-section-subtext font-medium cursor-pointer">
-                       I have read and agree to the{" "}
+                       {t('signup.terms_read_agree')}{" "}
                      </label>
                      <button
                        type="button"
                        onClick={() => setShowTerms(true)}
                        className="text-[#1C3152] font-bold hover:underline"
                      >
-                       Terms & Conditions
+                       {t('signup.terms_conditions')}
                      </button>
                    </div>
                  </div>
                  {termsError && (
                    <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider ml-1 animate-shake">
-                     Please accept the Terms & Conditions to continue.
+                     {t('signup.terms_error')}
                    </p>
                  )}
                </div>
-
+ 
                <div className="flex flex-col gap-4">
                  <button
                    type="submit"
@@ -231,7 +246,7 @@ export default function SignupClient() {
                      <span className="animate-spin material-symbols-outlined">progress_activity</span>
                    ) : (
                      <>
-                       <span>Create Account</span>
+                       <span>{t('signup.create_account')}</span>
                        <span className="material-symbols-outlined text-sm">person_add</span>
                      </>
                    )}
@@ -242,18 +257,18 @@ export default function SignupClient() {
                    onClick={() => setStep(1)}
                    className="w-full py-2 rec-section-subtext text-sm font-semibold hover:rec-section-heading transition-colors"
                  >
-                   Back to Email
+                   {t('signup.back_email')}
                  </button>
                </div>
             </form>
           )}
-
+ 
         </div>
         <div className="mt-8 text-center animate-fade-in delay-300">
           <p className="text-sm rec-section-subtext">
-            Already have an account?{" "}
+            {t('signup.have_account')}{" "}
             <Link href="/login" className="rec-section-heading-accent font-bold hover:underline ml-1 uppercase tracking-widest text-[10px]">
-              Sign in
+              {t('signup.signin')}
             </Link>
           </p>
         </div>

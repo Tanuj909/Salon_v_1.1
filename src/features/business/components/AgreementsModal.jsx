@@ -7,7 +7,7 @@ import { useAgreements } from '../hooks/useAgreements';
 import { useAuthContext } from '@/features/auth/hooks/useAuth';
 import { acceptAgreement } from '../services/agreementService';
 import { useToast } from '@/context/ToastContext';
-
+import { useLanguage } from '@/context/LanguageContext';
 
 const AgreementsModal = ({ isOpen, onClose, businessId }) => {
   const { user } = useAuthContext();
@@ -16,7 +16,7 @@ const AgreementsModal = ({ isOpen, onClose, businessId }) => {
   const [isMounted, setIsMounted] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [acceptingId, setAcceptingId] = useState(null);
-
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (isOpen) {
@@ -77,14 +77,19 @@ const AgreementsModal = ({ isOpen, onClose, businessId }) => {
       };
 
       await acceptAgreement(agreement.id, payload);
-      showToast("Agreement accepted successfully!", "success");
+      showToast(t("agreements.toast_success"), "success");
       refreshAgreements();
     } catch (err) {
       console.error("Failed to accept agreement:", err);
-      showToast(err.response?.data?.message || "Failed to accept agreement", "error");
+      showToast(err.response?.data?.message || t("agreements.toast_failed"), "error");
     } finally {
       setAcceptingId(null);
     }
+  };
+
+  const getAgreementStatusText = (status) => {
+    if (!status) return "";
+    return t(`agreements.status.${status.toLowerCase()}`);
   };
 
   const modalContent = (
@@ -98,8 +103,8 @@ const AgreementsModal = ({ isOpen, onClose, businessId }) => {
               <FileText size={24} />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-gray-900 leading-tight">Business Agreements</h2>
-              <p className="text-xs text-gray-500 font-medium">View and download your signed documents</p>
+              <h2 className="text-lg font-bold text-gray-900 leading-tight">{t("agreements.title")}</h2>
+              <p className="text-xs text-gray-500 font-medium">{t("agreements.subtitle")}</p>
             </div>
           </div>
           <button 
@@ -116,16 +121,16 @@ const AgreementsModal = ({ isOpen, onClose, businessId }) => {
             {loading && agreements.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full gap-3">
                 <Loader2 className="animate-spin text-[#D98C5F]" size={32} />
-                <p className="text-sm text-gray-500 font-medium">Loading agreements...</p>
+                <p className="text-sm text-gray-500 font-medium">{t("agreements.loading")}</p>
               </div>
             ) : agreements.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center p-8">
                 <div className="w-16 h-16 bg-white border border-gray-100 rounded-2xl flex items-center justify-center mb-4 shadow-sm text-gray-300">
                   <ShieldCheck size={32} />
                 </div>
-                <h3 className="text-gray-900 font-bold text-lg mb-2">No agreements found</h3>
+                <h3 className="text-gray-900 font-bold text-lg mb-2">{t("agreements.no_agreements_title")}</h3>
                 <p className="text-gray-500 text-sm max-w-[240px]">
-                  Your signed agreements will appear here once they are generated.
+                  {t("agreements.no_agreements_desc")}
                 </p>
               </div>
             ) : (
@@ -142,7 +147,7 @@ const AgreementsModal = ({ isOpen, onClose, businessId }) => {
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <div className="flex-1 min-w-0">
                         <h4 className="text-sm font-bold text-gray-900 truncate">
-                          {agreement.agreementType} Agreement
+                          {agreement.agreementType} {t("agreements.agreement_suffix")}
                         </h4>
                         <div className="flex items-center gap-2 mt-1">
                           <Calendar size={12} className="text-gray-400" />
@@ -162,7 +167,7 @@ const AgreementsModal = ({ isOpen, onClose, businessId }) => {
                           ? 'bg-amber-100 text-amber-600'
                           : 'bg-red-100 text-red-600'
                       }`}>
-                        {agreement.status}
+                        {getAgreementStatusText(agreement.status)}
                       </span>
                     </div>
 
@@ -172,7 +177,7 @@ const AgreementsModal = ({ isOpen, onClose, businessId }) => {
                         className="flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold transition-all bg-gray-50 text-gray-600 hover:bg-[#D98C5F]/10 hover:text-[#D98C5F]"
                       >
                         <Eye size={14} />
-                        View
+                        {t("agreements.btn_view")}
                       </button>
                       <a
                         href={agreement.agreementFileUrl}
@@ -182,7 +187,7 @@ const AgreementsModal = ({ isOpen, onClose, businessId }) => {
                         className="flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold transition-all bg-gray-100 text-gray-600 hover:bg-[#D98C5F]/10 hover:text-[#D98C5F]"
                       >
                         <Download size={14} />
-                        Download
+                        {t("agreements.btn_download")}
                       </a>
                     </div>
 
@@ -192,7 +197,7 @@ const AgreementsModal = ({ isOpen, onClose, businessId }) => {
                         <div className="flex flex-col gap-1.5">
                            <div className="flex items-center gap-2 text-red-600 bg-red-50 px-3 py-2 rounded-lg">
                               <X size={14} className="bg-red-100 rounded-full" />
-                              <p className="text-[11px] font-bold">Agreement Rejected!</p>
+                              <p className="text-[11px] font-bold">{t("agreements.status_rejected_msg")}</p>
                             </div>
                         </div>
                       )}
@@ -203,18 +208,18 @@ const AgreementsModal = ({ isOpen, onClose, businessId }) => {
                             <div className="flex flex-col gap-1.5">
                               <div className="flex items-center gap-2 text-green-600">
                                 <CheckCircle2 size={16} />
-                                <span className="text-sm font-bold">Already Accepted</span>
+                                <span className="text-sm font-bold">{t("agreements.status_accepted_msg")}</span>
                               </div>
                               {agreement.status === 'PENDING' && (
                                 <div className="flex items-center gap-2 text-amber-600 bg-amber-50 px-3 py-2 rounded-lg">
                                   <Clock size={14} />
-                                  <p className="text-[11px] font-bold">Approval still pending!</p>
+                                  <p className="text-[11px] font-bold">{t("agreements.status_pending_msg")}</p>
                                 </div>
                               )}
                               {agreement.status === 'APPROVED' && (
                                 <div className="flex items-center gap-2 text-green-600 bg-green-50 px-3 py-2 rounded-lg">
                                   <ShieldCheck size={14} />
-                                  <p className="text-[11px] font-bold">Agreement Approved!</p>
+                                  <p className="text-[11px] font-bold">{t("agreements.status_approved_msg")}</p>
                                 </div>
                               )}
                             </div>
@@ -229,7 +234,7 @@ const AgreementsModal = ({ isOpen, onClose, businessId }) => {
                               ) : (
                                 <ShieldCheck size={18} />
                               )}
-                              Accept Agreement
+                              {t("agreements.btn_accept")}
                             </button>
                           )}
                         </>
@@ -243,7 +248,7 @@ const AgreementsModal = ({ isOpen, onClose, businessId }) => {
                     onClick={loadMore}
                     className="w-full py-2.5 text-xs font-bold text-[#D98C5F] hover:bg-[#D98C5F]/10 rounded-xl transition-all border border-[#D98C5F]/20"
                   >
-                    Load older agreements
+                    {t("agreements.btn_load_older")}
                   </button>
                 )}
               </div>
@@ -282,7 +287,7 @@ const AgreementsModal = ({ isOpen, onClose, businessId }) => {
                 {/* Fallback overlay if iframe fails to load or takes time */}
                 <div className="absolute inset-0 -z-10 flex flex-col items-center justify-center bg-gray-50 text-gray-400">
                   <Loader2 className="animate-spin mb-2" size={32} />
-                  <p className="text-xs font-medium">Preparing preview...</p>
+                  <p className="text-xs font-medium">{t("agreements.preview_preparing")}</p>
                 </div>
               </div>
             </div>

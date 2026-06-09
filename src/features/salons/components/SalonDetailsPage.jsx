@@ -11,7 +11,9 @@ import BookAppointmentModal from "./BookAppointmentModal";
 import SalonReviews from "./SalonReviews";
 import HeroSection from "./HeroSection";
 import AboutSection from "./AboutSection";
+import GallerySection from "./GallerySection";
 import BusinessTimings from "./BusinessTimings";
+import { useLanguage } from "@/context/LanguageContext";
 
 // ─── Custom Hooks ────────────────────────────────────────────────────────────
 
@@ -53,6 +55,7 @@ function Reveal({ children, delay = 0, className = "" }) {
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 export default function SalonDetailsPage({ salon, staff, reviews, timings, id }) {
+  const { t, currentLanguage } = useLanguage();
   const router = useRouter();
   const pathname = usePathname();
   const { user } = useAuth();
@@ -97,10 +100,10 @@ export default function SalonDetailsPage({ salon, staff, reviews, timings, id })
 
   if (!salon) {
     return (
-      <div className="min-h-screen about-section-bg flex flex-col items-center justify-center gap-4 font-[Jost,sans-serif]">
-        <p className="salon-card-text text-lg">Salon not found.</p>
+      <div className="min-h-screen about-section-bg flex flex-col items-center justify-center gap-4 font-[Jost,sans-serif]" dir={currentLanguage === "ar" ? "rtl" : "ltr"}>
+        <p className="salon-card-text text-lg">{t("salon_details.salon_not_found")}</p>
         <Link href="/salons" className="icon-secondary underline text-sm">
-          ← Back to all salons
+          {t("salon_details.back_to_all_salons")}
         </Link>
       </div>
     );
@@ -114,7 +117,7 @@ export default function SalonDetailsPage({ salon, staff, reviews, timings, id })
     .join(", ") || salon.address;
 
   return (
-    <div className="min-h-screen font-['Manrope',sans-serif]">
+    <div className="min-h-screen font-['Manrope',sans-serif]" dir={currentLanguage === "ar" ? "rtl" : "ltr"}>
       {/* ═══════════════════════════════════════════
           HERO SECTION
       ═══════════════════════════════════════════ */}
@@ -128,6 +131,11 @@ export default function SalonDetailsPage({ salon, staff, reviews, timings, id })
           ABOUT SECTION
       ═══════════════════════════════════════════ */}
       <AboutSection description={salon.description} images={salon.imageUrls} />
+
+      {/* ═══════════════════════════════════════════
+          GALLERY SECTION
+      ═══════════════════════════════════════════ */}
+      <GallerySection images={salon.imageUrls} />
 
       {/* ═══════════════════════════════════════════
           SERVICES SECTION (PAGINATED API)
@@ -155,7 +163,7 @@ export default function SalonDetailsPage({ salon, staff, reviews, timings, id })
             </Reveal>
 
             {/* Right: Map Area + Address Row */}
-            <Reveal delay={200} className="h-full">
+            <Reveal delay={200} className="h-full text-start">
               <div className="flex flex-col gap-6 h-full">
                 {salon.latitude && salon.longitude ? (
                   <div className="flex-1 rounded-[40px] overflow-hidden shadow-2xl border-4 border-white relative group min-h-[350px]">
@@ -167,32 +175,32 @@ export default function SalonDetailsPage({ salon, staff, reviews, timings, id })
                     />
                     <div className="absolute top-0 right-0 w-32 h-32 rec-badge-top-rated-bg -translate-y-1/2 translate-x-1/2 rotate-45 pointer-events-none group-hover:scale-110 transition-transform duration-500 opacity-20" />
                   </div>
-                ) : <div className="flex-1 rounded-[40px] bg-gray-100 flex items-center justify-center min-h-[350px]"><span className="rec-section-subtext font-bold tracking-widest uppercase text-xs">Map Unavailable</span></div>}
+                ) : <div className="flex-1 rounded-[40px] bg-gray-100 flex items-center justify-center min-h-[350px]"><span className="rec-section-subtext font-bold tracking-widest uppercase text-xs">{t("salon_details.map_unavailable")}</span></div>}
 
                 {/* Address Row Below Map */}
-                <div className="bg-[#1C3152]/5 border rec-card-border rounded-3xl sm:rounded-[32px] p-6 sm:p-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 shrink-0 mt-auto">
-                  <div className="flex items-center gap-4 sm:gap-6 flex-1 min-w-0">
-                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl rec-badge-top-rated-bg flex items-center justify-center flex-shrink-0 shadow-lg">
-                      <svg width={18} height={18} className="sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5}>
+                <div className="bg-[#1C3152]/5 border rec-card-border rounded-3xl sm:rounded-[32px] p-4 sm:p-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 shrink-0 mt-auto text-start">
+                  <div className="flex items-center gap-3 sm:gap-6 flex-1 min-w-0">
+                    <div className="w-10 h-10 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl rec-badge-top-rated-bg flex items-center justify-center flex-shrink-0 shadow-lg">
+                      <svg width={14} height={14} className="sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5}>
                         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
                       </svg>
                     </div>
                     <div>
-                      <h4 className="rec-section-heading-accent text-[10px] uppercase tracking-[0.4em] font-bold mb-1.5">The Location</h4>
-                      <p className="rec-section-heading text-sm sm:text-base font-bold leading-relaxed line-clamp-2 font-[Cormorant_Garamond,serif] tracking-wide">{locationText}</p>
+                      <h4 className="rec-section-heading-accent text-[9px] sm:text-[10px] uppercase tracking-[0.4em] font-bold mb-1">{t("salon_details.the_location")}</h4>
+                      <p className="rec-section-heading text-xs sm:text-base font-bold leading-relaxed line-clamp-2 font-[Cormorant_Garamond,serif] tracking-wide">{locationText}</p>
                     </div>
                   </div>
 
-                  <div className="flex flex-col items-start sm:items-end sm:border-l rec-card-border sm:pl-8 w-full sm:w-auto">
-                    <h4 className="rec-section-heading-accent text-[9px] sm:text-[10px] uppercase tracking-[0.3em] sm:tracking-[0.4em] font-bold mb-1.5">Connect</h4>
-                    <p className="rec-section-heading text-sm sm:text-base font-bold mb-4">{salon.phoneNumber}</p>
+                  <div className="flex flex-col items-start sm:items-end sm:border-l rtl:sm:border-l-0 rtl:sm:border-r rec-card-border sm:pl-8 rtl:sm:pl-0 rtl:sm:pr-8 w-full sm:w-auto pt-4 sm:pt-0">
+                    <h4 className="rec-section-heading-accent text-[9px] sm:text-[10px] uppercase tracking-[0.3em] sm:tracking-[0.4em] font-bold mb-1">{t("salon_details.connect")}</h4>
+                    <p className="rec-section-heading text-xs sm:text-base font-bold mb-3">{salon.phoneNumber}</p>
                     <a
                       href={`https://www.google.com/maps/dir/?api=1${location?.latitude && location?.longitude ? `&origin=${location.latitude},${location.longitude}` : ''}&destination=${salon.latitude},${salon.longitude}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="rec-btn-primary px-6 py-3 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all shadow-md border-0 cursor-pointer text-center w-full sm:w-auto"
+                      className="rec-btn-primary px-4 py-2 sm:px-6 sm:py-3 rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-widest transition-all shadow-md border-0 cursor-pointer text-center w-full sm:w-auto"
                     >
-                      Navigate
+                      {t("salon_details.navigate")}
                     </a>
                   </div>
                 </div>

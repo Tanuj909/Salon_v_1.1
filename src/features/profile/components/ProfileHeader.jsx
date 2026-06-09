@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { ShieldCheck, CheckCircle, Crown, MapPin, Calendar, Star, User } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 const ProfileHeader = ({ user }) => {
   const [scrolled, setScrolled] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const { t } = useLanguage();
 
   useEffect(() => {
     setLoaded(true);
@@ -52,7 +54,7 @@ const ProfileHeader = ({ user }) => {
 
   const styles = `
     @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
-
+ 
     .ph-wrapper * { box-sizing: border-box; margin: 0; padding: 0; }
 
     .ph-wrapper {
@@ -325,7 +327,7 @@ const ProfileHeader = ({ user }) => {
         <img
           className={`ph-banner-img ${loaded ? 'loaded' : ''}`}
           src="https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=2074&auto=format&fit=crop"
-          alt="Profile banner"
+          alt={t("profile.profile_banner_alt")}
         />
         <div className="ph-banner-overlay" />
         <div className="ph-banner-line" />
@@ -342,7 +344,7 @@ const ProfileHeader = ({ user }) => {
                 <img
                   className="ph-avatar"
                   src={profileImageUrl}
-                  alt={fullName || 'Profile'}
+                  alt={fullName || t("profile.profile_alt")}
                   onError={() => setImageError(true)}
                 />
               ) : (
@@ -367,7 +369,7 @@ const ProfileHeader = ({ user }) => {
                 {isEmailVerified && (
                   <span className="ph-email-chip">
                     <CheckCircle size={11} />
-                    Verified
+                    {t("profile.verified")}
                   </span>
                 )}
               </div>
@@ -381,12 +383,12 @@ const ProfileHeader = ({ user }) => {
                   style={{ background: tier.gradient, boxShadow: `0 2px 12px ${tier.glow}` }}
                 >
                   <Crown size={12} />
-                  {tier.label} Member
+                  {t(`profile.tiers.${tier.label.toLowerCase()}`)} {t("profile.member_suffix")}
                 </span>
               ) : (
                 <span className="ph-tier-badge" style={{ background: 'var(--accent)', boxShadow: `0 2px 12px var(--accent-glow)` }}>
                   <User size={12} />
-                  {user?.user?.role || "USER"}
+                  {user?.user?.role || t("profile.user_role")}
                 </span>
               )}
               {userId && (
@@ -401,7 +403,7 @@ const ProfileHeader = ({ user }) => {
                 {memberSince && (
                   <div className="ph-meta-item">
                     <Calendar size={13} className="ph-meta-icon" />
-                    Since {memberSince}
+                    {t("profile.since")} {memberSince}
                   </div>
                 )}
                 {memberSince && (location || totalReviews) && <div className="ph-divider" />}
@@ -417,7 +419,7 @@ const ProfileHeader = ({ user }) => {
                 {totalReviews && (
                   <div className="ph-meta-item">
                     <Star size={13} className="ph-meta-icon" />
-                    {totalReviews} {totalReviews === 1 ? 'review' : 'reviews'}
+                    {totalReviews} {totalReviews === 1 ? t("profile.review") : t("profile.reviews_plural")}
                   </div>
                 )}
               </div>

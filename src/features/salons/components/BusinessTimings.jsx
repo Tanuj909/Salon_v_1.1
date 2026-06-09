@@ -2,6 +2,7 @@
 
 import React, { useRef, useEffect, useState } from "react";
 import { Clock } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 // ─── Reveal Animation ──────────────────────────────────────────────────────────
 function useReveal() {
@@ -51,6 +52,7 @@ const formatTime = (timeString) => {
 };
 
 const BusinessTimings = ({ timings, compact = false }) => {
+    const { t } = useLanguage();
     if (!timings || timings.length === 0) return null;
 
     const daysOfWeek = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
@@ -62,53 +64,56 @@ const BusinessTimings = ({ timings, compact = false }) => {
                 {!compact && (
                     <Reveal>
                         <div className="text-center mb-24">
-                            <span className="block text-[11px] tracking-[0.4em] uppercase rec-section-heading-accent font-extrabold mb-8">Plan Your Visit</span>
+                            <span className="block text-[11px] tracking-[0.4em] uppercase rec-section-heading-accent font-extrabold mb-8">{t("salon_details.plan_your_visit")}</span>
                             <h2 className="text-6xl rec-section-heading font-bold leading-tight font-[Cormorant_Garamond,serif]">
-                                Opening <em className="italic font-light rec-section-heading-accent">Hours</em>
+                                {t("salon_details.opening")} <em className="italic font-light rec-section-heading-accent">{t("salon_details.hours")}</em>
                             </h2>
                         </div>
                     </Reveal>
                 )}
 
-                <div className={`${compact ? 'p-4 sm:p-8 md:p-12 rounded-3xl sm:rounded-[48px] h-full flex flex-col justify-center' : 'max-w-3xl mx-auto rounded-3xl sm:rounded-[64px] p-6 sm:p-12 md:p-20'} bg-white border hero-filter-input-bg shadow-lg relative overflow-hidden`}>
+                <div className={`${compact ? 'p-3 sm:p-8 md:p-12 rounded-2xl sm:rounded-[48px] h-full flex flex-col justify-center' : 'max-w-3xl mx-auto rounded-3xl sm:rounded-[64px] p-6 sm:p-12 md:p-20'} bg-white border hero-filter-input-bg shadow-lg relative overflow-hidden`}>
                     <div className="absolute top-0 right-0 w-32 sm:w-48 h-32 sm:h-48 badge-verified-bg opacity-5 rounded-full -translate-y-1/2 translate-x-1/2" />
 
                     <div className={compact ? "space-y-3" : "space-y-6"}>
                         {daysOfWeek.map((day) => {
                             const timing = timings.find(t => t.dayOfWeek === day);
                             const isSelected = day === currentDay;
+                            
+                            // Map DAY English string to key in translations.js
+                            const dayTranslationKey = `salon_details.days.${day}`;
 
                             return (
                                 <div
                                     key={day}
-                                    className={`flex items-center justify-between transition-all duration-500 ${compact ? 'p-3 sm:p-5 rounded-xl sm:rounded-[24px]' : 'p-4 sm:p-8 rounded-2xl sm:rounded-[32px]'
+                                    className={`flex items-center justify-between transition-all duration-500 ${compact ? 'p-2 sm:p-5 rounded-xl sm:rounded-[24px]' : 'p-4 sm:p-8 rounded-2xl sm:rounded-[32px]'
                                         } ${isSelected
                                             ? "rec-btn-primary shadow-xl sm:shadow-2xl scale-[1.02] sm:scale-[1.05] z-10 relative"
                                             : "hover:bg-[#1C3152]/5 rec-section-heading"
                                         }`}
                                 >
-                                    <div className="flex items-center gap-2 sm:gap-4 truncate mr-2">
-                                        <span className={`${compact ? 'text-[11px] sm:text-sm' : 'text-sm sm:text-lg'} font-bold tracking-widest uppercase truncate ${isSelected ? "text-white" : "rec-section-heading"}`}>
-                                            {day.charAt(0) + day.slice(1).toLowerCase()}
+                                    <div className="flex items-center gap-1.5 sm:gap-4 truncate mr-1.5 min-w-0">
+                                        <span className={`${compact ? 'text-[10px] sm:text-sm' : 'text-xs sm:text-lg'} font-bold tracking-wider sm:tracking-widest uppercase truncate ${isSelected ? "text-white" : "rec-section-heading"}`}>
+                                            {t(dayTranslationKey)}
                                         </span>
                                         {isSelected && (
-                                            <span className={`${compact ? 'text-[9px] sm:text-[10px]' : 'text-[11px]'} bg-white/20 px-3 py-1.5 rounded-full uppercase font-extrabold tracking-widest animate-pulse text-white`}>
-                                                Today
+                                            <span className={`${compact ? 'text-[7.5px] sm:text-[10px]' : 'text-[9px] sm:text-[11px]'} bg-white/20 px-2 py-0.5 rounded-full uppercase font-extrabold tracking-wider sm:tracking-widest animate-pulse text-white`}>
+                                                {t("salon_details.today")}
                                             </span>
                                         )}
                                     </div>
 
-                                    <div className="flex items-center gap-4">
+                                    <div className="flex items-center gap-2">
                                         {!timing || timing.isClosed ? (
-                                            <span className={`${compact ? 'text-[11px] sm:text-xs' : 'text-xs sm:text-sm'} font-extrabold uppercase tracking-widest ${isSelected ? "text-[#fef9f3]/70" : "salon-list-title-accent"}`}>
-                                                Closed
+                                            <span className={`${compact ? 'text-[10px] sm:text-xs' : 'text-xs sm:text-sm'} font-extrabold uppercase tracking-wider sm:tracking-widest ${isSelected ? "text-[#fef9f3]/70" : "salon-list-title-accent"}`}>
+                                                {t("salon_details.closed")}
                                             </span>
                                         ) : (
-                                            <div className={`flex items-center ${compact ? 'gap-1.5 sm:gap-4' : 'gap-3 sm:gap-8'} shrink-0`}>
-                                                <span className={`${compact ? 'text-[10px] sm:text-sm' : 'text-sm sm:text-base'} font-bold whitespace-nowrap ${isSelected ? "text-white" : "rec-section-heading"}`}>
+                                            <div className={`flex items-center ${compact ? 'gap-1 sm:gap-4' : 'gap-3 sm:gap-8'} shrink-0`}>
+                                                <span className={`${compact ? 'text-[9px] min-[360px]:text-xs sm:text-sm' : 'text-xs sm:text-base'} font-bold whitespace-nowrap ${isSelected ? "text-white" : "rec-section-heading"}`}>
                                                     {formatTime(timing.openTime)} - {formatTime(timing.closeTime)}
                                                 </span>
-                                                <div className={`${compact ? 'w-6 h-6 sm:w-8 sm:h-8' : 'w-8 h-8 sm:w-10 sm:h-10'} rounded-full flex items-center justify-center shrink-0 ${isSelected ? "bg-white/20" : "rec-badge-top-rated-bg opacity-20"}`}>
+                                                <div className={`${compact ? 'hidden min-[380px]:flex w-6 h-6 sm:w-8 sm:h-8' : 'w-8 h-8 sm:w-10 sm:h-10'} rounded-full flex items-center justify-center shrink-0 ${isSelected ? "bg-white/20" : "rec-badge-top-rated-bg opacity-20"}`}>
                                                     <Clock className={compact ? "w-3 h-3 sm:w-4 sm:h-4" : "w-4 h-4 sm:w-5 sm:h-5"} />
                                                 </div>
                                             </div>

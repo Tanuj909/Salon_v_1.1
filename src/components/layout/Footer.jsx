@@ -4,10 +4,12 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import useActiveCategories from '@/features/salons/hooks/useActiveServices';
 import TermsAndCondition from '@/components/TermsAndCondition';
+import { useLanguage } from '@/context/LanguageContext';
 
 const Footer = () => {
   const { categories } = useActiveCategories();
   const [showTerms, setShowTerms] = useState(false);
+  const { t } = useLanguage();
 
   const getCategoryLink = (name) => {
     const match = categories?.find(c => c.name.toLowerCase() === name.toLowerCase());
@@ -25,25 +27,26 @@ const Footer = () => {
           {/* Col 1 — Brand */}
           <div className="flex flex-col items-center md:items-start text-center md:text-left">
             {/* Logo */}
-<div className="mb-6">
-  <Link
-    href="/"
-    className="inline-flex items-center gap-3 no-underline max-w-full"
-  >
-    <img 
-      src="/logo/fastbooking.png" 
-      alt="Fast Booking Service Logo" 
-      className="w-14 md:w-16 lg:w-[72px] h-auto object-contain shrink-0" 
-    />
-    <span className="text-2xl lg:text-3xl font-extrabold tracking-[0.05em] footer-main-text leading-tight break-words">
-      Fast Booking Service
-    </span>
-  </Link>
-</div>
+            <div className="mb-6">
+              <Link
+                href="/"
+                className="inline-flex items-center gap-3 no-underline max-w-full"
+              >
+                <img 
+                  src="/logo/fastbooking.png" 
+                  alt={`${t("footer.brand_name")} Logo`} 
+                  className="w-14 md:w-16 lg:w-[72px] h-auto object-contain shrink-0" 
+                />
+                <span className="text-2xl lg:text-3xl font-extrabold tracking-[0.05em] footer-main-text leading-tight break-words">
+                  {t("footer.brand_name")}
+                </span>
+              </Link>
+            </div>
 
             {/* Tagline */}
             <p className="text-[0.8rem] md:text-[0.86rem] leading-[1.7] mb-6 max-w-[280px] footer-link-text" style={{ fontFamily: "'Georgia', serif" }}>
-Fast Booking Service is a simple platform to quickly find and book salons, spas, barbers, and beauty services across the UAE in just a few clicks.            </p>
+              {t("footer.tagline")}
+            </p>
 
             {/* Social buttons */}
             <div className="flex gap-4 md:gap-3 mt-1 justify-center md:justify-start">
@@ -76,14 +79,14 @@ Fast Booking Service is a simple platform to quickly find and book salons, spas,
 
           {/* Col 2 — Explore */}
           <div className="flex flex-col items-center md:items-start text-center md:text-left">
-            <h4 className="text-base font-bold mb-6 tracking-[0.02em] footer-main-text">Explore</h4>
+            <h4 className="text-base font-bold mb-6 tracking-[0.02em] footer-main-text">{t("footer.explore")}</h4>
             
             <Link
               href="/salons"
               className="footer-link-text footer-link-hover-text block text-[0.88rem] mb-3.5 no-underline transition-colors duration-200"
               style={{ fontFamily: "'Georgia', serif" }}
             >
-              Our Salons
+              {t("footer.our_salons")}
             </Link>
 
             <Link
@@ -91,29 +94,13 @@ Fast Booking Service is a simple platform to quickly find and book salons, spas,
               className="footer-link-text footer-link-hover-text block text-[0.88rem] mb-3.5 no-underline transition-colors duration-200"
               style={{ fontFamily: "'Georgia', serif" }}
             >
-              About Us
+              {t("footer.about_us")}
             </Link>
-            
-            {/* <a
-              href="#"
-              className="ft-link block text-[0.88rem] mb-3.5 no-underline transition-colors duration-200"
-              style={{ color: 'rgba(253,246,240,0.55)', fontFamily: "'Georgia', serif" }}
-            >
-              Special Offers
-            </a>
-
-            <a
-              href="#"
-              className="ft-link block text-[0.88rem] mb-3.5 no-underline transition-colors duration-200"
-              style={{ color: 'rgba(253,246,240,0.55)', fontFamily: "'Georgia', serif" }}
-            >
-              Gift Cards
-            </a> */}
           </div>
 
           {/* Col 3 — Categories */}
           <div className="flex flex-col items-center md:items-start text-center md:text-left">
-            <h4 className="text-base font-bold mb-6 tracking-[0.02em] footer-main-text">Categories</h4>
+            <h4 className="text-base font-bold mb-6 tracking-[0.02em] footer-main-text">{t("footer.categories")}</h4>
 
             {/* Dynamic Category Links */}
             {['Men', 'Women', 'Kids', 'Pets'].map((catName) => (
@@ -123,21 +110,21 @@ Fast Booking Service is a simple platform to quickly find and book salons, spas,
                 className="footer-link-text footer-link-hover-text block text-[0.88rem] mb-3.5 no-underline transition-colors duration-200"
                 style={{ fontFamily: "'Georgia', serif" }}
               >
-                {catName}
+                {t(`home.cat_${catName.toLowerCase()}`)}
               </Link>
             ))}
           </div>
 
           {/* Col 4 — Business */}
           <div className="flex flex-col items-center md:items-start text-center md:text-left">
-            <h4 className="text-base font-bold mb-6 tracking-[0.02em] footer-main-text">Partner With Us</h4>
+            <h4 className="text-base font-bold mb-6 tracking-[0.02em] footer-main-text">{t("footer.partner_with_us")}</h4>
             
             <Link
               href="/contact"
               className="footer-link-text footer-link-hover-text block text-[0.88rem] mb-3.5 no-underline transition-colors duration-200"
               style={{ fontFamily: "'Georgia', serif" }}
             >
-              List your Business
+              {t("footer.list_business")}
             </Link>
           </div>
 
@@ -146,13 +133,9 @@ Fast Booking Service is a simple platform to quickly find and book salons, spas,
         {/* Bottom bar */}
         <div className="flex flex-col md:flex-row justify-between items-center text-center md:text-left gap-4 pt-7 border-t footer-divider">
           <p className="text-[0.78rem] w-full md:w-auto footer-link-text" style={{ fontFamily: "'Georgia', serif" }}>
-            © Fast Booking Service. All rights reserved.
+            {t("footer.copyright")}
           </p>
           <div className="flex flex-wrap justify-center md:justify-end gap-4 md:gap-6 w-full md:w-auto">
-            {/* <a href="#" className="footer-link-text footer-main-text hover:footer-link-hover-text text-[0.78rem] no-underline transition-colors duration-200"
-              style={{ fontFamily: "'Georgia', serif" }}>
-              Privacy Policy
-            </a> */}
             <button 
               onClick={(e) => {
                 e.preventDefault();
@@ -160,7 +143,7 @@ Fast Booking Service is a simple platform to quickly find and book salons, spas,
               }}
               className="footer-link-text footer-main-text hover:footer-link-hover-text text-[0.78rem] no-underline transition-colors duration-200 cursor-pointer bg-transparent border-none p-0"
               style={{ fontFamily: "'Georgia', serif" }}>
-              Terms & condition
+              {t("footer.terms_conditions")}
             </button>
           </div>
         </div>

@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { loginUser } from "@/features/auth/services/authService";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function LoginClient() {
   const router = useRouter();
@@ -13,6 +13,7 @@ export default function LoginClient() {
   const redirect = searchParams.get("redirect");
   const { refreshUser } = useAuth();
   const [loading, setLoading] = useState(false);
+  const { t } = useLanguage();
 
   const [form, setForm] = useState({
     email: "",
@@ -47,22 +48,26 @@ export default function LoginClient() {
             />
           </Link>
           <h1 className="text-2xl sm:text-3xl font-bold rec-section-heading font-[Cormorant_Garamond,serif] tracking-tight">
-            Welcome <em className="italic font-light rec-section-heading-accent">Back</em>
+            {t('login.welcome_back')}
           </h1>
-          <p className="text-[10px] uppercase tracking-[0.4em] rec-section-subtext font-bold mt-2">Sign in to your excellence</p>
+          <p className="text-[10px] uppercase tracking-[0.4em] rec-section-subtext font-bold mt-2">
+            {t('login.signin_excellence')}
+          </p>
         </div>
 
         {/* Login Card */}
         <div className="bg-white/90 backdrop-blur-md rounded-3xl sm:rounded-[2.5rem] p-6 sm:p-8 md:p-10 shadow-2xl border rec-card-border animate-slide-up">
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             <div className="space-y-1.5 sm:space-y-2">
-              <label className="text-[10px] uppercase tracking-widest font-bold rec-section-heading opacity-70 ml-1">Email Address</label>
+              <label className="text-[10px] uppercase tracking-widest font-bold rec-section-heading opacity-70 ml-1">
+                {t('login.email_address')}
+              </label>
               <div className="relative">
                 <span className="material-symbols-outlined absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-[#1C3152]/30 text-lg sm:text-xl">email</span>
                 <input
                   type="email"
                   required
-                  placeholder="name@example.com"
+                  placeholder={t('login.email_placeholder')}
                   className="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 bg-[#1C3152]/5 border-transparent rounded-xl sm:rounded-2xl text-sm focus:ring-2 focus:ring-[#1C3152]/10 transition-all placeholder-[#1C3152]/20 outline-none rec-section-heading font-medium"
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                 />
@@ -71,9 +76,11 @@ export default function LoginClient() {
 
             <div className="space-y-1.5 sm:space-y-2">
               <div className="flex justify-between items-center ml-1">
-                <label className="text-[10px] uppercase tracking-widest font-bold rec-section-heading opacity-70">Password</label>
+                <label className="text-[10px] uppercase tracking-widest font-bold rec-section-heading opacity-70">
+                  {t('login.password')}
+                </label>
                 <Link href="/forgot-password" size="sm" className="text-[10px] font-bold uppercase tracking-wider rec-section-heading-accent hover:opacity-80 transition-opacity">
-                  Forgot?
+                  {t('login.forgot_password')}
                 </Link>
               </div>
               <div className="relative">
@@ -81,7 +88,7 @@ export default function LoginClient() {
                 <input
                   type="password"
                   required
-                  placeholder="••••••••"
+                  placeholder={t('login.password_placeholder')}
                   className="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 bg-[#1C3152]/5 border-transparent rounded-xl sm:rounded-2xl text-sm focus:ring-2 focus:ring-[#1C3152]/10 transition-all placeholder-[#1C3152]/20 outline-none rec-section-heading font-medium"
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
                 />
@@ -97,7 +104,7 @@ export default function LoginClient() {
                 <span className="animate-spin material-symbols-outlined text-xl">progress_activity</span>
               ) : (
                 <>
-                  <span>Sign In</span>
+                  <span>{t('login.sign_in_btn')}</span>
                   <span className="material-symbols-outlined text-sm sm:text-base">arrow_forward</span>
                 </>
               )}
@@ -107,13 +114,13 @@ export default function LoginClient() {
         </div>
         <div className="mt-6 text-center animate-fade-in delay-300">
           <p className="text-xs sm:text-sm rec-section-subtext">
-            Don't have an account?{" "}
+            {t('login.no_account')}{" "}
             <button 
               type="button" 
               onClick={() => router.push("/signup")}
               className="rec-section-heading-accent font-bold hover:underline ml-1 uppercase tracking-widest text-[10px]"
             >
-              Register now
+              {t('login.register_now')}
             </button>
           </p>
         </div>

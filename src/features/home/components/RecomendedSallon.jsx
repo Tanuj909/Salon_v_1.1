@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { fetchNearbySalons } from "@/features/salons/services/salonService";
 import dynamic from "next/dynamic";
+import { useLanguage } from "@/context/LanguageContext";
 
 const MapPickerModal = dynamic(
   () => import("@/features/salons/components/MapPickerModal"),
@@ -25,10 +26,8 @@ const StarIcon = ({ filled }) => (
 
 import { useUserLocation } from "@/features/salons/hooks/useUserLocation";
 
-// Shared Section Header used in loading and main render
-
-
 export default function RecomendedSallon() {
+  const { t } = useLanguage();
   const [salons, setSalons] = useState([]);
   const [salonsLoading, setSalonsLoading] = useState(false);
   const { location, error: locationError, loading: locationLoading, isTimeout, saveManualLocation } = useUserLocation();
@@ -71,7 +70,7 @@ export default function RecomendedSallon() {
           <div className="h-px mb-10 rec-section-divider-line" />
           <div className="text-center py-12">
             <p className="rec-section-subtext">
-              {locationLoading ? 'Getting your location...' : 'Finding salons near you...'}
+              {locationLoading ? t('home.getting_location') : t('home.finding_salons')}
             </p>
           </div>
         </div>
@@ -102,7 +101,7 @@ export default function RecomendedSallon() {
                   <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
                   <circle cx="12" cy="10" r="3" />
                 </svg>
-                Retry Location
+                {t("home.retry_location")}
               </button>
             )}
           </div>
@@ -119,10 +118,10 @@ export default function RecomendedSallon() {
                 <circle cx="12" cy="10" r="3" />
               </svg>
             </div>
-            <h3 className="text-lg font-bold rec-empty-heading mb-2 font-[Cormorant_Garamond]">Location Access Required</h3>
+            <h3 className="text-lg font-bold rec-empty-heading mb-2 font-[Cormorant_Garamond]">{t("home.loc_access_required")}</h3>
             <div className="flex justify-center">
               <p className="rec-section-subtext font-[DM_Sans] text-sm max-w-[300px] mx-auto mb-6">
-                Please allow location access or choose manually to discover premium salons in your area.
+                {t("home.allow_loc_desc_alt")}
               </p>
             </div>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 px-4">
@@ -130,13 +129,13 @@ export default function RecomendedSallon() {
                 onClick={handleRetryLocation}
                 className="w-full sm:w-auto py-2.5 px-8 rounded-full rec-btn-primary text-[0.8rem] font-bold tracking-widest transition-all shadow-md"
               >
-                Allow Location
+                {t("home.allow_location")}
               </button>
               <button
                 onClick={() => setIsMapModalOpen(true)}
                 className="w-full sm:w-auto py-2.5 px-8 rounded-full border rec-btn-gold-outline text-[0.8rem] font-bold tracking-widest transition-all shadow-sm"
               >
-                Choose location manually
+                {t("home.choose_location_manually")}
               </button>
             </div>
           </div>
@@ -165,13 +164,13 @@ export default function RecomendedSallon() {
                     {/* Badge */}
                     {badge && bc && (
                       <span className={`absolute top-3.5 left-3.5 px-[11px] py-1 rounded-full text-[0.68rem] font-semibold tracking-[0.06em] backdrop-blur-[8px] border font-[DM_Sans] ${bc}`}>
-                        {badge}
+                        {t("home.top_rated")}
                       </span>
                     )}
 
                     {/* Open Status */}
                     <span className={`absolute top-3.5 right-3.5 px-2.5 py-1 rounded-full text-[0.72rem] font-semibold tracking-[0.04em] backdrop-blur-[8px] font-[DM_Sans] ${salon.isOpen ? 'rec-status-open' : 'rec-status-closed'}`}>
-                      {salon.isOpen ? 'Open' : 'Closed'}
+                      {salon.isOpen ? t("home.open") : t("home.closed")}
                     </span>
                   </div>
 
@@ -190,7 +189,7 @@ export default function RecomendedSallon() {
                       </div>
                       <div className="h-px mb-3 rec-card-inner-divider" />
                       <p className="text-[0.76rem] font-normal mb-3 rec-card-desc font-[DM_Sans] line-clamp-2 italic">
-                        {salon.description || "Luxury salon offering premium beauty services."}
+                        {salon.description || t("home.allow_loc_desc_alt")}
                       </p>
                     </div>
 
@@ -207,7 +206,7 @@ export default function RecomendedSallon() {
                         </span>
                       </div>
                       <span className="py-[7px] px-[16px] rounded-full rec-btn-primary text-[0.73rem] font-semibold tracking-[0.04em] font-[DM_Sans]">
-                        View
+                        {t("home.view_btn")}
                       </span>
                     </div>
                   </div>
@@ -217,19 +216,19 @@ export default function RecomendedSallon() {
           </div>
         ) : (
           <div className="text-center py-12 bg-white/50 rounded-2xl border border-dashed rec-empty-border">
-            <p className="rec-section-subtext mb-4">No salons found near your current location.</p>
+            <p className="rec-section-subtext mb-4">{t("home.no_salons_found")}</p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 px-4 sm:px-0">
               <button
                 onClick={() => setIsMapModalOpen(true)}
                 className="w-full sm:w-auto py-2 px-6 rounded-full border rec-btn-gold-outline text-[0.8rem] font-bold tracking-widest transition-all shadow-sm"
               >
-                Choose location manually
+                {t("home.choose_location_manually")}
               </button>
               <Link
                 href="/salons"
                 className="w-full sm:w-auto text-center py-2 px-6 rounded-full rec-btn-primary text-[0.8rem] font-bold tracking-widest transition-all shadow-md no-underline"
               >
-                Browse salons
+                {t("home.browse_salons")}
               </Link>
             </div>
           </div>

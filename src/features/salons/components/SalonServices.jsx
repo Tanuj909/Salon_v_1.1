@@ -2,6 +2,7 @@
 
 import React, { useRef, useEffect, useState } from "react";
 import { getBusinessCategoriesWithDetails, getServicesByCategoryForBusiness } from "../services/salonService";
+import { useLanguage } from "@/context/LanguageContext";
 
 // ─── Reveal Animation ──────────────────────────────────────────────────────────
 function useReveal() {
@@ -118,6 +119,7 @@ function SkeletonCard() {
 
 // ─── Category Card ─────────────────────────────────────────────────────────────
 function CategoryCard({ category, index, onClick }) {
+    const { t } = useLanguage();
     return (
         <Reveal delay={index * 80}>
             <div 
@@ -131,10 +133,10 @@ function CategoryCard({ category, index, onClick }) {
                     <div className="mb-4">
                         <div className="flex justify-between items-start gap-2 mb-2">
                             <span className="text-[10px] tracking-[0.18em] uppercase font-bold text-[#C49B66]">
-                                Category
+                                {t("salon_details.category")}
                             </span>
                             <span className="bg-[#1C3152]/10 text-[#1C3152] text-[10px] font-bold px-2.5 py-0.5 rounded-full">
-                                {category.serviceCount} Services
+                                {category.serviceCount} {category.serviceCount === 1 ? t("salon_details.service_count") : t("salon_details.services_count")}
                             </span>
                         </div>
                         <h3 className="text-[24px] font-bold text-[#1C3152] tracking-[-0.3px] leading-tight font-[Cormorant_Garamond,serif] group-hover:text-[#C49B66] transition-colors duration-200">
@@ -143,18 +145,18 @@ function CategoryCard({ category, index, onClick }) {
                     </div>
 
                     <p className="text-[13px] text-[#6B6B6B] leading-relaxed mb-6 line-clamp-2">
-                        {category.description || "Explore our premium selection of services tailored for you."}
+                        {category.description || t("salon_details.no_description_available")}
                     </p>
 
                     <div className="mt-auto pt-4 border-t border-[#E2E8F0]">
                         <div className="flex justify-between items-center text-[12px]">
-                            <span className="text-[#6B6B6B]">Price Range:</span>
+                            <span className="text-[#6B6B6B]">{t("salon_details.price_range")}</span>
                             <span className="font-bold text-[#1C3152]">
                                 AED {category.minPrice} - {category.maxPrice}
                             </span>
                         </div>
                         <div className="flex justify-between items-center text-[12px] mt-1">
-                            <span className="text-[#6B6B6B]">Avg. Price:</span>
+                            <span className="text-[#6B6B6B]">{t("salon_details.avg_price")}</span>
                             <span className="font-semibold text-[#C49B66]">
                                 AED {category.avgPrice}
                             </span>
@@ -166,7 +168,7 @@ function CategoryCard({ category, index, onClick }) {
                             onClick={(e) => { e.stopPropagation(); onClick(); }}
                             className="rec-btn-primary w-full py-3 rounded-xl border-0 text-xs font-bold cursor-pointer tracking-[0.06em] uppercase flex items-center justify-center gap-2 group-hover:bg-[#16263F] transition-all duration-300"
                         >
-                            View Services
+                            {t("salon_details.view_services_btn")}
                             <svg className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                             </svg>
@@ -179,7 +181,8 @@ function CategoryCard({ category, index, onClick }) {
 }
 
 // ─── Service Card ──────────────────────────────────────────────────────────────
-function ServiceCard({ service, index, onBookNow, salon, onOpenSlider }) {
+function ServiceCard({ service, index, onBookNow, salon, onOpenSlider, onOpenDescription }) {
+    const { t } = useLanguage();
     const salonName = salon?.name || "Glamour Studio";
     const salonCategory = salon?.category?.name || "Premium Salon";
     
@@ -229,7 +232,7 @@ function ServiceCard({ service, index, onBookNow, salon, onOpenSlider }) {
                     {/* Service Label + Title + Image */}
                     <div className="pb-4 mb-4 flex items-start gap-4">
                         <div className="flex-1 min-w-0">
-                            <p className="rec-section-heading-accent text-[10px] tracking-[0.18em] uppercase font-bold mb-[5px]">Service</p>
+                            <p className="rec-section-heading-accent text-[10px] tracking-[0.18em] uppercase font-bold mb-[5px]">{t("salon_details.category")}</p>
                             <h2 className="rec-section-heading text-[24px] font-bold m-0 tracking-[-0.3px] leading-tight line-clamp-2 font-[Cormorant_Garamond,serif]">
                                 {service.name}
                             </h2>
@@ -242,7 +245,7 @@ function ServiceCard({ service, index, onBookNow, salon, onOpenSlider }) {
                                         onOpenSlider(sliderImages, 0);
                                     }
                                 }}
-                                title="Click to view images"
+                                title={t("salon_details.view")}
                             >
                                 <img
                                     src={serviceImage}
@@ -261,10 +264,28 @@ function ServiceCard({ service, index, onBookNow, salon, onOpenSlider }) {
                         )}
                     </div>
 
+                    {/* Description Section */}
+                    {service.description && (
+                        <div className="flex items-center gap-1.5 mb-4 text-[12px] sm:text-[13px] text-[#6B6B6B] w-full min-w-0 font-[DM_Sans]">
+                            <span className="truncate flex-1">
+                                {service.description}
+                            </span>
+                            <button 
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onOpenDescription(service);
+                                }}
+                                className="text-[#C49B66] font-bold hover:underline text-[12px] bg-transparent border-0 p-0 cursor-pointer shrink-0"
+                            >
+                                {t("salon_details.view")}
+                            </button>
+                        </div>
+                    )}
+
                     {/* Price Section */}
                     <div className="mb-6 flex items-center justify-between border-t border-[#E2E8F0] pt-4 mt-auto">
                         <span className="text-[12px] font-bold rec-section-heading font-[Cormorant_Garamond,serif] uppercase tracking-wider">
-                            Price
+                            {t("salon_details.price")}
                         </span>
                         <div>
                             <span className="text-[16px] font-bold text-[#C49B66] font-[Cormorant_Garamond,serif]">
@@ -283,7 +304,7 @@ function ServiceCard({ service, index, onBookNow, salon, onOpenSlider }) {
                             onClick={() => onBookNow?.(service)}
                             className="rec-btn-primary w-full p-[14px] rounded-xl border-0 text-sm font-bold cursor-pointer tracking-[0.04em] transition-all duration-300 hover:shadow-xl active:scale-[0.98]"
                         >
-                            Book Service
+                            {t("salon_details.book_service")}
                         </button>
                     </div>
                 </div>
@@ -294,6 +315,7 @@ function ServiceCard({ service, index, onBookNow, salon, onOpenSlider }) {
 
 // ─── Image Slider Lightbox Modal ───────────────────────────────────────────────
 function ImageSliderModal({ images, currentIndex, onClose, onPrev, onNext, onIndexSelect }) {
+    const { t } = useLanguage();
     useEffect(() => {
         const handleKeyDown = (e) => {
             if (e.key === "Escape") onClose();
@@ -315,7 +337,7 @@ function ImageSliderModal({ images, currentIndex, onClose, onPrev, onNext, onInd
             <button 
                 onClick={onClose}
                 className="absolute top-6 right-6 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 z-[100000]"
-                aria-label="Close slider"
+                aria-label={t("salon_details.close_slider_aria")}
             >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <line x1="18" y1="6" x2="6" y2="18" />
@@ -328,7 +350,7 @@ function ImageSliderModal({ images, currentIndex, onClose, onPrev, onNext, onInd
                 <button
                     onClick={(e) => { e.stopPropagation(); onPrev(); }}
                     className="absolute left-6 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 z-[100000]"
-                    aria-label="Previous image"
+                    aria-label={t("salon_details.prev_image_aria")}
                 >
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                         <line x1="19" y1="12" x2="5" y2="12" />
@@ -355,7 +377,7 @@ function ImageSliderModal({ images, currentIndex, onClose, onPrev, onNext, onInd
                 <button
                     onClick={(e) => { e.stopPropagation(); onNext(); }}
                     className="absolute right-6 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 z-[100000]"
-                    aria-label="Next image"
+                    aria-label={t("salon_details.next_image_aria")}
                 >
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                         <line x1="5" y1="12" x2="19" y2="12" />
@@ -386,8 +408,59 @@ function ImageSliderModal({ images, currentIndex, onClose, onPrev, onNext, onInd
     );
 }
 
+// ─── Description Preview Modal ──────────────────────────────────────────────────
+function DescriptionModal({ service, onClose }) {
+    const { t } = useLanguage();
+    if (!service) return null;
+
+    return (
+        <div 
+            className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-opacity duration-300"
+            onClick={onClose}
+        >
+            <div 
+                className="bg-white rounded-[24px] max-w-md w-full p-6 shadow-2xl relative border border-[#E2E8F0] animate-in fade-in zoom-in-95 duration-200"
+                onClick={(e) => e.stopPropagation()}
+            >
+                {/* Close Button */}
+                <button 
+                    onClick={onClose}
+                    className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-500 flex items-center justify-center cursor-pointer transition-all"
+                >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+
+                <div className="space-y-4">
+                    <span className="text-[10px] tracking-[0.18em] uppercase font-bold text-[#C49B66]">
+                        {t("salons_list.service")}
+                    </span>
+                    <h3 className="text-[24px] font-bold text-[#1C3152] tracking-[-0.3px] leading-tight font-[Cormorant_Garamond,serif] pr-6">
+                        {service.name}
+                    </h3>
+                    <div className="h-px bg-gray-100 w-full" />
+                    <p className="text-[14px] text-[#4A4A4A] leading-relaxed font-[DM_Sans]">
+                        {service.description}
+                    </p>
+                    <div className="pt-2 flex justify-end">
+                        <button
+                            onClick={onClose}
+                            className="rec-btn-primary px-6 py-2.5 rounded-xl border-0 text-xs font-bold cursor-pointer tracking-[0.04em] uppercase"
+                        >
+                            {t("salon_details.close")}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 // ─── Main Component ────────────────────────────────────────────────────────────
 const SalonServices = ({ salon, onBookService }) => {
+    const { t, currentLanguage } = useLanguage();
     // Categories States
     const [categories, setCategories] = useState([]);
     const [loadingCategories, setLoadingCategories] = useState(true);
@@ -402,6 +475,9 @@ const SalonServices = ({ salon, onBookService }) => {
     // Image Slider Lightbox States
     const [sliderImages, setSliderImages] = useState(null);
     const [currentSliderIndex, setCurrentSliderIndex] = useState(0);
+
+    // Description Modal States
+    const [descModalService, setDescModalService] = useState(null);
 
     // Initial load: fetch business categories
     useEffect(() => {
@@ -483,10 +559,10 @@ const SalonServices = ({ salon, onBookService }) => {
                 <Reveal>
                     <div className="text-center mb-16 sm:mb-20 relative">
                         <span className="rec-badge-top-rated-bg inline-block px-5 py-2 rounded-full text-[10px] sm:text-[11px] tracking-[0.2em] uppercase font-bold mb-5 shadow-sm">
-                            Pricing &amp; Rituals
+                            {t("salon_details.pricing_rituals")}
                         </span>
                         <h2 className="rec-section-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight font-[Cormorant_Garamond,serif]">
-                            Our <em className="italic font-light rec-section-heading-accent">Services</em>
+                            {t("salon_details.our_services").split(' ')[0]} <em className="italic font-light rec-section-heading-accent">{t("salon_details.our_services").split(' ').slice(1).join(' ')}</em>
                         </h2>
                         <div className="flex items-center justify-center gap-3">
                             <div className="rec-section-divider w-16 h-[1.5px] rounded-full opacity-40" />
@@ -543,13 +619,13 @@ const SalonServices = ({ salon, onBookService }) => {
                                         <line x1="19" y1="12" x2="5" y2="12" />
                                         <polyline points="12 19 5 12 12 5" />
                                     </svg>
-                                    Back to Categories
+                                    {t("salon_details.back_to_categories")}
                                 </button>
                                 <div className="text-left space-y-2">
                                     <div className="inline-flex items-center gap-2">
                                         <span className="h-[1px] w-6 bg-[#C49B66] opacity-60" />
                                         <span className="text-[10px] tracking-[0.2em] uppercase font-bold text-[#C49B66]">
-                                            Selected Category
+                                            {t("salon_details.selected_category")}
                                         </span>
                                     </div>
                                     <h3 className="text-3xl sm:text-4xl font-bold text-[#1C3152] tracking-tight font-[Cormorant_Garamond,serif] leading-tight">
@@ -584,6 +660,7 @@ const SalonServices = ({ salon, onBookService }) => {
                                         onBookNow={onBookService}
                                         salon={salon}
                                         onOpenSlider={openSlider}
+                                        onOpenDescription={setDescModalService}
                                     />
                                 ))}
                             </div>
@@ -592,9 +669,9 @@ const SalonServices = ({ salon, onBookService }) => {
                         {/* Services Error */}
                         {servicesError && (
                             <div className="text-center py-12">
-                                <p className="text-red-500 font-medium mb-3">{servicesError}</p>
+                                <p className="text-red-500 font-medium mb-3">{t("salon_details.no_services_category")}</p>
                                 <button onClick={() => handleSelectCategory(selectedCategory)} className="rec-btn-primary px-4 py-2 rounded-xl text-xs font-bold">
-                                    Retry
+                                    {t("salon_details.retry")}
                                 </button>
                             </div>
                         )}
@@ -604,19 +681,19 @@ const SalonServices = ({ salon, onBookService }) => {
                 {/* Categories Error */}
                 {categoriesError && (
                     <div className="text-center py-12">
-                        <p className="text-red-500 font-medium mb-3">{categoriesError}</p>
+                        <p className="text-red-500 font-medium mb-3">{t("salon_details.no_categories")}</p>
                         <button
                             onClick={() => {
                                 setCategoriesError(null);
                                 setLoadingCategories(true);
                                 getBusinessCategoriesWithDetails(salon.id)
                                     .then((data) => setCategories(data || []))
-                                    .catch(() => setCategoriesError("Failed to fetch service categories."))
+                                    .catch(() => setCategoriesError(t("salon_details.no_categories")))
                                     .finally(() => setLoadingCategories(false));
                             }}
                             className="rec-btn-primary px-4 py-2 rounded-xl text-xs font-bold"
                         >
-                            Retry
+                            {t("salon_details.retry")}
                         </button>
                     </div>
                 )}
@@ -631,6 +708,14 @@ const SalonServices = ({ salon, onBookService }) => {
                     onPrev={handlePrevSlider}
                     onNext={handleNextSlider}
                     onIndexSelect={handleSelectSliderIndex}
+                />
+            )}
+
+            {/* Description Details Modal */}
+            {descModalService && (
+                <DescriptionModal
+                    service={descModalService}
+                    onClose={() => setDescModalService(null)}
                 />
             )}
         </section>

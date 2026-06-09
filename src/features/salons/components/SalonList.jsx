@@ -7,6 +7,8 @@ import Fuse from 'fuse.js';
 import { fuseData } from '@/features/home/data/fuseData';
 import { enrichSynonyms, fuseOptions } from '@/features/home/utils/searchUtils';
 import { fetchDistinctServiceNames } from "@/features/salons/services/salonService";
+import { useLanguage } from "@/context/LanguageContext";
+
 // Local badge styles
 const badgeStyles = {
   "VERIFIED": {
@@ -38,6 +40,7 @@ const StarIcon = ({ filled }) => (
 
 // ─── Salon Card ───────────────────────────────────────────────────────────────
 function SalonCard({ salon }) {
+  const { t } = useLanguage();
   // Determine image source with fallback
   const imageSrc = salon.bannerImageUrl || (salon.imageUrls && salon.imageUrls.length > 0 ? salon.imageUrls[0] : "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&auto=format&fit=crop&q=60");
 
@@ -45,7 +48,7 @@ function SalonCard({ salon }) {
   const locationString = [salon.city, salon.state, salon.country].filter(Boolean).join(", ");
 
   // Open status badge
-  const openBadge = salon.isOpen ? "Open Now" : "Closed";
+  const openBadge = salon.isOpen ? t("salons_list.open_now") : t("salons_list.closed");
 
   // Verification badge check
   const badge = salon.verificationStatus === "VERIFIED" ? "VERIFIED" : null;
@@ -82,7 +85,7 @@ function SalonCard({ salon }) {
       shadow-md
     "
           >
-            Top Rated
+            {t("salons_list.top_rated")}
           </span>
         )}
 
@@ -100,7 +103,7 @@ function SalonCard({ salon }) {
 
         <div className="flex items-center gap-1.5 text-[0.75rem] mb-3 salon-card-text font-['Manrope',sans-serif] font-medium">
           <MapPin size={12} className="hero-filter-icon" />
-          {locationString || salon.address || "Location unavailable"}
+          {locationString || salon.address || t("salons_list.location_unavailable")}
         </div>
 
         {/* Divider */}
@@ -116,7 +119,7 @@ function SalonCard({ salon }) {
         {/* Service Count (if available) */}
         {salon.serviceCount !== undefined && salon.serviceCount !== null && (
           <div className="inline-block px-2.5 py-1 bg-[#4b3621]/5 text-[#4b3621] text-[0.68rem] font-bold uppercase tracking-widest rounded-md mb-auto font-['Manrope',sans-serif] self-start">
-            {salon.serviceCount} Services Available
+            {salon.serviceCount} {t("salons_list.services_available")}
           </div>
         )}
 
@@ -140,7 +143,7 @@ function SalonCard({ salon }) {
           </div>
 
           <span className="py-2 px-[18px] rounded-full border-[1.5px] rec-card-btn text-[0.75rem] font-bold tracking-[0.04em] font-['Manrope',sans-serif] transition-all duration-300 group-hover:rec-btn-primary group-hover:shadow-lg">
-            Explore
+            {t("salons_list.explore")}
           </span>
         </div>
       </div>
@@ -154,6 +157,7 @@ export default function SalonList() {
     salons, loading, error, isFallback,
     searchParams, updateParams, saveManualLocation, useCurrentLocation, retry
   } = useNearbySalons();
+  const { t } = useLanguage();
 
   const [activeFilter, setActiveFilter] = useState("All");
   const [search, setSearch] = useState("");
@@ -207,8 +211,15 @@ export default function SalonList() {
   const [salonPlaceholderIndex, setSalonPlaceholderIndex] = useState(0);
   const [servicePlaceholderIndex, setServicePlaceholderIndex] = useState(0);
 
-  const salonPlaceholders = ["Encore Salon", "The Barber Shop", "Luxe Cuts", "Zen Spa", "Elite Grooming", "Radiance Beauty"];
-  const servicePlaceholders = ["Haircut", "Manicure", "Beard Trim", "Facial", "Hair Coloring", "Massage"];
+  const salonPlaceholders = ["Encore Salon", "The Barber Shop", "Zen Spa", "Elite Grooming", "Radiance Beauty"];
+  const servicePlaceholders = [
+    t("home.placeholder_0"),
+    t("home.placeholder_1"),
+    t("home.placeholder_2"),
+    t("home.placeholder_3"),
+    t("home.placeholder_4"),
+    t("home.placeholder_5")
+  ];
 
   const [headingIndex, setHeadingIndex] = useState(0);
   const headings = [
@@ -221,7 +232,7 @@ export default function SalonList() {
   const [headingFade, setHeadingFade] = useState(true);
 
   // ─── Heading Cycle (5s) ───
-  React.useEffect(() => {
+  useEffect(() => {
     const headingInterval = setInterval(() => {
       setHeadingFade(false);
       setTimeout(() => {
@@ -233,7 +244,7 @@ export default function SalonList() {
   }, []);
 
   // ─── Placeholder Cycle (3.5s) ───
-  React.useEffect(() => {
+  useEffect(() => {
     const placeholderInterval = setInterval(() => {
       setPlaceholderFade(false);
       setTimeout(() => {
@@ -245,7 +256,7 @@ export default function SalonList() {
     return () => clearInterval(placeholderInterval);
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchActiveCategories().then(data => {
       const catList = (Array.isArray(data) ? data : (data.content || []));
       setCategories(catList);
@@ -267,12 +278,11 @@ export default function SalonList() {
       }
     };
 
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     let timer;
     if (loading && !salons.length) {
       timer = setTimeout(() => {
@@ -285,8 +295,8 @@ export default function SalonList() {
   }, [loading, salons.length]);
 
   // Sync draft params with search params only on initial load or browser detection
-  const hasInitialized = React.useRef(false);
-  React.useEffect(() => {
+  const hasInitialized = useRef(false);
+  useEffect(() => {
     if (searchParams.lat && !hasInitialized.current) {
       setDraftParams({
         lat: searchParams.lat,
@@ -361,19 +371,19 @@ export default function SalonList() {
           <div className="w-16 h-16 border-4 border-[#cd6133]/20 border-t-[#cd6133] rounded-full animate-spin" />
           <div className="space-y-2">
             <h2 className="text-xl font-bold salon-list-title-text font-[Cormorant_Garamond]">
-              {showTimeoutOptions ? "Still searching for your location..." : "Finding best salons near you..."}
+              {showTimeoutOptions ? t("salons_list.still_searching_loc") : t("salons_list.finding_best_salons")}
             </h2>
             <p className="footer-link-text font-medium font-[DM_Sans] text-sm opacity-80">
               {showTimeoutOptions
-                ? "It's taking a bit longer than expected. You can wait a moment or enter your location manually below."
-                : "We're locating the premium grooming spaces in your area."}
+                ? t("salons_list.longer_expected_desc")
+                : t("salons_list.locating_premium_spaces")}
             </p>
           </div>
 
           {showTimeoutOptions && (
             <div className="w-full pt-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="p-4 hero-filter-bar-bg rounded-2xl border hero-filter-input-bg shadow-sm">
-                <p className="text-[10px] uppercase tracking-widest font-bold hero-filter-icon mb-3">Enter Manually</p>
+                <p className="text-[10px] uppercase tracking-widest font-bold hero-filter-icon mb-3">{t("salons_list.enter_manually")}</p>
                 <LocationPicker
                   currentAddress={draftParams.address}
                   lat={draftParams.lat}
@@ -397,9 +407,9 @@ export default function SalonList() {
                       },
                       (err) => {
                         if (err.code === err.PERMISSION_DENIED) {
-                          alert("Location access is denied. Please enable it in your browser settings or click the lock icon in the address bar to allow location.");
+                          alert(t("salons_list.alert_location_denied"));
                         } else {
-                          alert("Failed to detect location. Please try again.");
+                          alert(t("salons_list.alert_location_failed"));
                         }
                       },
                       { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
@@ -444,11 +454,11 @@ export default function SalonList() {
                   onClick={() => setShowMobileSearch(true)} 
                   className="flex-1 cursor-pointer md:cursor-default whitespace-nowrap"
                 >
-                  Discover{" "}
+                  {t("salons_list.discover")}{" "}
                   <span className={`inline-block transition-opacity duration-500 rec-section-heading-accent ${headingFade ? "opacity-100" : "opacity-0"}`}>
-                    {headings[headingIndex]}
+                    {t(`salons_list.headings.${headings[headingIndex].toLowerCase()}`)}
                   </span>{" "}
-                  Salons
+                  {t("salons_list.salons_title")}
                 </span>
                 <div className="flex items-center gap-2 sm:gap-3 md:hidden shrink-0 ml-2">
                     {!showFilters && (
@@ -497,7 +507,7 @@ export default function SalonList() {
             {!showFilters && (
               <div className="md:hidden mt-6 w-full animate-in fade-in slide-in-from-top-3 duration-500 relative z-[100]" ref={mobileServiceSearchRef}>
                 <div className="absolute -top-2.5 left-4 z-[2]">
-                    <span className="px-2.5 py-1 rounded-md bg-[#1C3152] text-[#C8A951] text-[8px] font-black uppercase tracking-[0.15em] shadow-sm border border-[#C8A951]/20">Service</span>
+                    <span className="px-2.5 py-1 rounded-md bg-[#1C3152] text-[#C8A951] text-[8px] font-black uppercase tracking-[0.15em] shadow-sm border border-[#C8A951]/20">{t("salons_list.service")}</span>
                 </div>
                 <div className="relative group flex items-center gap-2.5">
                   <div className="relative flex-1 flex items-center h-[54px] hero-filter-bar-bg backdrop-blur-lg rounded-2xl border hero-filter-input-bg shadow-md focus-within:ring-4 focus-within:ring-[#cd6133]/10 focus-within:border-[#cd6133]/60 transition-all duration-300">
@@ -565,7 +575,7 @@ export default function SalonList() {
               className={`h-11 px-6 flex items-center gap-3 rounded-2xl border transition-all duration-300 font-bold text-[0.85rem] ${showFilters ? 'bg-[#1e0a18] text-white border-[#1e0a18] shadow-md' : 'hero-filter-bar-bg border hero-filter-input-bg salon-card-title hover:bg-white hover:border-[#cd6133]/30 shadow-sm'}`}
             >
               <SlidersHorizontal size={16} className={showFilters ? 'text-[#C8A951]' : 'hero-filter-icon'} />
-              <span>{showFilters ? 'Hide Filters' : 'Filters'}</span>
+              <span>{showFilters ? t("salons_list.hide_filters") : t("salons_list.filters")}</span>
               {hasChanges && (
                 <span className="w-1.5 h-1.5 rounded-full hero-filter-btn-bg animate-pulse" />
               )}
@@ -596,7 +606,7 @@ export default function SalonList() {
             {/* Service Name Search */}
             <div className="relative flex-1 group">
               <div className="absolute -top-2.5 left-4 z-[2]">
-                  <span className="px-2.5 py-1 rounded-md bg-[#1C3152] text-[#C8A951] text-[8px] font-black uppercase tracking-[0.15em] shadow-sm border border-[#C8A951]/20">Service</span>
+                  <span className="px-2.5 py-1 rounded-md bg-[#1C3152] text-[#C8A951] text-[8px] font-black uppercase tracking-[0.15em] shadow-sm border border-[#C8A951]/20">{t("salons_list.service")}</span>
               </div>
               <span className="absolute left-[18px] top-1/2 -translate-y-1/2 pointer-events-none text-[#1C3152]/60 transition-colors group-focus-within:text-[#1C3152]">
                 <Search size={18} strokeWidth={2.5} />
@@ -651,7 +661,7 @@ export default function SalonList() {
               ) : (
                 <>
                   <Search size={18} strokeWidth={2.5} />
-                  <span>Search</span>
+                  <span>{t("salons_list.search")}</span>
                 </>
               )}
             </button>
@@ -665,7 +675,7 @@ export default function SalonList() {
               {/* Location Picker */}
               <div className="lg:col-span-6 space-y-1.5">
                 <div className="flex items-center justify-between px-1">
-                  <label className="text-[9px] font-bold uppercase tracking-[0.2em] footer-link-text">Near Your Location</label>
+                  <label className="text-[9px] font-bold uppercase tracking-[0.2em] footer-link-text">{t("salons_list.near_your_location")}</label>
                 </div>
                 <LocationPicker
                   currentAddress={draftParams.address}
@@ -689,9 +699,9 @@ export default function SalonList() {
                       },
                       (err) => {
                         if (err.code === err.PERMISSION_DENIED) {
-                          alert("Location access is denied. Please enable it in your browser settings or click the lock icon in the address bar to allow location.");
+                          alert(t("salons_list.alert_location_denied"));
                         } else {
-                          alert("Failed to detect location. Please try again.");
+                          alert(t("salons_list.alert_location_failed"));
                         }
                       },
                       { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
@@ -703,7 +713,7 @@ export default function SalonList() {
               {/* Radius Select */}
               <div className="lg:col-span-3 space-y-1.5">
                 <div className="flex items-center justify-between px-1">
-                  <label className="text-[9px] font-bold uppercase tracking-[0.2em] footer-link-text">Search Radius</label>
+                  <label className="text-[9px] font-bold uppercase tracking-[0.2em] footer-link-text">{t("salons_list.search_radius")}</label>
                   <span className="text-[9px] font-black hero-filter-icon bg-[#7a2860]/5 px-2 py-0.5 rounded-full">{draftParams.radius}km</span>
                 </div>
                 <div className="flex items-center h-11 px-5 rounded-xl border border-[#3c143212] bg-white group">
@@ -719,7 +729,7 @@ export default function SalonList() {
               {/* Time Select (Modal Trigger) */}
               <div className="lg:col-span-3 space-y-1.5 flex flex-col relative">
                 <div className="flex items-center justify-between px-1">
-                  <label className="text-[9px] font-bold uppercase tracking-[0.2em] footer-link-text">Appointment Time</label>
+                  <label className="text-[9px] font-bold uppercase tracking-[0.2em] footer-link-text">{t("salons_list.appointment_time")}</label>
                 </div>
                 <div 
                   onMouseDown={(e) => e.stopPropagation()}
@@ -733,7 +743,7 @@ export default function SalonList() {
                   <div className="flex items-center gap-2 overflow-hidden">
                     <span className="material-symbols-outlined text-gray-400 text-sm">calendar_today</span>
                     <span className="text-[10px] font-bold text-[#1C3152] truncate">
-                      {draftParams.date ? `${draftParams.date} ${draftParams.startTime ? `@ ${draftParams.startTime}` : ''}` : "Choose Date & Time"}
+                      {draftParams.date ? `${draftParams.date} ${draftParams.startTime ? `@ ${draftParams.startTime}` : ''}` : t("salons_list.choose_datetime")}
                     </span>
                   </div>
                   <span className="material-symbols-outlined text-gray-400 text-sm">expand_more</span>
@@ -744,14 +754,14 @@ export default function SalonList() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6 items-end">
               {/* Category Select */}
               <div className="lg:col-span-5 space-y-1.5 flex flex-col">
-                <label className="text-[9px] font-bold uppercase tracking-[0.2em] footer-link-text ml-1">Category</label>
+                <label className="text-[9px] font-bold uppercase tracking-[0.2em] footer-link-text ml-1">{t("salons_list.category")}</label>
                 <div className="relative">
                   <select
                     className="w-full h-11 px-4 pr-10 rounded-xl border hero-filter-input-bg about-section-bg salon-list-title-text text-[0.85rem] outline-none focus:border-[#cd6133] focus:ring-2 focus:ring-[#cd6133]/5 font-[DM_Sans] appearance-none"
                     value={draftParams.categoryId}
                     onChange={(e) => setDraftParams(prev => ({ ...prev, categoryId: e.target.value }))}
                   >
-                    <option value="">Choose Category</option>
+                    <option value="">{t("salons_list.choose_category")}</option>
                     {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                   </select>
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#3c143240]">
@@ -762,7 +772,7 @@ export default function SalonList() {
 
               {/* Service Name Box */}
               <div className="lg:col-span-5 space-y-1.5 flex flex-col">
-                <label className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#3c143240] ml-1">Service Name</label>
+                <label className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#3c143240] ml-1">{t("salons_list.service_name")}</label>
                 <div className="relative overflow-visible">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 footer-link-text">
                     <Search size={14} />
@@ -770,7 +780,7 @@ export default function SalonList() {
                   <input
                     className="w-full h-11 pl-9 pr-4 rounded-xl border hero-filter-input-bg about-section-bg salon-list-title-text text-[0.85rem] outline-none focus:border-[#cd6133] focus:ring-2 focus:ring-[#cd6133]/5 font-[DM_Sans]"
                     type="text"
-                    placeholder="e.g. Haircut, Facial..."
+                    placeholder={t("salons_list.service_placeholder")}
                     value={draftParams.serviceName}
                     onChange={handleServiceChange}
                     onFocus={() => { if (draftParams.serviceName.trim()) setShowSuggestions(true); }}
@@ -808,7 +818,7 @@ export default function SalonList() {
                   ) : (
                     <Search size={14} />
                   )}
-                  {loading ? "Fetching" : "Apply"}
+                  {loading ? t("salons_list.fetching") : t("salons_list.apply")}
                 </button>
               </div>
             </div>
@@ -835,7 +845,7 @@ export default function SalonList() {
               )}
             </div>
             <h3 className="text-xl font-bold salon-list-title-text mb-2 font-[Cormorant_Garamond]">
-              {error.toLowerCase().includes("location") ? "Location Access Required" : "Something went wrong"}
+              {error.toLowerCase().includes("location") ? t("salons_list.location_access_required") : t("salons_list.something_went_wrong")}
             </h3>
             <div className="flex justify-center">
               <p className="footer-link-text font-[DM_Sans] max-w-[400px] mx-auto">{error}</p>
@@ -845,7 +855,7 @@ export default function SalonList() {
               onClick={error.toLowerCase().includes("location") ? () => window.location.reload() : retry}
               className="mt-6 px-8 py-3 hero-filter-btn-bg text-white rounded-xl font-bold hover:hero-filter-btn-hover-bg transition-colors font-[DM_Sans]"
             >
-              {error.toLowerCase().includes("location") ? "Retry Location Access" : "Try Again"}
+              {error.toLowerCase().includes("location") ? t("salons_list.retry_location_access") : t("salons_list.try_again")}
             </button>
           </div>
         ) : salons.length === 0 ? (
@@ -857,8 +867,8 @@ export default function SalonList() {
               </svg>
             </div>
             <div className="flex flex-col items-center">
-              <h3 className="text-xl font-bold salon-list-title-text mb-2 font-[Cormorant_Garamond]">No Salon found!</h3>
-              <p className="footer-link-text font-[DM_Sans] max-w-[400px] mx-auto mb-6">We couldn't find any salons in your area. Try adjusting your search radius or searching for a different location.</p>
+              <h3 className="text-xl font-bold salon-list-title-text mb-2 font-[Cormorant_Garamond]">{t("salons_list.no_salon_found")}</h3>
+              <p className="footer-link-text font-[DM_Sans] max-w-[400px] mx-auto mb-6">{t("salons_list.no_salons_in_area_desc")}</p>
             </div>
           </div>
         ) : filtered.length === 0 ? (
@@ -869,8 +879,8 @@ export default function SalonList() {
                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
             </div>
-            <h3 className="text-xl font-bold salon-list-title-text mb-2 font-[Cormorant_Garamond]">No matches found</h3>
-            <p className="footer-link-text font-[DM_Sans]">Try adjusting your search or filters within the current results.</p>
+            <h3 className="text-xl font-bold salon-list-title-text mb-2 font-[Cormorant_Garamond]">{t("salons_list.no_matches_found")}</h3>
+            <p className="footer-link-text font-[DM_Sans]">{t("salons_list.adjust_search_filters_desc")}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -892,4 +902,4 @@ export default function SalonList() {
       />
     </div>
   );
-}
+}

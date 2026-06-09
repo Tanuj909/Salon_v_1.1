@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect, useState } from "react";
+import { useLanguage } from "@/context/LanguageContext";
 
 // ─── Reveal Animation ──────────────────────────────────────────────────────────
 function useReveal() {
@@ -40,6 +41,7 @@ function Reveal({ children, delay = 0, className = "" }) {
 
 // ─── Main Component ────────────────────────────────────────────────────────────
 const SalonReviews = ({ reviews }) => {
+    const { t } = useLanguage();
     if (!reviews) return null;
 
     return (
@@ -48,10 +50,10 @@ const SalonReviews = ({ reviews }) => {
                 <Reveal>
                     <div className="text-center mb-16 sm:mb-24 relative">
                         <span className="rec-badge-top-rated-bg inline-block px-5 py-2 rounded-full text-[10px] sm:text-[11px] tracking-[0.2em] uppercase font-bold mb-5 shadow-sm">
-                            Testimonials
+                            {t("salon_details.testimonials")}
                         </span>
                         <h2 className="text-[22px] sm:text-4xl md:text-6xl rec-section-heading font-bold leading-tight tracking-tight font-[Cormorant_Garamond,serif]">
-                            What Our Clients <em className="italic font-light rec-section-heading-accent">Say</em>
+                            {t("salon_details.what_clients_say").split(' ').slice(0, 3).join(' ')} <em className="italic font-light rec-section-heading-accent">{t("salon_details.what_clients_say").split(' ').slice(3).join(' ')}</em>
                         </h2>
                         <div className="flex items-center justify-center gap-3">
                             <div className="rec-section-divider w-16 h-[1.5px] rounded-full opacity-40" />
@@ -63,7 +65,7 @@ const SalonReviews = ({ reviews }) => {
 
                 {reviews.length === 0 ? (
                     <div className="text-center py-16 sm:py-24 px-4 bg-white/30 rounded-[32px] sm:rounded-[40px] border hero-filter-input-bg">
-                        <p className="footer-link-text opacity-70 italic text-lg sm:text-xl">No reviews yet. Be the first to share your experience.</p>
+                        <p className="footer-link-text opacity-70 italic text-lg sm:text-xl">{t("salon_details.no_reviews_yet")}</p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-10">
@@ -94,7 +96,7 @@ const SalonReviews = ({ reviews }) => {
                                                 {review.staff && (
                                                     <span className="flex items-center gap-1">
                                                         <span className="w-1 h-1 rounded-full rec-section-divider" />
-                                                        Staff: {review.staff.fullName}
+                                                        {t("salon_details.staff_label")}{review.staff.fullName}
                                                     </span>
                                                 )}
                                             </div>
@@ -110,7 +112,7 @@ const SalonReviews = ({ reviews }) => {
                                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-green-600/60">
                                                 <polyline points="20 6 9 17 4 12" />
                                             </svg>
-                                            Verified Experience
+                                            {t("salon_details.verified_experience")}
                                         </span>
                                         <span>{new Date(review.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
                                     </div>

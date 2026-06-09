@@ -5,11 +5,12 @@ import { createPortal } from 'react-dom';
 import { X, Send, Paperclip, Loader2, Download, User, ShieldCheck } from 'lucide-react';
 import { useMessages } from '../hooks/useMessages';
 import { useAuthContext } from '@/features/auth/hooks/useAuth';
-
+import { useLanguage } from '@/context/LanguageContext';
 
 const MessageModal = ({ isOpen, onClose, businessId }) => {
   const { user } = useAuthContext();
   const { messages, loading, sending, sendMessage, loadMore, hasMore } = useMessages(businessId);
+  const { t } = useLanguage();
 
   const [inputText, setInputText] = useState("");
   const scrollRef = useRef(null);
@@ -64,7 +65,7 @@ const MessageModal = ({ isOpen, onClose, businessId }) => {
       await sendMessage(inputText);
       setInputText("");
     } catch (err) {
-      alert("Failed to send message. Please try again.");
+      alert(t("verification_support.alert_send_failed"));
     }
   };
 
@@ -79,8 +80,8 @@ const MessageModal = ({ isOpen, onClose, businessId }) => {
               <ShieldCheck size={24} />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-gray-900 leading-tight">Verification Support</h2>
-              <p className="text-xs text-gray-500 font-medium">Chat with administrators</p>
+              <h2 className="text-lg font-bold text-gray-900 leading-tight">{t("verification_support.title")}</h2>
+              <p className="text-xs text-gray-500 font-medium">{t("verification_support.subtitle")}</p>
             </div>
           </div>
           <button 
@@ -99,16 +100,16 @@ const MessageModal = ({ isOpen, onClose, businessId }) => {
           {loading && messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full gap-3">
               <Loader2 className="animate-spin text-[#D98C5F]" size={32} />
-              <p className="text-sm text-gray-500 font-medium">Loading conversation...</p>
+              <p className="text-sm text-gray-500 font-medium">{t("verification_support.loading")}</p>
             </div>
           ) : messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center p-8">
               <div className="w-16 h-16 bg-white border border-gray-100 rounded-2xl flex items-center justify-center mb-4 shadow-sm text-gray-300">
                 <Send size={32} />
               </div>
-              <h3 className="text-gray-900 font-bold text-lg mb-2">No messages yet</h3>
+              <h3 className="text-gray-900 font-bold text-lg mb-2">{t("verification_support.no_messages_title")}</h3>
               <p className="text-gray-500 text-sm max-w-[240px]">
-                Ask questions about your business verification status here.
+                {t("verification_support.no_messages_desc")}
               </p>
             </div>
           ) : (
@@ -125,7 +126,7 @@ const MessageModal = ({ isOpen, onClose, businessId }) => {
                   >
                     {!isMe && (
                       <span className="text-[10px] font-bold text-gray-500 mb-1 ml-10">
-                        {msg.senderName} {isFromAdmin && <span className="bg-blue-100 text-blue-600 px-1 rounded text-[8px] uppercase ml-1">Admin</span>}
+                        {msg.senderName} {isFromAdmin && <span className="bg-blue-100 text-blue-600 px-1 rounded text-[8px] uppercase ml-1">{t("verification_support.admin_label")}</span>}
                       </span>
                     )}
                     <div className={`flex items-end gap-2 max-w-[85%] ${alignLeft ? 'flex-row' : 'flex-row-reverse'}`}>
@@ -155,8 +156,8 @@ const MessageModal = ({ isOpen, onClose, businessId }) => {
                                 <Paperclip size={14} />
                               </div>
                               <div className="flex-1 min-w-0">
-                                  <p className="text-xs font-bold truncate">Attachment</p>
-                                  <p className="text-[10px] opacity-60">Click to download</p>
+                                  <p className="text-xs font-bold truncate">{t("verification_support.attachment")}</p>
+                                  <p className="text-[10px] opacity-60">{t("verification_support.click_to_download")}</p>
                               </div>
                               <a 
                                 href={msg.attachmentUrl} 
@@ -172,7 +173,7 @@ const MessageModal = ({ isOpen, onClose, businessId }) => {
                           )}
                         </div>
                         <span className={`text-[10px] text-gray-400 font-medium ${alignLeft ? 'ml-1' : 'mr-1 text-right'}`}>
-                          {msg.sentAt ? new Date(msg.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }) : 'Just now'}
+                          {msg.sentAt ? new Date(msg.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }) : t("verification_support.just_now")}
                         </span>
                       </div>
                     </div>
@@ -186,7 +187,7 @@ const MessageModal = ({ isOpen, onClose, businessId }) => {
                   onClick={loadMore}
                   className="mx-auto px-4 py-1.5 text-xs font-bold text-[#D98C5F] hover:bg-[#D98C5F]/10 rounded-full transition-all border border-[#D98C5F]/20"
                 >
-                  Load older messages
+                  {t("verification_support.load_older")}
                 </button>
               )}
             </div>
@@ -200,7 +201,7 @@ const MessageModal = ({ isOpen, onClose, businessId }) => {
             <textarea
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              placeholder="Type your message..."
+              placeholder={t("verification_support.placeholder")}
               rows={1}
               className="flex-1 bg-transparent border-none focus:ring-0 focus:outline-none outline-none py-2.5 text-sm max-h-32 min-h-[40px] resize-none shadow-none"
               onKeyDown={(e) => {

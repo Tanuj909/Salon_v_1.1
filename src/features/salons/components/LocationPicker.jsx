@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MapPin, Navigation, Search, Loader2, X, Map as MapIcon } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import { useLanguage } from '@/context/LanguageContext';
 
 const MapPickerModal = dynamic(() => import('./MapPickerModal'), {
     ssr: false,
@@ -16,6 +17,7 @@ const LocationPicker = ({ currentAddress, lat, lng, onLocationSelect, onDetectLo
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [isMapOpen, setIsMapOpen] = useState(false);
     const wrapperRef = useRef(null);
+    const { t } = useLanguage();
 
     // Update query when currentAddress changes externally
     useEffect(() => {
@@ -68,7 +70,7 @@ const LocationPicker = ({ currentAddress, lat, lng, onLocationSelect, onDetectLo
             setShowSuggestions(true);
         } catch (error) {
             console.error("Geocoding error:", error);
-            setSearchError("Failed to fetch locations. Please try again.");
+            setSearchError(t("location.search_failed"));
             setSuggestions([]);
             setShowSuggestions(true);
         } finally {
@@ -114,7 +116,7 @@ const LocationPicker = ({ currentAddress, lat, lng, onLocationSelect, onDetectLo
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     onFocus={() => query.length >= 3 && setShowSuggestions(true)}
-                    placeholder="Search for a city or area..."
+                    placeholder={t("location.search_placeholder")}
                     className="w-full h-11 pl-10 pr-[100px] bg-white border border-[#3c143212] rounded-xl text-[0.8rem] font-medium text-[#1e0a18] outline-none transition-all focus:border-[#7a2860] focus:ring-4 focus:ring-[#7a2860]/5 shadow-sm"
                 />
 
@@ -131,7 +133,7 @@ const LocationPicker = ({ currentAddress, lat, lng, onLocationSelect, onDetectLo
                     <button
                         onClick={() => setIsMapOpen(true)}
                         className="p-1.5 sm:p-2 bg-transparent sm:bg-background-light text-[#7a2860] sm:text-[#1e0a18] rounded-lg hover:bg-[#7a2860]/10 sm:hover:bg-[#7a2860] sm:hover:text-white transition-all active:scale-95"
-                        title="Pick from map"
+                        title={t("location.pick_from_map")}
                     >
                         <MapIcon size={16} />
                     </button>
@@ -143,10 +145,10 @@ const LocationPicker = ({ currentAddress, lat, lng, onLocationSelect, onDetectLo
                             onDetectLocation();
                         }}
                         className="p-1.5 sm:p-2 sm:px-3 flex items-center gap-1.5 bg-transparent sm:bg-[#7a2860] text-[#7a2860] sm:text-white rounded-lg hover:bg-[#7a2860]/10 sm:hover:bg-[#1e0a18] transition-all active:scale-95 sm:shadow-md sm:shadow-[#7a2860]/20"
-                        title="Detect Location"
+                        title={t("location.detect_location")}
                     >
                         <Navigation size={16} className="sm:w-3 sm:h-3" fill="currentColor" />
-                        <span className="hidden sm:inline font-bold text-[0.7rem]">Detect Location</span>
+                        <span className="hidden sm:inline font-bold text-[0.7rem]">{t("location.detect_location")}</span>
                     </button>
                 </div>
             </div>
@@ -157,7 +159,7 @@ const LocationPicker = ({ currentAddress, lat, lng, onLocationSelect, onDetectLo
                     {isSearching ? (
                         <div className="p-6 flex items-center justify-center gap-3 text-[#3c143260]">
                             <Loader2 size={20} className="animate-spin" />
-                            <span className="text-sm font-medium">Searching locations...</span>
+                            <span className="text-sm font-medium">{t("location.searching")}</span>
                         </div>
                     ) : searchError ? (
                         <div className="p-6 flex flex-col items-center justify-center gap-2 text-red-500">
@@ -167,7 +169,7 @@ const LocationPicker = ({ currentAddress, lat, lng, onLocationSelect, onDetectLo
                     ) : query.length >= 3 && suggestions.length === 0 ? (
                         <div className="p-6 flex flex-col items-center justify-center gap-2 text-[#3c143260]">
                             <Search size={20} />
-                            <span className="text-sm font-medium">No locations found</span>
+                            <span className="text-sm font-medium">{t("location.no_locations_found")}</span>
                         </div>
                     ) : (
                         <div className="max-h-[300px] overflow-y-auto">

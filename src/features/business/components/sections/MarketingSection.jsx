@@ -3,26 +3,29 @@ import { motion } from 'framer-motion';
 import { HiOutlineMail, HiOutlineUserGroup, HiOutlineBell } from 'react-icons/hi';
 import { BsMegaphone, BsChatDots, BsGift, BsGraphUp } from 'react-icons/bs';
 import { FiCheckCircle } from 'react-icons/fi';
+import { useLanguage } from '@/context/LanguageContext';
 
 const MarketingSection = () => {
+    const { t, language } = useLanguage();
+
     const points = [
         {
-            label: 'Exquisite customizable message templates',
+            labelKey: 'list_business.marketing.point_1_label',
             icon: <BsMegaphone size={16} />,
             color: '#C8A951',
-            description: 'Create beautiful campaigns in minutes'
+            descKey: 'list_business.marketing.point_1_desc'
         },
         {
-            label: 'Advanced precision client targeting',
+            labelKey: 'list_business.marketing.point_2_label',
             icon: <HiOutlineUserGroup size={16} />,
             color: '#1C3152',
-            description: 'Reach the right clients at the right time'
+            descKey: 'list_business.marketing.point_2_desc'
         },
         {
-            label: 'Automated reminders & follow-ups',
+            labelKey: 'list_business.marketing.point_3_label',
             icon: <HiOutlineBell size={16} />,
             color: '#C8A951',
-            description: 'Reduce no-shows by up to 40% automatically'
+            descKey: 'list_business.marketing.point_3_desc'
         },
     ];
 
@@ -56,7 +59,7 @@ const MarketingSection = () => {
             maxWidth: 1200,
             margin: '0 auto',
             position: 'relative',
-        }}>
+        }} dir={language === 'ar' ? 'rtl' : 'ltr'}>
             {/* Background decoration */}
             <div className="absolute top-[20%] right-[10%] w-[400px] h-[400px] bg-[radial-gradient(circle,rgba(200,169,81,0.05)_0%,transparent_70%)] pointer-events-none z-0" />
 
@@ -88,7 +91,7 @@ const MarketingSection = () => {
                             <BsChatDots size={14} />
                         </motion.div>
                         <span className="text-[10px] font-bold tracking-[0.2em] uppercase rec-section-heading-accent">
-                            Marketing Automation
+                            {t('list_business.marketing.badge')}
                         </span>
                     </motion.div>
 
@@ -97,7 +100,7 @@ const MarketingSection = () => {
                         variants={itemVariants}
                         className="font-[Cormorant_Garamond,serif] text-4xl sm:text-5xl md:text-6xl font-bold rec-section-heading leading-tight tracking-tight mb-5"
                     >
-                        Stay in touch with{' '}
+                        {t('list_business.marketing.headline_1')}{' '}
                         <motion.span
                             initial={{ opacity: 0, x: -10 }}
                             whileInView={{ opacity: 1, x: 0 }}
@@ -105,7 +108,7 @@ const MarketingSection = () => {
                             transition={{ duration: 0.5, delay: 0.6 }}
                             className="rec-section-heading-accent italic inline-block relative"
                         >
-                            smart
+                            {t('list_business.marketing.headline_accent')}
                             <motion.div
                                 initial={{ width: 0 }}
                                 whileInView={{ width: '100%' }}
@@ -114,7 +117,7 @@ const MarketingSection = () => {
                                 className="absolute bottom-1 left-0 h-2 bg-[#C8A951]/20 rounded-full -z-[1]"
                             />
                         </motion.span>{' '}
-                        campaigns
+                        {t('list_business.marketing.headline_2')}
                     </motion.h2>
 
                     {/* Description */}
@@ -122,7 +125,7 @@ const MarketingSection = () => {
                         variants={itemVariants}
                         className="text-base sm:text-lg rec-section-subtext leading-relaxed mb-10 max-w-lg font-medium"
                     >
-                        Engage clients effortlessly with personalized messaging that feels human, not automated. Build lasting relationships and watch your retention soar.
+                        {t('list_business.marketing.description')}
                     </motion.p>
 
                     {/* Feature List */}
@@ -134,7 +137,7 @@ const MarketingSection = () => {
                             <motion.div
                                 key={i}
                                 variants={itemVariants}
-                                whileHover={{ x: 5 }}
+                                whileHover={{ x: language === 'ar' ? -5 : 5 }}
                                 transition={{ duration: 0.2 }}
                                 className="flex gap-4"
                             >
@@ -151,10 +154,10 @@ const MarketingSection = () => {
                                 </motion.div>
                                 <div>
                                     <span className="text-lg font-bold rec-section-heading tracking-tight mb-1 block">
-                                        {item.label}
+                                        {t(item.labelKey)}
                                     </span>
                                     <span className="text-sm rec-section-subtext leading-relaxed font-medium">
-                                        {item.description}
+                                        {t(item.descKey)}
                                     </span>
                                 </div>
                             </motion.div>
@@ -255,7 +258,7 @@ const MarketingSection = () => {
                     >
                         <div className="w-2.5 h-2.5 rounded-full bg-[#C8A951] shadow-[0_0_15px_#C8A951] animate-pulse" />
                         <span className="text-[10px] font-bold text-white tracking-[0.2em] uppercase">
-                            Auto-Pilot Active
+                            {t('list_business.marketing.auto_pilot')}
                         </span>
                     </motion.div>
                 </motion.div>

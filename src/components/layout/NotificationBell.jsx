@@ -4,6 +4,9 @@ import { useState, useRef, useEffect } from "react";
 import { Bell, Check, CheckCheck, Wifi, WifiOff } from "lucide-react";
 import { useNotifications } from "@/features/notifications/hooks/useNotifications";
 import { formatDistanceToNow } from "@/features/notifications/lib/timeUtils";
+import { useLanguage } from "@/context/LanguageContext";
+import { useRouter } from "next/navigation";
+import { useAuthContext } from "@/features/auth/hooks/useAuth";
 
 // Notification type → color dot mapping
 const TYPE_COLORS = {
@@ -17,6 +20,9 @@ const TYPE_COLORS = {
 export default function NotificationBell({ isScrolled }) {
   const { notifications, unreadCount, wsConnected, markAsRead, markAllAsRead, refetch } =
     useNotifications();
+  const { t } = useLanguage();
+  const { user } = useAuthContext();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -35,12 +41,21 @@ export default function NotificationBell({ isScrolled }) {
     if (!notification.isRead) {
       await markAsRead(notification.id);
     }
+    
+    const isAdminRole = ["ADMIN", "SUPER_ADMIN", "STAFF", "RECEPTIONIST"].includes(user?.role);
+    if (isAdminRole) {
+      // For Admins/Staff, only mark as read and do nothing else (no redirection to prevent 404s)
+      return;
+    }
+
     if (notification.actionUrl) {
-      // Fix: If it's a booking link, redirect to profile since dedicated booking pages don't exist
+      // Client-side navigation to prevent full page reload/refresh for regular users
       if (notification.actionUrl.startsWith("/bookings/")) {
-        window.location.href = "/profile";
-      } else {
+        router.push("/profile");
+      } else if (notification.actionUrl.startsWith("http")) {
         window.location.href = notification.actionUrl;
+      } else {
+        router.push(notification.actionUrl);
       }
     }
   };
@@ -71,7 +86,7 @@ export default function NotificationBell({ isScrolled }) {
           className={`absolute bottom-1 right-1 w-2 h-2 rounded-full border border-white ${
             wsConnected ? "bg-green-400 animate-pulse" : "bg-gray-300"
           }`}
-          title={wsConnected ? "Live Connection" : "Offline - Polling active"}
+          title={wsConnected ? t("notifications.live_connection") : t("notifications.offline_polling")}
         />
       </button>
 
@@ -84,7 +99,7 @@ export default function NotificationBell({ isScrolled }) {
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
             <div className="flex items-center gap-2">
               <span className="font-semibold text-sm text-gray-900">
-                Notifications
+                {t("notifications.title")}
               </span>
               {wsConnected ? (
                 <Wifi size={12} className="text-green-500" />
@@ -99,7 +114,7 @@ export default function NotificationBell({ isScrolled }) {
                   refetch();
                 }}
                 className="p-1 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-[#D98C5F]"
-                title="Refresh notifications"
+                title={t("notifications.refresh")}
               >
                 <span className="material-symbols-outlined text-sm">refresh</span>
               </button>
@@ -111,7 +126,7 @@ export default function NotificationBell({ isScrolled }) {
             {notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-gray-400">
                 <Bell size={32} className="mb-3 opacity-30" />
-                <p className="text-sm">No notifications yet</p>
+                <p className="text-sm">{t("notifications.no_notifications")}</p>
               </div>
             ) : (
               [...notifications]
@@ -158,7 +173,7 @@ export default function NotificationBell({ isScrolled }) {
                     </p>
                     <div className="flex items-center justify-between mt-2">
                       <p className="text-[11px] text-gray-400">
-                        {formatDistanceToNow(n.createdAt)}
+                        {formatDistanceToNow(n.createdAt, t)}
                       </p>
                       
                       {!n.isRead && (
@@ -169,7 +184,7 @@ export default function NotificationBell({ isScrolled }) {
                           }}
                           className="text-[10px] font-bold text-blue-600 hover:text-blue-700 uppercase tracking-wider"
                         >
-                          Mark as Read
+                          {t("notifications.mark_as_read")}
                         </button>
                       )}
                     </div>

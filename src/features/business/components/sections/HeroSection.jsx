@@ -2,8 +2,11 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/context/LanguageContext';
 
 const HeroSection = () => {
+    const { t, language } = useLanguage();
+
     const containerVariants = {
         hidden: { opacity: 0 },
         visible: {
@@ -80,6 +83,7 @@ const HeroSection = () => {
             animate="visible"
             variants={containerVariants}
             className="relative min-h-[60vh] md:min-h-[70vh] flex flex-col items-center px-4 sm:px-6 pt-10 md:pt-12 overflow-hidden"
+            dir={language === 'ar' ? 'rtl' : 'ltr'}
             style={{
                 background: 'transparent',
             }}
@@ -102,14 +106,14 @@ const HeroSection = () => {
                         </svg>
                     </motion.span>
                     <span className="text-[10px] font-bold tracking-[0.1em] uppercase text-white">
-                        Trusted by 5,000+ salons worldwide
+                        {t('list_business.hero.badge')}
                     </span>
                 </motion.div>
 
                 {/* Headline - Improved for mobile wrapping */}
                 <motion.div variants={contentVariants} className="mb-3 text-center w-full">
                     <h1 className="font-[Cormorant_Garamond,serif] text-4xl sm:text-5xl md:text-6xl font-bold rec-section-heading leading-tight tracking-tight">
-                        Run your salon with <em className="italic font-light rec-section-heading-accent">effortless</em> clarity
+                        {t('list_business.hero.headline_1')} <em className="italic font-light rec-section-heading-accent">{t('list_business.hero.headline_accent')}</em> {t('list_business.hero.headline_2')}
                     </h1>
                 </motion.div>
 
@@ -118,7 +122,7 @@ const HeroSection = () => {
                     variants={contentVariants}
                     className="text-sm sm:text-base rec-section-subtext mb-8 text-center max-w-[600px] mx-auto font-medium"
                 >
-                    Bookings, staff & revenue — all in one place. The modern operating system for salons and spas.
+                    {t('list_business.hero.description')}
                 </motion.p>
 
                 {/* CTA Button - Reduced margin */}
@@ -134,7 +138,7 @@ const HeroSection = () => {
                             href="/partner"
                             className="inline-flex items-center gap-2 px-10 py-4 rounded-full rec-btn-primary font-bold text-[10px] tracking-[0.2em] uppercase transition-all shadow-xl"
                         >
-                            Start Free Trial
+                            {t('list_business.hero.cta')}
                         </Link>
                     </motion.div>
                 </motion.div>
@@ -189,7 +193,7 @@ const HeroSection = () => {
                             className="absolute -top-4 -right-2 md:top-[-18px] md:right-[28px] p-3 md:p-4 bg-white rounded-2xl shadow-2xl border rec-card-border z-20"
                         >
                             <div className="text-[9px] font-bold tracking-widest uppercase rec-section-subtext mb-1">
-                                Today's Revenue
+                                {t('list_business.hero.todays_revenue')}
                             </div>
                             <div className="font-[Cormorant_Garamond,serif] text-xl font-bold rec-section-heading leading-none">
                                 AED 2,500
@@ -204,7 +208,7 @@ const HeroSection = () => {
                             className="absolute -bottom-4 -left-2 md:bottom-[28px] md:left-[-24px] p-3 md:p-4 bg-white rounded-2xl shadow-2xl border rec-card-border z-20"
                         >
                             <div className="text-[9px] font-bold tracking-widest uppercase rec-section-subtext mb-1">
-                                Up Next · 2:30 PM
+                                {t('list_business.hero.up_next')}
                             </div>
                             <div className="font-[Cormorant_Garamond,serif] text-lg font-bold rec-section-heading-accent leading-none">
                                 Sarah M.

@@ -1,5 +1,5 @@
 // Simple time formatter — no extra library needed
-export const formatDistanceToNow = (dateString) => {
+export const formatDistanceToNow = (dateString, t) => {
   if (!dateString) return "";
 
   // Handle high-precision ISO strings (e.g. .667766 -> .667) for better browser compatibility
@@ -24,11 +24,28 @@ export const formatDistanceToNow = (dateString) => {
   const now  = new Date();
   const diff = Math.floor((now - date) / 1000); // seconds
 
-  if (diff < 0)               return "just now";
-  if (diff < 60)              return "just now";
-  if (diff < 3600)            return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400)           return `${Math.floor(diff / 3600)}h ago`;
-  if (diff < 86400 * 7)       return `${Math.floor(diff / 86400)}d ago`;
+  // Fallback translation helper if t is not provided (e.g. tests or other calls)
+  const translate = (key, val) => {
+    if (t) {
+      if (val !== undefined) {
+        return t(key).replace("{value}", val);
+      }
+      return t(key);
+    }
+    // English defaults
+    if (key === "notifications.just_now") return "just now";
+    if (key === "notifications.m_ago") return `${val}m ago`;
+    if (key === "notifications.h_ago") return `${val}h ago`;
+    if (key === "notifications.d_ago") return `${val}d ago`;
+    if (key === "notifications.locale_code") return "en-IN";
+    return "";
+  };
 
-  return date.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+  if (diff < 0)               return translate("notifications.just_now");
+  if (diff < 60)              return translate("notifications.just_now");
+  if (diff < 3600)            return translate("notifications.m_ago", Math.floor(diff / 60));
+  if (diff < 86400)           return translate("notifications.h_ago", Math.floor(diff / 3600));
+  if (diff < 86400 * 7)       return translate("notifications.d_ago", Math.floor(diff / 86400));
+
+  return date.toLocaleDateString(translate("notifications.locale_code"), { day: "numeric", month: "short" });
 };

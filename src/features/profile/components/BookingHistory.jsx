@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Calendar, Clock, CreditCard, User, Scissors, ChevronRight, ChevronLeft, Loader2, AlertCircle, Receipt, MapPin, Star } from 'lucide-react';
 import { useBookingHistory } from '../hooks/useBookingHistory';
+import { useLanguage } from '@/context/LanguageContext';
 
 const BookingHistory = ({ businessId }) => {
     const { bookings, loading, error, pagination, nextPage, prevPage, cancelBooking, isCanceling, submitReview, isSubmittingReview } = useBookingHistory(businessId);
+    const { t } = useLanguage();
 
     const [showReviewModal, setShowReviewModal] = useState(false);
     const [selectedBooking, setSelectedBooking] = useState(null);
@@ -15,12 +17,12 @@ const BookingHistory = ({ businessId }) => {
 
     const handleCancel = async (bookingId) => {
         if (isCanceling) return;
-        const reason = window.prompt("Please provide a reason for cancellation:");
+        const reason = window.prompt(t("profile.prompt_cancel_reason"));
         if (reason === null) return;
 
         const success = await cancelBooking(bookingId, reason.trim() || "Client not available");
         if (!success) {
-            alert("Failed to cancel the booking. Please try again.");
+            alert(t("profile.alert_cancel_failed"));
         }
     };
 
@@ -43,9 +45,9 @@ const BookingHistory = ({ businessId }) => {
         if (success) {
             setShowReviewModal(false);
             setSelectedBooking(null);
-            alert("Thank you for your valuable feedback!");
+            alert(t("profile.alert_review_success"));
         } else {
-            alert("Failed to submit review. Please try again later.");
+            alert(t("profile.alert_review_failed"));
         }
     };
 
@@ -73,6 +75,11 @@ const BookingHistory = ({ businessId }) => {
         }
     };
 
+    const getStatusText = (status) => {
+        if (!status) return t("profile.status.unknown");
+        return t(`profile.status.${status.toLowerCase()}`);
+    };
+
     const getPaymentStatusStyle = (status) => {
         if (!status) return "text-muted";
         switch (status.toUpperCase()) {
@@ -87,6 +94,11 @@ const BookingHistory = ({ businessId }) => {
             default:
                 return "text-muted";
         }
+    };
+
+    const getPaymentStatusText = (status) => {
+        if (!status) return '';
+        return t(`profile.payment_status.${status.toLowerCase()}`);
     };
 
     const formatDate = (dateStr) => {
@@ -117,7 +129,7 @@ const BookingHistory = ({ businessId }) => {
     };
 
     const getServiceNames = (services) => {
-        if (!services || services.length === 0) return 'Service';
+        if (!services || services.length === 0) return t("profile.service");
         return services.map(s => s.name).join(', ');
     };
 
@@ -128,9 +140,9 @@ const BookingHistory = ({ businessId }) => {
         if (total >= 60) {
             const hrs = Math.floor(total / 60);
             const mins = total % 60;
-            return mins > 0 ? `${hrs}h ${mins}m` : `${hrs}h`;
+            return mins > 0 ? `${hrs}${t("profile.hour_abbr")} ${mins}${t("profile.minute_abbr")}` : `${hrs}${t("profile.hour_abbr")}`;
         }
-        return `${total}m`;
+        return `${total}${t("profile.minute_abbr")}`;
     };
 
     // Loading state
@@ -138,11 +150,11 @@ const BookingHistory = ({ businessId }) => {
         return (
             <div className="px-4 sm:px-8 mt-12 sm:mt-16">
                 <div className="flex items-center justify-between mb-8">
-                    <h2 className="text-2xl font-bold profile-name-text font-[Cormorant_Garamond]">Recent Appointments</h2>
+                    <h2 className="text-2xl font-bold profile-name-text font-[Cormorant_Garamond]">{t("profile.recent_appointments")}</h2>
                 </div>
                 <div className="flex items-center justify-center py-16">
                     <Loader2 className="w-8 h-8 salon-list-title-accent animate-spin" />
-                    <span className="ml-3 profile-meta-text opacity-50 font-medium">Loading bookings...</span>
+                    <span className="ml-3 profile-meta-text opacity-50 font-medium">{t("profile.loading_bookings")}</span>
                 </div>
             </div>
         );
@@ -153,12 +165,12 @@ const BookingHistory = ({ businessId }) => {
         return (
             <div className="px-4 sm:px-8 mt-12 sm:mt-16">
                 <div className="flex items-center justify-between mb-8">
-                    <h2 className="text-2xl font-bold profile-name-text font-[Cormorant_Garamond]">Recent Appointments</h2>
+                    <h2 className="text-2xl font-bold profile-name-text font-[Cormorant_Garamond]">{t("profile.recent_appointments")}</h2>
                 </div>
                 <div className="bg-red-50 border border-red-100 rounded-2xl p-8 text-center">
                     <AlertCircle className="w-10 h-10 text-primary mx-auto mb-3" />
                     <p className="text-primary font-medium">{error}</p>
-                    <p className="text-primary text-sm mt-1">Please try again later.</p>
+                    <p className="text-primary text-sm mt-1">{t("profile.try_again_later")}</p>
                 </div>
             </div>
         );
@@ -169,14 +181,14 @@ const BookingHistory = ({ businessId }) => {
         return (
             <div className="px-4 sm:px-8 mt-12 sm:mt-16">
                 <div className="flex items-center justify-between mb-8">
-                    <h2 className="text-2xl font-bold profile-name-text font-[Cormorant_Garamond]">Recent Appointments</h2>
+                    <h2 className="text-2xl font-bold profile-name-text font-[Cormorant_Garamond]">{t("profile.recent_appointments")}</h2>
                 </div>
                 <div className="bg-white p-12 rounded-xl border border-dashed border-border text-center">
                     <div className="w-16 h-16 bg-background-light rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
                         <Calendar size={32} />
                     </div>
-                    <p className="text-muted font-medium">No bookings found in your history.</p>
-                    <p className="text-muted text-sm mt-1">Your appointments will appear here once booked.</p>
+                    <p className="text-muted font-medium">{t("profile.no_bookings_found")}</p>
+                    <p className="text-muted text-sm mt-1">{t("profile.appointments_appear_here")}</p>
                 </div>
             </div>
         );
@@ -186,9 +198,9 @@ const BookingHistory = ({ businessId }) => {
         <div className="px-3 sm:px-8 mt-10 sm:mt-16">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <div>
-                    <h2 className="text-xl sm:text-2xl font-bold profile-name-text font-[Cormorant_Garamond]">Recent Appointments</h2>
+                    <h2 className="text-xl sm:text-2xl font-bold profile-name-text font-[Cormorant_Garamond]">{t("profile.recent_appointments")}</h2>
                     <p className="profile-meta-text opacity-50 text-[10px] sm:text-xs font-bold uppercase tracking-widest mt-1">
-                        {pagination.totalElements} {pagination.totalElements === 1 ? 'Booking' : 'Bookings'} Found
+                        {pagination.totalElements} {pagination.totalElements === 1 ? t("profile.booking_found") : t("profile.bookings_found")}
                     </p>
                 </div>
                 {pagination.totalPages > 1 && (
@@ -225,17 +237,17 @@ const BookingHistory = ({ businessId }) => {
                         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                             <div className="flex flex-wrap items-center gap-2">
                                 <span className="bg-[#628EB8]/10 text-[#1F355E] border border-[#628EB8]/20 px-2.5 py-1 rounded-lg text-[9px] sm:text-[10px] font-bold uppercase tracking-wider whitespace-nowrap">
-                                    Booking Number: <span className="font-extrabold text-[#628EB8]">{booking.bookingNumber}</span>
+                                    {t("profile.booking_number_label")}<span className="font-extrabold text-[#628EB8]">{booking.bookingNumber}</span>
                                 </span>
                                 {booking.paymentMethod && (
                                     <span className="flex items-center gap-1.5 bg-green-50 text-green-700 border border-green-200/50 px-2.5 py-1 rounded-lg text-[9px] sm:text-[10px] font-bold uppercase tracking-wider whitespace-nowrap">
                                         <CreditCard size={11} className="shrink-0 text-green-600" />
-                                        Payment Method: <span className="font-extrabold">{booking.paymentMethod === "CASH" ? "CASH" : booking.paymentMethod}</span>
+                                        {t("profile.payment_method_label")}<span className="font-extrabold">{booking.paymentMethod === "CASH" ? t("profile.cash") : booking.paymentMethod}</span>
                                     </span>
                                 )}
                             </div>
                             <span className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-full border text-[8px] sm:text-[9px] font-black uppercase tracking-[0.15em] ${getStatusStyle(booking.status)} whitespace-nowrap`}>
-                                {(booking.status || 'Unknown').replace(/_/g, ' ')}
+                                {getStatusText(booking.status)}
                             </span>
                         </div>
 
@@ -297,29 +309,29 @@ const BookingHistory = ({ businessId }) => {
                             {/* Right: Pricing & Actions */}
                             <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-start gap-4 md:gap-3 md:min-w-[180px] pt-4 md:pt-0 border-t md:border-t-0 border-muted">
                                 <div className="text-left md:text-right">
-                                    <p className="profile-meta-text opacity-30 text-[0.5rem] sm:text-[0.55rem] uppercase font-black tracking-widest mb-0.5">Amount</p>
+                                    <p className="profile-meta-text opacity-30 text-[0.5rem] sm:text-[0.55rem] uppercase font-black tracking-widest mb-0.5">{t("profile.amount_label")}</p>
                                     <div className="flex flex-col md:items-end">
                                         {booking.discountAmount > 0 ? (
                                             <>
                                                 <div className="flex items-center gap-2 md:flex-row-reverse">
                                                     <p className="profile-meta-text opacity-30 text-[10px] sm:text-xs line-through">
-                                                        ₹{booking.totalAmount?.toFixed(2)}
+                                                        AED{booking.totalAmount?.toFixed(2)}
                                                     </p>
                                                     <p className="font-bold text-base sm:text-lg profile-name-text tracking-tight">
-                                                        ₹{booking.finalAmount?.toFixed(2)}
+                                                        AED{booking.finalAmount?.toFixed(2)}
                                                     </p>
                                                 </div>
                                                 <p className="text-success text-[0.55rem] sm:text-[0.6rem] font-bold">
-                                                    −₹{booking.discountAmount?.toFixed(2)} off
+                                                    −AED{booking.discountAmount?.toFixed(2)} {t("profile.off_suffix")}
                                                 </p>
                                             </>
                                         ) : (
                                             <p className="font-bold text-base sm:text-lg profile-name-text tracking-tight">
-                                                ₹{booking.finalAmount?.toFixed(2) || booking.totalAmount?.toFixed(2) || 'N/A'}
+                                                AED{booking.finalAmount?.toFixed(2) || booking.totalAmount?.toFixed(2) || t("profile.na")}
                                             </p>
                                         )}
                                         <p className={`text-[0.55rem] sm:text-[0.6rem] font-bold uppercase tracking-wider mt-0.5 ${getPaymentStatusStyle(booking.paymentStatus)}`}>
-                                            {booking.paymentStatus || ''}
+                                            {getPaymentStatusText(booking.paymentStatus)}
                                         </p>
                                     </div>
                                 </div>
@@ -331,7 +343,7 @@ const BookingHistory = ({ businessId }) => {
                                             disabled={isCanceling}
                                             className="px-3 sm:px-4 py-2 sm:py-1.5 rounded-lg border border-danger/20 text-danger text-[0.6rem] sm:text-[0.65rem] font-bold uppercase tracking-wider hover:bg-danger/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed w-full text-center"
                                         >
-                                            Cancel
+                                            {t("profile.btn_cancel")}
                                         </button>
                                     )}
 
@@ -341,7 +353,7 @@ const BookingHistory = ({ businessId }) => {
                                             className="px-3 sm:px-4 py-2 sm:py-1.5 rounded-lg border border-success/20 text-success text-[0.6rem] sm:text-[0.65rem] font-bold uppercase tracking-wider hover:bg-success/10 transition-colors w-full text-center flex items-center justify-center gap-1.5"
                                         >
                                             <Star size={10} className="sm:w-3 sm:h-3" />
-                                            <span>Review</span>
+                                            <span>{t("profile.btn_review")}</span>
                                         </button>
                                     )}
                                 </div>
@@ -359,17 +371,17 @@ const BookingHistory = ({ businessId }) => {
                         disabled={pagination.isFirst}
                         className="px-4 py-2 rounded-xl border hero-filter-input-bg text-xs font-bold uppercase tracking-wider profile-name-text disabled:opacity-30 disabled:cursor-not-allowed hover:bg-black/[0.05] transition-all"
                     >
-                        ← Previous
+                        {t("profile.previous")}
                     </button>
                     <span className="profile-meta-text opacity-50 text-xs font-bold">
-                        Page {pagination.currentPage + 1} of {pagination.totalPages}
+                        {t("profile.page_of")} {pagination.currentPage + 1} {t("profile.page_of_divider")} {pagination.totalPages}
                     </span>
                     <button
                         onClick={nextPage}
                         disabled={pagination.isLast}
                         className="px-4 py-2 rounded-xl border hero-filter-input-bg text-xs font-bold uppercase tracking-wider profile-name-text disabled:opacity-30 disabled:cursor-not-allowed hover:bg-black/[0.05] transition-all"
                     >
-                        Next →
+                        {t("profile.next")}
                     </button>
                 </div>
             )}
@@ -387,13 +399,13 @@ const BookingHistory = ({ businessId }) => {
                                 <path d="M18 6L6 18M6 6l12 12" />
                             </svg>
                         </button>
-
-                        <h3 className="font-[Cormorant_Garamond] text-3xl font-bold profile-name-text mb-2">Share Your Experience</h3>
-                        <p className="profile-meta-text opacity-60 text-sm mb-6">Your feedback helps us maintain our standard of luxury.</p>
+ 
+                        <h3 className="font-[Cormorant_Garamond] text-3xl font-bold profile-name-text mb-2">{t("profile.share_experience")}</h3>
+                        <p className="profile-meta-text opacity-60 text-sm mb-6">{t("profile.feedback_luxury")}</p>
 
                         <form onSubmit={handleReviewSubmit} className="space-y-4">
                             <div>
-                                <label className="block text-[10px] uppercase tracking-widest profile-meta-text opacity-80 font-black mb-2">Rating *</label>
+                                <label className="block text-[10px] uppercase tracking-widest profile-meta-text opacity-80 font-black mb-2">{t("profile.rating_label")}</label>
                                 <div className="flex gap-2">
                                     {[1, 2, 3, 4, 5].map((star) => (
                                         <button
@@ -409,7 +421,7 @@ const BookingHistory = ({ businessId }) => {
                             </div>
 
                             <div>
-                                <label htmlFor="review-comment" className="block text-[10px] uppercase tracking-widest profile-meta-text opacity-80 font-black mb-2">Comments *</label>
+                                <label htmlFor="review-comment" className="block text-[10px] uppercase tracking-widest profile-meta-text opacity-80 font-black mb-2">{t("profile.comments_label")}</label>
                                 <textarea
                                     id="review-comment"
                                     required
@@ -417,7 +429,7 @@ const BookingHistory = ({ businessId }) => {
                                     value={newReview.comment}
                                     onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
                                     className="w-full px-4 py-3 rounded-xl border hero-filter-input-bg bg-[#fdfaf8] focus:outline-none focus:border-accent/40 transition-colors text-sm resize-none"
-                                    placeholder="Tell us about your service..."
+                                    placeholder={t("profile.tell_us_about_service")}
                                 />
                             </div>
 
@@ -433,7 +445,7 @@ const BookingHistory = ({ businessId }) => {
                                         <polyline points="20 6 9 17 4 12" />
                                     </svg>
                                 </div>
-                                <span className="profile-meta-text opacity-60 text-sm select-none">Submit anonymously</span>
+                                <span className="profile-meta-text opacity-60 text-sm select-none">{t("profile.submit_anonymously")}</span>
                             </label>
 
                             <button
@@ -441,7 +453,7 @@ const BookingHistory = ({ businessId }) => {
                                 disabled={isSubmittingReview}
                                 className="w-full mt-6 py-4 rounded-xl footer-bg text-white text-[10px] font-bold tracking-[0.2em] uppercase transition-all duration-300 hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                {isSubmittingReview ? "Submitting..." : "Post Review"}
+                                {isSubmittingReview ? t("profile.submitting") : t("profile.post_review")}
                             </button>
                         </form>
                     </div>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { fetchCategories, fetchNearbyByCategory } from "@/features/salons/services/salonService";
 import { useUserLocation } from "@/features/salons/hooks/useUserLocation";
 import dynamic from "next/dynamic";
+import { useLanguage } from "@/context/LanguageContext";
 
 const MapPickerModal = dynamic(
   () => import("@/features/salons/components/MapPickerModal"),
@@ -39,12 +40,13 @@ const StarIcon = ({ filled }) => (
 
 // ─── Salon card (Using rec-* classes from blue-gold-theme.css) ──────────────
 function SalonCard({ salon }) {
+  const { t } = useLanguage();
   const img =
     salon.imageUrls?.[0] ||
     salon.bannerImageUrl ||
     "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&auto=format&fit=crop&q=60";
   const rating = salon.averageRating || 0;
-  const badge = salon.verificationStatus === "VERIFIED" ? "Top Rated" : null;
+  const badge = salon.verificationStatus === "VERIFIED" ? t("home.top_rated") : null;
 
   return (
     <Link
@@ -76,7 +78,7 @@ function SalonCard({ salon }) {
             : "rec-status-closed"
             }`}
         >
-          {salon.isOpen ? "Open" : "Closed"}
+          {salon.isOpen ? t("home.open") : t("home.closed")}
         </span>
       </div>
 
@@ -99,7 +101,7 @@ function SalonCard({ salon }) {
           <div className="h-px mb-3 rec-card-inner-divider" />
 
           <p className="text-[0.76rem] font-normal mb-3 rec-card-desc font-[DM_Sans] line-clamp-2 italic">
-            {salon.description || "Luxury salon offering premium beauty services."}
+            {salon.description || t("home.allow_loc_desc_alt")}
           </p>
         </div>
 
@@ -116,7 +118,7 @@ function SalonCard({ salon }) {
             </span>
           </div>
           <span className="py-[7px] px-[16px] rounded-full rec-btn-primary text-[0.73rem] font-semibold tracking-[0.04em] font-[DM_Sans]">
-            View
+            {t("home.view_btn")}
           </span>
         </div>
       </div>
@@ -140,6 +142,7 @@ function SalonCardSkeleton() {
 
 // ─── Single category row ─────────────────────────────────────────────────────
 function CategoryRow({ category, lat, lng }) {
+  const { t } = useLanguage();
   const [salons, setSalons] = useState([]);
   const [loading, setLoading] = useState(true);
   const scrollRef = useRef(null);
@@ -158,6 +161,9 @@ function CategoryRow({ category, lat, lng }) {
     scrollRef.current?.scrollBy({ left: dir * 300, behavior: "smooth" });
   };
 
+  const catKey = "home.cat_" + category.name.toLowerCase();
+  const translatedCategoryName = t(catKey, category.name);
+
   return (
     <div className="mb-16 last:mb-0">
       {/* Row header */}
@@ -167,7 +173,7 @@ function CategoryRow({ category, lat, lng }) {
           <div className="flex items-center gap-2">
             <span className="w-6 h-px inline-block rec-section-divider" />
             <span className="text-[0.72rem] font-semibold tracking-[0.12em] uppercase rec-section-eyebrow font-[DM_Sans]">
-              {category.name.charAt(0) + category.name.slice(1).toLowerCase()}
+              {translatedCategoryName.charAt(0) + translatedCategoryName.slice(1).toLowerCase()}
             </span>
           </div>
 
@@ -184,10 +190,10 @@ function CategoryRow({ category, lat, lng }) {
             </div>
             <div>
               <h3 className="font-bold leading-[1.1] rec-section-heading font-[Cormorant_Garamond,Georgia,serif] text-[clamp(1.1rem,2vw,1.6rem)] capitalize">
-                {category.name} <span className="rec-section-heading-accent italic">Salons</span>
+                {translatedCategoryName} <span className="rec-section-heading-accent italic">{t("home.salons_title_suffix")}</span>
               </h3>
               <p className="text-[0.85rem] leading-[1.65] mt-1 max-w-[380px] rec-section-subtext font-[DM_Sans] line-clamp-1">
-                {category.description || `${category.businessCount || 0} salons available in your area`}
+                {category.description || t("home.salons_available_count").replace("{count}", category.businessCount || 0)}
               </p>
             </div>
           </div>
@@ -219,7 +225,7 @@ function CategoryRow({ category, lat, lng }) {
             href={`/salons?categoryId=${category.id}`}
             className="flex items-center gap-2 py-[9px] px-5 rounded-full border-[1.5px] rec-btn-outline text-[0.75rem] font-semibold tracking-[0.04em] cursor-pointer no-underline font-[DM_Sans] transition-all"
           >
-            See All
+            {t("home.see_all")}
             <svg width={14} height={14} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <line x1="5" y1="12" x2="19" y2="12" />
               <polyline points="12 5 19 12 12 19" />
@@ -243,7 +249,7 @@ function CategoryRow({ category, lat, lng }) {
             ? salons.map((salon) => <SalonCard key={salon.id} salon={salon} />)
             : (
               <div className="flex-1 py-10 text-center rec-section-subtext text-sm font-[DM_Sans] bg-white/40 rounded-2xl border border-dashed rec-card-border">
-                No salons found nearby for this category.
+                {t("home.no_salons_found_cat")}
               </div>
             )}
       </div>
@@ -256,6 +262,7 @@ function CategoryRow({ category, lat, lng }) {
 
 // ────────────────────────────────────────────────────────────────────────────
 export default function Categories() {
+  const { t } = useLanguage();
   const [categories, setCategories] = useState([]);
   const [loadingCats, setLoadingCats] = useState(true);
   const { location, error, loading: locationLoading, saveManualLocation } = useUserLocation();
@@ -283,15 +290,15 @@ export default function Categories() {
             <div className="flex items-center gap-2 mb-3">
               <span className="w-6 h-px inline-block rec-section-divider" />
               <span className="text-[0.72rem] font-semibold tracking-[0.12em] uppercase rec-section-eyebrow">
-                Tailored For You
+                {t("home.tailored_for_you")}
               </span>
             </div>
             <h2 className="font-bold leading-[1.1] rec-section-heading font-[Cormorant_Garamond,Georgia,serif] text-[clamp(1.75rem,3vw,2.6rem)]">
-              Browse By
-              <span className="italic rec-section-heading-accent ml-2">Category</span>
+              {t("home.browse_by_category").split(' ').slice(0, -1).join(' ')}
+              <span className="italic rec-section-heading-accent ml-2">{t("home.browse_by_category").split(' ').slice(-1)[0]}</span>
             </h2>
             <p className="text-[0.85rem] leading-[1.65] mt-2 max-w-[380px] rec-section-subtext">
-              Discover the best salons near you, organised by what you need.
+              {t("home.browse_category_desc")}
             </p>
           </div>
 
@@ -299,7 +306,7 @@ export default function Categories() {
             href="/salons"
             className="flex items-center gap-2 py-[11px] px-6 rounded-full border-[1.5px] rec-btn-outline text-[0.8rem] font-semibold tracking-[0.04em] cursor-pointer transition-all no-underline"
           >
-            View All Categories
+            {t("home.view_all_categories")}
             <svg width={14} height={14} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <line x1="5" y1="12" x2="19" y2="12" />
               <polyline points="12 5 19 12 12 19" />
@@ -336,10 +343,10 @@ export default function Categories() {
                 <circle cx="12" cy="10" r="3" />
               </svg>
             </div>
-            <h3 className="text-lg font-bold rec-empty-heading mb-2 font-[Cormorant_Garamond]">Location Access Required</h3>
+            <h3 className="text-lg font-bold rec-empty-heading mb-2 font-[Cormorant_Garamond]">{t("home.loc_access_required")}</h3>
             <div className="flex justify-center">
               <p className="rec-section-subtext text-sm max-w-[350px] mx-auto mb-6">
-                To see salons in your area, please allow location access or choose manually.
+                {t("home.allow_loc_desc")}
               </p>
             </div>
 
@@ -348,20 +355,20 @@ export default function Categories() {
                 onClick={handleRetryLocation}
                 className="w-full sm:w-auto py-2.5 px-8 rounded-full rec-btn-primary text-[0.8rem] font-bold tracking-widest shadow-md"
               >
-                Retry Location
+                {t("home.retry_location")}
               </button>
               <button
                 onClick={() => setIsMapModalOpen(true)}
                 className="w-full sm:w-auto py-2.5 px-8 rounded-full border rec-btn-gold-outline text-[0.8rem] font-bold tracking-widest shadow-sm"
               >
-                Choose location manually
+                {t("home.choose_location_manually")}
               </button>
             </div>
           </div>
         ) : categories.length === 0 ? (
           <div className="text-center py-16">
             <p className="rec-section-subtext font-[DM_Sans]">
-              No categories available at the moment.
+              {t("home.no_categories")}
             </p>
           </div>
         ) : (

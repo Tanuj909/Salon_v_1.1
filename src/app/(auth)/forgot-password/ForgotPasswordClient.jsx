@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { forgotPassword, resetPassword } from "@/features/auth/services/authService";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function ForgotPasswordClient() {
   const router = useRouter();
@@ -14,6 +15,7 @@ export default function ForgotPasswordClient() {
   const [newPassword, setNewPassword] = useState("");
   const [toast, setToast] = useState(null); // { type: 'success' | 'error', text: '' }
   const [error, setError] = useState("");
+  const { t } = useLanguage();
 
   // Auto-dismiss toast after 10s
   useEffect(() => {
@@ -101,14 +103,10 @@ export default function ForgotPasswordClient() {
         {/* Header */}
         <div className="text-center mb-5 sm:mb-8 animate-fade-in">
           <h1 className="text-xl sm:text-3xl font-bold rec-section-heading font-[Cormorant_Garamond,serif] tracking-tight">
-            {step === 1 ? (
-              <>Forgot <em className="italic font-light rec-section-heading-accent">Password?</em></>
-            ) : (
-              <>Reset <em className="italic font-light rec-section-heading-accent">Password</em></>
-            )}
+            {step === 1 ? t('forgot_password.forgot_title') : t('forgot_password.reset_title')}
           </h1>
           <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.3em] sm:tracking-[0.4em] rec-section-subtext font-bold mt-1.5 sm:mt-2">
-            {step === 1 ? "Enter your email to receive an OTP" : "Enter the OTP and your new password"}
+            {step === 1 ? t('forgot_password.forgot_subtitle') : t('forgot_password.reset_subtitle')}
           </p>
         </div>
 
@@ -127,13 +125,15 @@ export default function ForgotPasswordClient() {
           {step === 1 && (
             <form onSubmit={handleSendOTP} className="space-y-3.5 sm:space-y-6">
               <div className="space-y-1.5">
-                <label className="text-[10px] uppercase tracking-widest font-bold rec-section-heading opacity-70 ml-1">Email Address</label>
+                <label className="text-[10px] uppercase tracking-widest font-bold rec-section-heading opacity-70 ml-1">
+                  {t('forgot_password.email_address')}
+                </label>
                 <div className="relative">
                   <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#1C3152]/30 text-lg">email</span>
                   <input
                     type="email"
                     required
-                    placeholder="name@example.com"
+                    placeholder={t('forgot_password.email_placeholder')}
                     value={email}
                     className="w-full pl-10 pr-3 py-3 sm:py-4 bg-[#1C3152]/5 border-transparent rounded-xl sm:rounded-2xl text-sm focus:ring-2 focus:ring-[#1C3152]/10 transition-all placeholder-[#1C3152]/20 outline-none rec-section-heading font-medium"
                     onChange={(e) => setEmail(e.target.value)}
@@ -150,7 +150,7 @@ export default function ForgotPasswordClient() {
                   <span className="animate-spin material-symbols-outlined text-lg sm:text-xl">progress_activity</span>
                 ) : (
                   <>
-                    <span>Send OTP</span>
+                    <span>{t('forgot_password.send_otp')}</span>
                     <span className="material-symbols-outlined text-sm">arrow_forward</span>
                   </>
                 )}
@@ -163,7 +163,9 @@ export default function ForgotPasswordClient() {
             <form onSubmit={handleResetPassword} className="space-y-3 sm:space-y-5">
               {/* Email (locked) */}
               <div className="space-y-1">
-                <label className="text-[10px] uppercase tracking-widest font-bold rec-section-heading opacity-70 ml-1">Email</label>
+                <label className="text-[10px] uppercase tracking-widest font-bold rec-section-heading opacity-70 ml-1">
+                  {t('forgot_password.email_locked')}
+                </label>
                 <div className="relative">
                   <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#1C3152]/30 text-lg">email</span>
                   <input
@@ -177,13 +179,15 @@ export default function ForgotPasswordClient() {
 
               {/* OTP */}
               <div className="space-y-1">
-                <label className="text-[10px] uppercase tracking-widest font-bold rec-section-heading opacity-70 ml-1">OTP Code</label>
+                <label className="text-[10px] uppercase tracking-widest font-bold rec-section-heading opacity-70 ml-1">
+                  {t('forgot_password.otp_code')}
+                </label>
                 <div className="relative">
                   <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#1C3152]/30 text-lg">pin</span>
                   <input
                     type="text"
                     required
-                    placeholder="Enter 6-digit OTP"
+                    placeholder={t('forgot_password.otp_placeholder')}
                     value={otp}
                     maxLength={6}
                     inputMode="numeric"
@@ -195,13 +199,15 @@ export default function ForgotPasswordClient() {
 
               {/* New Password */}
               <div className="space-y-1">
-                <label className="text-[10px] uppercase tracking-widest font-bold rec-section-heading opacity-70 ml-1">New Password</label>
+                <label className="text-[10px] uppercase tracking-widest font-bold rec-section-heading opacity-70 ml-1">
+                  {t('forgot_password.new_password')}
+                </label>
                 <div className="relative">
                   <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#1C3152]/30 text-lg">lock</span>
                   <input
                     type="password"
                     required
-                    placeholder="••••••••"
+                    placeholder={t('forgot_password.new_password_placeholder')}
                     value={newPassword}
                     className="w-full pl-10 pr-3 py-2.5 sm:py-4 bg-[#1C3152]/5 border-transparent rounded-xl sm:rounded-2xl text-sm focus:ring-2 focus:ring-[#1C3152]/10 transition-all placeholder-[#1C3152]/20 outline-none rec-section-heading font-medium"
                     onChange={(e) => setNewPassword(e.target.value)}
@@ -218,7 +224,7 @@ export default function ForgotPasswordClient() {
                   <span className="animate-spin material-symbols-outlined text-lg sm:text-xl">progress_activity</span>
                 ) : (
                   <>
-                    <span>Reset Password</span>
+                    <span>{t('forgot_password.reset_password_btn')}</span>
                     <span className="material-symbols-outlined text-sm">check</span>
                   </>
                 )}
@@ -232,7 +238,7 @@ export default function ForgotPasswordClient() {
                   disabled={loading}
                   className="text-[10px] font-bold uppercase tracking-wider rec-section-heading-accent hover:opacity-80 transition-opacity disabled:opacity-40"
                 >
-                  Resend OTP
+                  {t('forgot_password.resend_otp')}
                 </button>
               </div>
             </form>
@@ -242,13 +248,13 @@ export default function ForgotPasswordClient() {
         {/* Back to Login */}
         <div className="mt-5 sm:mt-6 text-center animate-fade-in delay-300">
           <p className="text-xs sm:text-sm rec-section-subtext">
-            Remember your password?{" "}
+            {t('forgot_password.remember_password')}{" "}
             <button
               type="button"
               onClick={() => router.push("/login")}
               className="rec-section-heading-accent font-bold hover:underline ml-1 uppercase tracking-widest text-[10px]"
             >
-              Sign In
+              {t('forgot_password.signin')}
             </button>
           </p>
         </div>

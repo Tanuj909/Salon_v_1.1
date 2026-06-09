@@ -1,74 +1,76 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 
 const GallerySection = () => {
+  const { t } = useLanguage();
   const [activeFilter, setActiveFilter] = useState('all');
 
   const categories = [
-    { id: 'all', label: 'All Works' },
-    { id: 'hair', label: 'Hair' },
-    { id: 'skin', label: 'Skin' },
-    { id: 'nails', label: 'Nails' },
-    { id: 'bridal', label: 'Bridal' }
+    { id: 'all', label: t("home.gallery_cat_all") },
+    { id: 'hair', label: t("home.gallery_cat_hair") },
+    { id: 'skin', label: t("home.gallery_cat_skin") },
+    { id: 'nails', label: t("home.gallery_cat_nails") },
+    { id: 'bridal', label: t("home.gallery_cat_bridal") }
   ];
 
   const galleryItems = [
     {
       id: 1,
-      title: "Precision Bob Cut",
+      title: t("home.gallery_item_title_1"),
       category: "hair",
       image: "https://images.unsplash.com/photo-1525614686090-7a3108e3758e?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fGJvYiUyMGN1dHxlbnwwfHwwfHx8MA%3D%3D",
-      description: "Modern precision cut with textured ends"
+      description: t("home.gallery_item_desc_1")
     },
     {
       id: 2,
-      title: "Balayage Masterpiece",
+      title: t("home.gallery_item_title_2"),
       category: "hair",
       image: "https://images.unsplash.com/photo-1568530134868-5d89f49d5a72?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTl8fEJhbGF5YWdlfGVufDB8fDB8fHww",
-      description: "Sun-kissed balayage for natural dimension"
+      description: t("home.gallery_item_desc_2")
     },
     {
       id: 3,
-      title: "Luxury Facial",
+      title: t("home.gallery_item_title_3"),
       category: "skin",
       image: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fHNhbG9ufGVufDB8fDB8fHww",
-      description: "Deep cleansing facial with organic products"
+      description: t("home.gallery_item_desc_3")
     },
     {
       id: 4,
-      title: "Bridal Glow",
+      title: t("home.gallery_item_title_4"),
       category: "bridal",
       image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDZwatrTnvnmq9fKbDCD54TxCGWmSdF8uG7JHsAv0tsf_y3mGeYufo8SXtIpO5SGh5ZdtVgEvAvpcofmIXhg8ePC2wo6M5VSUlq5LDaZDwcuFsbofUOH--p6xj8SwLQYhQHiGmOllpVgvnClOpKg14NyUI5yuRUD3iJPUSkg-SnqU2y0z1bsZbaP25NgGW7wYH5jmHzl_5tQmksd7ezywNc_n6PnQhu8DraI5qkvvtgaDvi3GdA0mqj-nYxXuwNKtpY9G7YxDel5-Br",
-      description: "Complete bridal makeup and styling"
+      description: t("home.gallery_item_desc_4")
     },
     {
       id: 5,
-      title: "Artistic Nail Design",
+      title: t("home.gallery_item_title_5"),
       category: "nails",
       image: "https://images.unsplash.com/photo-1588015810531-dd522c9c8bbb?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8TmFpbCUyMERlc2lnbnxlbnwwfHwwfHx8MA%3D%3D",
-      description: "Hand-painted floral nail artistry"
+      description: t("home.gallery_item_desc_5")
     },
     {
       id: 6,
-      title: "Microblading",
+      title: t("home.gallery_item_title_6"),
       category: "skin",
       image: "https://plus.unsplash.com/premium_photo-1718626724867-970453587837?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8TWljcm9ibGFkaW5nfGVufDB8fDB8fHww",
-      description: "Natural brow enhancement technique"
+      description: t("home.gallery_item_desc_6")
     },
     {
       id: 7,
-      title: "Bridal Updo",
+      title: t("home.gallery_item_title_7"),
       category: "bridal",
       image: "https://images.unsplash.com/photo-1760220006440-4b98ad942c53?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8QnJpZGFsJTIwVXBkb3xlbnwwfHwwfHx8MA%3D%3D",
-      description: "Elegant bridal updo with accessories"
+      description: t("home.gallery_item_desc_7")
     },
     {
       id: 8,
-      title: "Gel Manicure",
+      title: t("home.gallery_item_title_8"),
       category: "nails",
       image: "https://images.unsplash.com/photo-1611821828952-3453ba0f9408?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fEdlbCUyME1hbmljdXJlfGVufDB8fDB8fHww",
-      description: "Long-lasting gel polish application"
+      description: t("home.gallery_item_desc_8")
     }
   ];
 
@@ -79,7 +81,7 @@ const GallerySection = () => {
   return (
     <section className="py-24 px-6 max-w-[1280px] mx-auto">
       <div className="text-center mb-12">
-        <h2 className="text-3xl md:text-4xl font-extrabold mb-4 tracking-tight rec-section-heading font-[Cormorant_Garamond,serif]">Our Gallery</h2>
+        <h2 className="text-3xl md:text-4xl font-extrabold mb-4 tracking-tight rec-section-heading font-[Cormorant_Garamond,serif]">{t("home.our_gallery")}</h2>
         <div className="w-20 h-1 rec-section-divider mx-auto rounded-full mt-3 mb-8"></div>
         
         {/* Filter Buttons */}
@@ -124,7 +126,7 @@ const GallerySection = () => {
                 {item.description}
               </p>
               <button className="rec-btn-primary border border-white/30 text-white px-4 py-1.5 rounded-full text-xs font-bold hover:bg-white hover:text-[#1C3152] transition-colors mt-3 font-[DM_Sans]">
-                View Details
+                {t("home.view_details_btn")}
               </button>
             </div>
           </div>
@@ -134,7 +136,7 @@ const GallerySection = () => {
       {/* Empty State */}
       {filteredItems.length === 0 && (
         <div className="text-center py-12">
-          <p className="rec-section-subtext text-lg font-[DM_Sans]">No items found in this category.</p>
+          <p className="rec-section-subtext text-lg font-[DM_Sans]">{t("home.gallery_no_items")}</p>
         </div>
       )}
     </section>

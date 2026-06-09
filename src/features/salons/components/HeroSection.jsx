@@ -1,4 +1,7 @@
+"use client";
+
 import React, { useEffect, useRef, useState } from "react";
+import { useLanguage } from "@/context/LanguageContext";
 
 function useReveal() {
     const ref = useRef(null);
@@ -71,6 +74,7 @@ function Badge({ children, variant = "gold" }) {
 
 const HeroSection = ({ salonImg, salon, handleBookButtonClick }) => {
     const heroRef = useParallax();
+    const { t } = useLanguage();
 
     const toTitleCase = (str) => {
         if (!str) return "";
@@ -97,11 +101,11 @@ const HeroSection = ({ salonImg, salon, handleBookButtonClick }) => {
                                     <svg width={12} height={12} viewBox="0 0 24 24" fill="currentColor">
                                         <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                                     </svg>
-                                    Verified Studio
+                                    {t("salon_details.verified_studio")}
                                 </Badge>
                             )}
                             <Badge variant="gold">
-                                {salon.isOpen ? "Open Now" : "Closed"}
+                                {salon.isOpen ? t("salon_details.open_now") : t("salon_details.closed")}
                             </Badge>
                         </div>
                     </Reveal>
@@ -128,7 +132,7 @@ const HeroSection = ({ salonImg, salon, handleBookButtonClick }) => {
                                         ))}
                                     </div>
                                     <span className="text-[9px] md:text-[11px] font-bold uppercase tracking-widest text-white">
-                                        {salon.totalReviews > 0 ? `${salon.averageRating.toFixed(1)} / ${salon.totalReviews} Reviews` : "New Experience"}
+                                        {salon.totalReviews > 0 ? `${salon.averageRating.toFixed(1)} / ${salon.totalReviews} ${t("salon_details.reviews")}` : t("salon_details.new_experience")}
                                     </span>
                                 </div>
                             </div>
@@ -172,7 +176,7 @@ const HeroSection = ({ salonImg, salon, handleBookButtonClick }) => {
                                 onClick={handleBookButtonClick}
                                 className="w-full sm:w-auto group relative px-10 py-4 rounded-full rec-btn-primary text-[#C49B66] text-[13px] sm:text-[16px] font-black tracking-[0.2em] uppercase overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 border-0 cursor-pointer text-center"
                             >
-                                <span className="relative z-10">Book Appointment</span>
+                                <span className="relative z-10">{t("salon_details.book_appointment")}</span>
                                 <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
                                 <div className="glow-line" />
                             </button>
@@ -180,7 +184,7 @@ const HeroSection = ({ salonImg, salon, handleBookButtonClick }) => {
                                 href="#services"
                                 className="w-full sm:w-auto relative flex items-center justify-center group px-8 py-3.5 rounded-full border border-white/40 text-white text-[11px] sm:text-[13px] font-black tracking-[0.2em] uppercase transition-all duration-500 hover:bg-white text-center overflow-hidden"
                             >
-                                <span className="relative z-10 transition-colors duration-300 group-hover:text-black">View Services</span>
+                                <span className="relative z-10 transition-colors duration-300 group-hover:text-black">{t("salon_details.view_services")}</span>
                                 <div className="glow-line" />
                             </a>
                         </div>

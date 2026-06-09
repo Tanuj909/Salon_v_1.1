@@ -8,8 +8,7 @@ import { useMyBusiness } from '@/features/business/hooks/useMyBusiness';
 import MessageModal from '@/features/business/components/MessageModal';
 import AgreementsModal from '@/features/business/components/AgreementsModal';
 import SupportModal from '@/features/support/components/SupportModal';
-
-
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -23,6 +22,7 @@ export default function Navbar() {
   const { business, loading: businessLoading } = useMyBusiness();
   const router = useRouter();
   const pathname = usePathname();
+  const { language, toggleLanguage, t } = useLanguage();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -45,79 +45,79 @@ export default function Navbar() {
         : 'navbar-bg-transparent py-5 md:py-6'
         }`}
     >
-      <div className="w-full px-4 sm:px-6 md:px-10 lg:px-16 xl:px-24 mx-auto">
+      <div className="w-full px-4 sm:px-6 md:px-10 lg:px-16 xl:px-8 2xl:px-24 mx-auto">
         <div className="flex items-center justify-between gap-2 flex-nowrap">
           {/* Left Side: Logo & Primary Links */}
-          <div className="flex items-center gap-2 sm:gap-3 lg:gap-6 min-w-0 flex-shrink">
+          <div className="flex items-center gap-2 sm:gap-3 lg:gap-6 xl:gap-3 2xl:gap-6 min-w-0 flex-shrink">
             <Link
               href="/"
-              className="flex items-center gap-1.5 sm:gap-2.5 lg:gap-3 group transition-all"
+              className="flex items-center gap-1.5 sm:gap-2.5 lg:gap-3 group transition-all flex-shrink-0"
             >
               <img
                 src="/logo/fastbooking.png"
                 alt="Fast Booking Service Logo"
-                className="w-12 sm:w-14 lg:w-20 h-auto object-contain transition-transform group-hover:scale-110 flex-shrink-0"
+                className="w-12 sm:w-14 lg:w-20 xl:w-16 2xl:w-20 h-auto object-contain transition-transform group-hover:scale-110 flex-shrink-0"
               />
-              <div className="flex flex-col leading-tight items-start px-2 py-1 md:px-3 lg:px-4 md:py-1.5 lg:py-2 rounded-xl lg:rounded-2xl navbar-link-bg border border-white/80 shadow-sm group-hover:bg-white/90 transition-all">
-                <span className="text-sm sm:text-lg lg:text-xl font-black navbar-logo-text tracking-tighter whitespace-nowrap leading-[1.1] pb-0.5">
-                  Fast Booking 
+              <div className="flex flex-col leading-tight items-start px-2 py-1 md:px-3 lg:px-4 xl:px-2.5 2xl:px-4 md:py-1.5 lg:py-2 xl:py-1 2xl:py-2 rounded-xl lg:rounded-2xl navbar-link-bg border border-white/80 shadow-sm group-hover:bg-white/90 transition-all">
+                <span className="text-sm sm:text-lg lg:text-xl xl:text-base 2xl:text-xl font-black navbar-logo-text tracking-tighter whitespace-nowrap leading-[1.1] pb-0.5">
+                  {t('navbar.logo_text')}
                 </span>
-                <span className="text-[8px] sm:text-[10px] lg:text-[12px] font-bold uppercase tracking-[0.2em] navbar-logo-subtext -mt-0.5">
-                  Service
+                <span className="text-[8px] sm:text-[10px] lg:text-[12px] xl:text-[9px] 2xl:text-[12px] font-bold uppercase tracking-[0.2em] navbar-logo-subtext -mt-0.5">
+                  {t('navbar.logo_subtext')}
                 </span>
               </div>
             </Link>
 
-            <div className="hidden lg:flex items-center gap-3">
+            <div className="hidden xl:flex items-center gap-1.5 2xl:gap-3">
               <Link
                 href="/"
-                className={`px-4 lg:px-5 py-2 md:py-2.5 rounded-full text-sm font-medium transition-all shadow-sm ${isScrolled
+                className={`px-3 xl:px-3.5 2xl:px-5 py-2 md:py-2.5 rounded-full text-xs 2xl:text-sm font-medium transition-all shadow-sm ${isScrolled
                   ? 'navbar-link-bg-scrolled navbar-link-text hover:navbar-link-hover-bg hover:navbar-link-hover-text'
                   : 'navbar-link-bg navbar-link-text hover:navbar-link-hover-bg-alt hover:navbar-link-hover-text'
                   }`}
               >
-                Home
+                {t('navbar.home')}
               </Link>
               <Link
                 href="/salons"
-                className={`px-4 lg:px-5 py-2 md:py-2.5 rounded-full text-sm font-medium transition-all shadow-sm ${isScrolled
+                className={`px-3 xl:px-3.5 2xl:px-5 py-2 md:py-2.5 rounded-full text-xs 2xl:text-sm font-medium transition-all shadow-sm ${isScrolled
                   ? 'navbar-link-bg-scrolled navbar-link-text hover:navbar-link-hover-bg hover:navbar-link-hover-text'
                   : 'navbar-link-bg navbar-link-text hover:navbar-link-hover-bg-alt hover:navbar-link-hover-text'
                   }`}
               >
-                Salons
+                {t('navbar.salons')}
               </Link>
               {business && (
                 <Link
                   href="/partner/documents"
-                  className={`px-4 lg:px-5 py-2 md:py-2.5 rounded-full text-sm font-medium transition-all shadow-sm ${isScrolled
+                  className={`px-3 xl:px-3.5 2xl:px-5 py-2 md:py-2.5 rounded-full text-xs 2xl:text-sm font-medium transition-all shadow-sm ${isScrolled
                     ? 'navbar-link-bg-scrolled navbar-link-text hover:navbar-link-hover-bg hover:navbar-link-hover-text'
                     : 'navbar-link-bg navbar-link-text hover:navbar-link-hover-bg-alt hover:navbar-link-hover-text'
                     }`}
                 >
-                  Documents
+                  {t('navbar.documents')}
                 </Link>
               )}
               {business && (
                 <button
                   onClick={() => setIsMessagesOpen(true)}
-                  className={`px-4 lg:px-5 py-2 md:py-2.5 rounded-full text-sm font-medium transition-all shadow-sm ${isScrolled
+                  className={`px-3 xl:px-3.5 2xl:px-5 py-2 md:py-2.5 rounded-full text-xs 2xl:text-sm font-medium transition-all shadow-sm ${isScrolled
                     ? 'navbar-link-bg-scrolled navbar-link-text hover:navbar-link-hover-bg hover:navbar-link-hover-text'
                     : 'navbar-link-bg navbar-link-text hover:navbar-link-hover-bg-alt hover:navbar-link-hover-text'
                     }`}
                 >
-                  Messages
+                  {t('navbar.messages')}
                 </button>
               )}
               {business && (
                 <button
                   onClick={() => setIsAgreementsOpen(true)}
-                  className={`px-4 lg:px-5 py-2 md:py-2.5 rounded-full text-sm font-medium transition-all shadow-sm ${isScrolled
+                  className={`px-3 xl:px-3.5 2xl:px-5 py-2 md:py-2.5 rounded-full text-xs 2xl:text-sm font-medium transition-all shadow-sm ${isScrolled
                     ? 'navbar-link-bg-scrolled navbar-link-text hover:navbar-link-hover-bg hover:navbar-link-hover-text'
                     : 'navbar-link-bg navbar-link-text hover:navbar-link-hover-bg-alt hover:navbar-link-hover-text'
                     }`}
                 >
-                  Agreement
+                  {t('navbar.agreement')}
                 </button>
               )}
 
@@ -125,15 +125,17 @@ export default function Navbar() {
           </div>
 
           {/* Right Side: Actions */}
-          <div className="flex items-center gap-2.5 sm:gap-3 lg:gap-4 ml-auto">
+          <div className="flex items-center gap-1.5 sm:gap-3 lg:gap-4 xl:gap-2 2xl:gap-4 ml-auto">
+
+
             <Link
               href="/contact"
-              className={`hidden sm:flex px-5 md:px-6 py-2.5 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all shadow-md active:scale-95 whitespace-nowrap ${isScrolled
+              className={`hidden sm:flex px-4 xl:px-4 2xl:px-6 py-2.5 xl:py-2.5 2xl:py-3 rounded-full text-xs xl:text-xs 2xl:text-sm font-semibold transition-all shadow-md active:scale-95 whitespace-nowrap ${isScrolled
                 ? 'navbar-btn-primary-bg navbar-btn-primary-text hover:navbar-btn-primary-hover-bg'
                 : 'navbar-btn-outline-bg navbar-btn-outline-text hover:navbar-btn-primary-hover-bg hover:navbar-btn-primary-text navbar-btn-outline-border'
                 }`}
             >
-              List Your Business
+              {t('navbar.list_business')}
             </Link>
 
             {/* // Navbar ke andar, user logged in ho to: */}
@@ -166,7 +168,7 @@ export default function Navbar() {
                   {isProfileOpen && (
                     <div className="fixed 
   left-1/2 -translate-x-1/2   /* perfect center */
-  md:absolute md:left-auto md:right-0 md:translate-x-0   /* desktop normal */
+  md:absolute md:left-1/2 md:-translate-x-1/2 md:right-auto   /* desktop centered */
   top-12 
   w-[calc(100vw-2rem)] sm:w-64 md:w-48 
   max-w-[calc(100vw-2rem)] 
@@ -181,7 +183,7 @@ export default function Navbar() {
                         onClick={() => setIsProfileOpen(false)}
                       >
                         <span className="material-symbols-outlined text-lg">account_circle</span>
-                        Profile
+                        {t('navbar.profile')}
                       </Link>
                       {['ADMIN', 'SUPER_ADMIN', 'STAFF', 'RECEPTIONIST'].includes(user?.role) && (
                         <Link
@@ -190,7 +192,7 @@ export default function Navbar() {
                           onClick={() => setIsProfileOpen(false)}
                         >
                           <span className="material-symbols-outlined text-lg">admin_panel_settings</span>
-                          Console
+                          {t('navbar.console')}
                         </Link>
                       )}
                       {business && (
@@ -200,7 +202,7 @@ export default function Navbar() {
                           onClick={() => setIsProfileOpen(false)}
                         >
                           <span className="material-symbols-outlined text-lg">description</span>
-                          Documents
+                          {t('navbar.documents')}
                         </Link>
                       )}
                       {business && (
@@ -212,7 +214,7 @@ export default function Navbar() {
                           }}
                         >
                           <span className="material-symbols-outlined text-lg">chat</span>
-                          Messages
+                          {t('navbar.messages')}
                         </button>
                       )}
                       {business && (
@@ -224,7 +226,7 @@ export default function Navbar() {
                           }}
                         >
                           <span className="material-symbols-outlined text-lg">description</span>
-                          Agreement
+                          {t('navbar.agreement')}
                         </button>
                       )}
 
@@ -236,7 +238,7 @@ export default function Navbar() {
                         }}
                       >
                         <span className="material-symbols-outlined text-lg">contact_support</span>
-                        Support
+                        {t('navbar.support')}
                       </button>
 
                       <button
@@ -244,7 +246,7 @@ export default function Navbar() {
                         onClick={handleLogout}
                       >
                         <span className="material-symbols-outlined text-lg">logout</span>
-                        Logout
+                        {t('navbar.logout')}
                       </button>
                     </div>
                   )}
@@ -252,19 +254,56 @@ export default function Navbar() {
               ) : (
                 <Link
                   href={`/login?redirect=${encodeURIComponent(pathname)}`}
-                  className={`px-5 md:px-7 py-2.5 md:py-3 rounded-full text-xs md:text-sm font-semibold transition-all shadow-md active:scale-95 whitespace-nowrap ${isScrolled
+                  className={`py-2 md:py-3 rounded-full font-semibold transition-all shadow-md active:scale-95 whitespace-nowrap ${
+                    language === 'ar'
+                      ? 'px-2.5 text-[10px] sm:px-5 sm:text-xs'
+                      : 'px-3 sm:px-5 text-xs md:text-sm'
+                  } ${isScrolled
                     ? 'navbar-btn-primary-bg navbar-btn-primary-text hover:navbar-btn-primary-hover-bg'
                     : 'navbar-btn-outline-bg navbar-btn-outline-text hover:navbar-btn-primary-bg hover:navbar-btn-primary-text border border-white/30'
                     }`}
                 >
-                  Login
+                  {t('navbar.login')}
                 </Link>
               )}
             </div>
 
+            {/* Language Switcher */}
+            <div
+              onClick={toggleLanguage}
+              className={`hidden xl:flex items-center relative cursor-pointer select-none bg-[#FDF9F4] border border-[#EFE5D3] rounded-full p-0.5 w-[78px] h-[30px] transition-all shadow-sm active:scale-95 ${
+                isScrolled ? 'mr-1' : 'mr-1'
+              }`}
+            >
+              {/* Sliding Background Pill */}
+              <div
+                className={`absolute top-0.5 bottom-0.5 left-0.5 w-[35px] rounded-full bg-[#1C3152] transition-transform duration-300 ease-out ${
+                  language === 'en' ? 'translate-x-0' : 'translate-x-[37px]'
+                }`}
+              />
+
+              {/* Text labels */}
+              <div className="flex w-full justify-between items-center text-[11px] font-bold z-10">
+                <span
+                  className={`w-[35px] text-center transition-colors duration-300 ${
+                    language === 'en' ? 'text-[#C49B66] font-bold' : 'text-[#8C8375]'
+                  }`}
+                >
+                  EN
+                </span>
+                <span
+                  className={`w-[35px] text-center transition-colors duration-300 ${
+                    language === 'ar' ? 'text-[#C49B66] font-bold' : 'text-[#8C8375]'
+                  }`}
+                >
+                  AR
+                </span>
+              </div>
+            </div>
+
             {/* Hamburger (Mobile) */}
             <button
-              className={`flex items-center justify-center lg:hidden p-1.5 md:p-2.5 rounded-lg transition-all ${isScrolled
+              className={`flex items-center justify-center xl:hidden p-1.5 md:p-2.5 rounded-lg transition-all ${isScrolled
                 ? 'navbar-link-bg-scrolled text-black hover:navbar-link-hover-bg hover:navbar-link-hover-text'
                 : 'navbar-btn-outline-bg text-black hover:navbar-link-hover-bg hover:navbar-link-hover-text'
                 }`}
@@ -281,7 +320,7 @@ export default function Navbar() {
 
       {/* Mobile Menu Overlay */}
       {isMenuOpen && (
-        <div className="absolute top-full inset-x-4 mt-2 p-4 lg:hidden flex flex-col gap-3 shadow-2xl border border-[#D98C5F]/10 bg-white/95 backdrop-blur-2xl animate-in slide-in-from-top-4 duration-300 rounded-3xl">
+        <div className="absolute top-full inset-x-4 mt-2 p-4 xl:hidden flex flex-col gap-3 shadow-2xl border border-[#D98C5F]/10 bg-white/95 backdrop-blur-2xl animate-in slide-in-from-top-4 duration-300 rounded-3xl">
           <div className="flex flex-col gap-2 p-2">
             <Link
               href="/"
@@ -289,7 +328,7 @@ export default function Navbar() {
               onClick={() => setIsMenuOpen(false)}
             >
               <span className="material-symbols-outlined text-xl">home</span>
-              Home
+              {t('navbar.home')}
             </Link>
             <Link
               href="/salons"
@@ -297,7 +336,7 @@ export default function Navbar() {
               onClick={() => setIsMenuOpen(false)}
             >
               <span className="material-symbols-outlined text-xl">storefront</span>
-              Salons
+              {t('navbar.salons')}
             </Link>
 
             {business && (
@@ -307,7 +346,7 @@ export default function Navbar() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 <span className="material-symbols-outlined text-xl">description</span>
-                Documents
+                {t('navbar.documents')}
               </Link>
             )}
             
@@ -320,7 +359,7 @@ export default function Navbar() {
                 }}
               >
                 <span className="material-symbols-outlined text-xl">chat</span>
-                Messages
+                {t('navbar.messages')}
               </button>
             )}
 
@@ -333,7 +372,7 @@ export default function Navbar() {
                 }}
               >
                 <span className="material-symbols-outlined text-xl">description</span>
-                Agreement
+                {t('navbar.agreement')}
               </button>
             )}
 
@@ -346,7 +385,7 @@ export default function Navbar() {
                 }}
               >
                 <span className="material-symbols-outlined text-xl">contact_support</span>
-                Support
+                {t('navbar.support')}
               </button>
             )}
 
@@ -358,8 +397,20 @@ export default function Navbar() {
               onClick={() => setIsMenuOpen(false)}
             >
               <span className="material-symbols-outlined text-xl">business_center</span>
-              List Your Business
+              {t('navbar.list_business')}
             </Link>
+
+            {/* Mobile Language Switcher */}
+            <button
+              onClick={() => {
+                toggleLanguage();
+                setIsMenuOpen(false);
+              }}
+              className="mt-2 flex items-center justify-center gap-2 py-3 px-4 border border-[#D98C5F]/20 hover:bg-[#D98C5F]/5 text-[#D98C5F] rounded-2xl font-semibold active:scale-[0.98] transition-all text-base text-center w-full cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-xl">language</span>
+              <span>{language === 'en' ? 'العربية' : 'English'}</span>
+            </button>
 
             {!loading && !user && (
               <Link
@@ -368,7 +419,7 @@ export default function Navbar() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 <span className="material-symbols-outlined text-xl">login</span>
-                Login
+                {t('navbar.login')}
               </Link>
             )}
           </div>

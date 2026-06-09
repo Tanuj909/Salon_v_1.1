@@ -2,30 +2,33 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { HiOutlineStar, HiStar } from 'react-icons/hi';
 import { BsChatQuote } from 'react-icons/bs';
+import { useLanguage } from '@/context/LanguageContext';
 
 const TestimonialSection = () => {
+    const { t, language } = useLanguage();
+
     const testimonials = [
         {
-            quote: "By far the best experience I've had with a salon booking system! Super user-friendly, and automated policies reduced no-shows dramatically.",
-            name: 'Ursula M.',
-            business: 'Royal Salon',
-            location: 'Paris, France',
+            quoteKey: 'list_business.testimonials.quote_1',
+            nameKey: 'list_business.testimonials.name_1',
+            businessKey: 'list_business.testimonials.business_1',
+            locationKey: 'list_business.testimonials.location_1',
             rating: 5,
             image: 'https://images.unsplash.com/photo-1494790108777-8fd4f2a24a6d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80',
         },
         {
-            quote: "This platform transformed how we manage our spa. The analytics alone saved us hours of manual work every week. Absolutely essential for any serious business.",
-            name: 'James C.',
-            business: 'Tranquil Spa',
-            location: 'London, UK',
+            quoteKey: 'list_business.testimonials.quote_2',
+            nameKey: 'list_business.testimonials.name_2',
+            businessKey: 'list_business.testimonials.business_2',
+            locationKey: 'list_business.testimonials.location_2',
             rating: 5,
             image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80',
         },
         {
-            quote: "Our bookings increased by 40% within the first month. Clients love the easy scheduling and we love the automated reminders. Win-win!",
-            name: 'Sophie L.',
-            business: 'Luxe Beauty Lounge',
-            location: 'Milan, Italy',
+            quoteKey: 'list_business.testimonials.quote_3',
+            nameKey: 'list_business.testimonials.name_3',
+            businessKey: 'list_business.testimonials.business_3',
+            locationKey: 'list_business.testimonials.location_3',
             rating: 5,
             image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80',
         },
@@ -72,7 +75,7 @@ const TestimonialSection = () => {
             maxWidth: 1200,
             margin: '0 auto',
             position: 'relative',
-        }}>
+        }} dir={language === 'ar' ? 'rtl' : 'ltr'}>
 
             {/* Background decoration */}
             <div className="absolute top-[20%] left-[5%] w-[300px] h-[300px] bg-[radial-gradient(circle,rgba(200,169,81,0.04)_0%,transparent_70%)] pointer-events-none z-0" />
@@ -97,7 +100,7 @@ const TestimonialSection = () => {
                             className="h-[1px] bg-gradient-to-r from-transparent to-[#C8A951]"
                         />
                         <span className="text-[10px] font-bold tracking-[0.2em] uppercase rec-section-heading-accent hero-filter-input-bg px-4 py-1.5 rounded-full border rec-card-border shadow-sm">
-                            Client Stories
+                            {t('list_business.testimonials.badge')}
                         </span>
                         <motion.div
                             initial={{ width: 0 }}
@@ -115,7 +118,7 @@ const TestimonialSection = () => {
                         transition={{ duration: 0.5, delay: 0.3 }}
                         className="font-[Cormorant_Garamond,serif] text-3xl sm:text-5xl md:text-6xl font-bold rec-section-heading leading-tight tracking-tight mb-4"
                     >
-                        Loved by{' '}
+                        {t('list_business.testimonials.headline_1')}{' '}
                         <motion.span
                             initial={{ opacity: 0, x: -5 }}
                             whileInView={{ opacity: 1, x: 0 }}
@@ -123,7 +126,7 @@ const TestimonialSection = () => {
                             transition={{ duration: 0.5, delay: 0.5 }}
                             className="rec-section-heading-accent italic inline-block relative"
                         >
-                            professionals
+                            {t('list_business.testimonials.headline_accent')}
                             <motion.div
                                 initial={{ width: 0 }}
                                 whileInView={{ width: '100%' }}
@@ -132,7 +135,7 @@ const TestimonialSection = () => {
                                 className="absolute bottom-1.5 left-0 h-2 bg-[#C8A951]/20 rounded-full -z-[1]"
                             />
                         </motion.span>{' '}
-                        worldwide
+                        {t('list_business.testimonials.headline_2')}
                     </motion.h2>
                     
                     <div className="flex items-center justify-center gap-4 mb-6">
@@ -143,7 +146,7 @@ const TestimonialSection = () => {
                         transition={{ duration: 0.5, delay: 0.4 }}
                         className="text-base sm:text-lg rec-section-subtext leading-relaxed max-w-lg mx-auto font-medium"
                     >
-                        Join thousands of satisfied salon owners who trust our platform
+                        {t('list_business.testimonials.description')}
                     </motion.p>
                     </div>
                 </motion.div>
@@ -204,7 +207,7 @@ const TestimonialSection = () => {
                                 transition={{ duration: 0.5, delay: 0.4 }}
                                 className="text-base rec-section-heading leading-relaxed mb-8 relative z-[2] font-medium"
                             >
-                                "{testimonial.quote}"
+                                "{t(testimonial.quoteKey)}"
                             </motion.p>
 
                             {/* Author */}
@@ -223,20 +226,20 @@ const TestimonialSection = () => {
                                 >
                                     <img
                                         src={testimonial.image}
-                                        alt={testimonial.name}
+                                        alt={t(testimonial.nameKey)}
                                         className="w-full h-full object-cover"
                                     />
                                 </motion.div>
 
                                 <div>
                                     <div className="text-base font-bold rec-section-heading mb-0.5">
-                                        {testimonial.name}
+                                        {t(testimonial.nameKey)}
                                     </div>
                                     <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#C8A951]">
-                                        <span>{testimonial.business}</span>
+                                        <span>{t(testimonial.businessKey)}</span>
                                         <span className="w-1 h-1 bg-[#1C3152]/30 rounded-full" />
                                         <span className="rec-section-subtext normal-case tracking-normal font-medium">
-                                            {testimonial.location}
+                                            {t(testimonial.locationKey)}
                                         </span>
                                     </div>
                                 </div>

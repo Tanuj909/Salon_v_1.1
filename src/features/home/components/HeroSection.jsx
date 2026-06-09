@@ -467,12 +467,14 @@ import { fuseData } from '../data/fuseData';
 import { enrichSynonyms, fuseOptions } from '../utils/searchUtils';
 import { useUserLocation } from '@/features/salons/hooks/useUserLocation';
 import DateTimePickerModal from './DateTimePickerModal';
+import { useLanguage } from '@/context/LanguageContext';
 
 const MapPickerModal = dynamic(() => import('@/features/salons/components/MapPickerModal'), {
   ssr: false,
 });
 
 const HeroSection = () => {
+  const { t } = useLanguage();
   const [current, setCurrent] = useState(0);
 
   const [serviceSearch, setServiceSearch] = useState("");
@@ -602,14 +604,20 @@ const HeroSection = () => {
   };
 
   const headings = [
-    "Experience Luxury Services Near You",
-    "Find Your Perfect Style Right Today",
-    "Expert Grooming For Everyone Locally",
-    "Your Beauty Is Always Our Priority"
+    t("home.heading_0"),
+    t("home.heading_1"),
+    t("home.heading_2"),
+    t("home.heading_3")
   ];
 
   const servicePlaceholders = [
-    "Haircut", "Manicure", "Beard Trim", "Facial", "Hair Coloring", "Massage", "Spa Treatment"
+    t("home.placeholder_0"),
+    t("home.placeholder_1"),
+    t("home.placeholder_2"),
+    t("home.placeholder_3"),
+    t("home.placeholder_4"),
+    t("home.placeholder_5"),
+    t("home.placeholder_6")
   ];
 
 
@@ -714,7 +722,7 @@ const HeroSection = () => {
           <div className="inline-flex items-center gap-2 bg-gray-100 border border-gray-200 rounded-full px-4 py-1.5 mb-6 animate-fade-up [animation-delay:100ms]">
             <div className="w-4 h-4 rounded-full bg-[#087810] animate-pulse" />
             <span className="text-[10px] md:text-xs tracking-[0.15em] uppercase text-gray-600 font-medium">
-              Premium Salon Experiences
+              {t("home.premium_experiences")}
             </span>
           </div>
 
@@ -722,7 +730,7 @@ const HeroSection = () => {
           <h1 className="font-['Cormorant_Garamond',serif] text-[clamp(1.4rem,4.5vw,3.6rem)] text-gray-900 font-light leading-tight mb-5 animate-fade-up [animation-delay:300ms] inline-flex items-center justify-center">
             <span className={`transition-opacity duration-500 ${headingFade ? 'opacity-100' : 'opacity-0'}`}>
               {headings[headingIndex].split(' ').map((word, i) => {
-                const accentedWords = ['Luxury', 'Perfect', 'Grooming', 'Beauty'];
+                const accentedWords = ['Luxury', 'Perfect', 'Grooming', 'Beauty', 'الفاخرة', 'المثالي', 'احترافي', 'جمالك'];
                 return (
                   <span key={i}>
                     {accentedWords.includes(word) ? (
@@ -739,7 +747,7 @@ const HeroSection = () => {
 
           {/* Subtext */}
           <p className="hidden md:block text-[clamp(1rem,2vw,1.25rem)] font-light text-gray-600 tracking-wide max-w-2xl leading-relaxed mb-10 animate-fade-up [animation-delay:500ms] px-4">
-            Discover and book the finest grooming for Men, Women & Pets. <br className="hidden md:block" /> Seamless appointments, exceptional results.
+            {t("home.hero_subtext")}
           </p>
 
           {/* Filter Bar (Optimized for Narrow Mobile and Tablet) */}
@@ -802,9 +810,9 @@ const HeroSection = () => {
                   >
                     <span className="material-symbols-outlined hero-filter-icon text-xl">calendar_today</span>
                     <div className="flex flex-col text-left overflow-hidden">
-                      <span className="text-[8px] uppercase font-bold text-gray-400 tracking-tighter leading-none mb-1">Appointment Time</span>
+                      <span className="text-[8px] uppercase font-bold text-gray-400 tracking-tighter leading-none mb-1">{t("home.appointment_time")}</span>
                       <span className="text-[11px] font-bold hero-filter-input-text truncate leading-none">
-                        {date ? `${date} ${startTime ? `@ ${startTime}` : ''}` : "Choose Date & Time"}
+                        {date ? `${date} ${startTime ? `@ ${startTime}` : ''}` : t("home.choose_datetime")}
                       </span>
                     </div>
                     <span className="material-symbols-outlined text-gray-400 text-lg ml-auto">chevron_right</span>
@@ -821,9 +829,9 @@ const HeroSection = () => {
                       <span className="material-symbols-outlined text-lg">map</span>
                     </div>
                     <div className="flex flex-col text-left overflow-hidden">
-                      <span className="text-[8px] uppercase font-bold text-gray-400 tracking-tighter leading-none mb-1">Location</span>
+                      <span className="text-[8px] uppercase font-bold text-gray-400 tracking-tighter leading-none mb-1">{t("home.location_label")}</span>
                       <span className="text-[11px] font-bold hero-filter-input-text truncate leading-none">
-                        {locationLoading ? "Detecting..." : (location?.address || "Choose Manually")}
+                        {locationLoading ? t("home.detecting") : (location?.address || t("home.choose_manually"))}
                       </span>
                     </div>
                   </div>
@@ -870,7 +878,7 @@ const HeroSection = () => {
               href="/salons"
               className="px-8 py-4 hero-filter-btn-bg hover:hero-filter-btn-hover-bg border-2 border-white/30 backdrop-blur-md rounded-full text-white font-bold tracking-widest uppercase text-[10px] transition-all flex items-center gap-2 group"
             >
-              <span className="text-white">Explore All</span>
+              <span className="text-white">{t("home.explore_all")}</span>
               <span className="material-symbols-outlined text-sm text-white group-hover:translate-x-1 transition-transform">arrow_forward</span>
             </Link>
           </div>

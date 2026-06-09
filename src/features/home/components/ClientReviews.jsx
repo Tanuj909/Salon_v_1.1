@@ -1,62 +1,65 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 
 const ClientReviews = () => {
+  const { t } = useLanguage();
+
   const reviews = [
     {
       id: 1,
-      name: "Sarah Johnson",
-      role: "Regular Client",
+      name: t("home.review_name_1"),
+      role: t("home.review_role_1"),
       image: "https://images.unsplash.com/photo-1494790108777-2fdad95f6b8a?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80",
       rating: 5,
-      text: "Absolutely love this place! The signature haircut transformed my look completely. The stylist really listened to what I wanted and delivered beyond expectations. The ambiance is so relaxing too.",
-      date: "March 2024"
+      text: t("home.review_text_1"),
+      date: t("home.date_mar_2024")
     },
     {
       id: 2,
-      name: "Michael Chen",
-      role: "First-time Visitor",
+      name: t("home.review_name_2"),
+      role: t("home.review_role_2"),
       image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80",
       rating: 5,
-      text: "Came for a hot stone massage and left feeling like a new person. The therapist was professional and knew exactly where to focus. Already booked my next appointment!",
-      date: "March 2024"
+      text: t("home.review_text_2"),
+      date: t("home.date_mar_2024")
     },
     {
       id: 3,
-      name: "Emma Rodriguez",
-      role: "Bride",
+      name: t("home.review_name_3"),
+      role: t("home.review_role_3"),
       image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80",
       rating: 5,
-      text: "The bridal package was worth every penny! My entire bridal party felt like royalty. The makeup lasted all night and the hairstyles stayed perfect through dancing. Thank you!",
-      date: "February 2024"
+      text: t("home.review_text_3"),
+      date: t("home.date_feb_2024")
     },
     {
       id: 4,
-      name: "David Williams",
-      role: "Loyal Customer",
+      name: t("home.review_name_4"),
+      role: t("home.review_role_4"),
       image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80",
       rating: 5,
-      text: "Best barber in town! Consistent quality every single time. The attention to detail and the hot towel treatment at the end is the perfect finishing touch.",
-      date: "February 2024"
+      text: t("home.review_text_4"),
+      date: t("home.date_feb_2024")
     },
     {
       id: 5,
-      name: "Lisa Thompson",
-      role: "Spa Enthusiast",
+      name: t("home.review_name_5"),
+      role: t("home.review_role_5"),
       image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80",
       rating: 5,
-      text: "The hydrating facial is absolutely divine! My skin hasn't glowed this much in years. The products they use smell amazing and feel so luxurious on the skin.",
-      date: "January 2024"
+      text: t("home.review_text_5"),
+      date: t("home.date_jan_2024")
     },
     {
       id: 6,
-      name: "James Anderson",
-      role: "Business Professional",
+      name: t("home.review_name_6"),
+      role: t("home.review_role_6"),
       image: "https://images.unsplash.com/photo-1552058544-f2b08422138a?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80",
       rating: 4,
-      text: "Great atmosphere and skilled staff. The manicure was precise and lasted weeks. Would highly recommend for anyone looking for quality grooming services.",
-      date: "January 2024"
+      text: t("home.review_text_6"),
+      date: t("home.date_jan_2024")
     }
   ];
 
@@ -120,11 +123,11 @@ const ClientReviews = () => {
             <div className="flex items-center gap-2 mb-2 md:mb-3">
               <span className="w-6 h-px inline-block rec-section-divider" />
               <span className="text-[0.65rem] md:text-[0.7rem] font-bold tracking-[0.15em] uppercase rec-section-eyebrow">
-                Client Testimonials
+                {t("home.client_testimonials")}
               </span>
             </div>
             <h2 className="text-2xl md:text-5xl font-extrabold rec-section-heading leading-tight font-[Cormorant_Garamond,serif]">
-              Words From Our <span className="italic font-normal rec-section-heading-accent">Guests</span>
+              {t("home.words_from_guests").split(' ').slice(0, -1).join(' ')} <span className="italic font-normal rec-section-heading-accent">{t("home.words_from_guests").split(' ').slice(-1)[0]}</span>
             </h2>
           </div>
         </div>

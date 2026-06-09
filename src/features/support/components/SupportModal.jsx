@@ -9,9 +9,11 @@ import {
 import { useSupport } from "../hooks/useSupport";
 import { useAuthContext } from "@/features/auth/hooks/useAuth";
 import { toast } from "react-toastify";
+import { useLanguage } from "@/context/LanguageContext";
 
 const SupportModal = ({ isOpen, onClose }) => {
   const { user } = useAuthContext();
+  const { t } = useLanguage();
   const { 
     queries, loading, submitting, hasMore, error, 
     loadQueries, loadMore, submitQuery, resetQueries 
@@ -85,15 +87,15 @@ const SupportModal = ({ isOpen, onClose }) => {
     e.preventDefault();
 
     if (!subject.trim()) {
-      toast.error("Subject is required.");
+      toast.error(t("support.err_subject_required"));
       return;
     }
     if (!message.trim()) {
-      toast.error("Message is required.");
+      toast.error(t("support.err_message_required"));
       return;
     }
     if (!phoneNumber.trim()) {
-      toast.error("Phone number is required.");
+      toast.error(t("support.err_phone_required"));
       return;
     }
 
@@ -110,7 +112,7 @@ const SupportModal = ({ isOpen, onClose }) => {
       setMessage("");
       setSuggestion("");
       setSubmitSuccess(true);
-      toast.success("Query submitted successfully!");
+      toast.success(t("support.success_query_submitted"));
       
       // Dynamic response: Switch to My Queries and highlight PENDING tab
       setTimeout(() => {
@@ -121,7 +123,7 @@ const SupportModal = ({ isOpen, onClose }) => {
 
     } catch (err) {
       console.error(err);
-      let errorMsg = err.response?.data?.message || "Failed to submit query. Please try again.";
+      let errorMsg = err.response?.data?.message || t("support.err_submit_failed");
       if (errorMsg.startsWith("Validation failed: ")) {
         errorMsg = errorMsg.replace("Validation failed: ", "");
       }
@@ -146,10 +148,10 @@ const SupportModal = ({ isOpen, onClose }) => {
 
   const getStatusLabel = (status) => {
     switch (status) {
-      case "PENDING": return "Pending";
-      case "IN_PROGRESS": return "In Progress";
-      case "RESOLVED": return "Resolved";
-      case "CLOSED": return "Closed";
+      case "PENDING": return t("support.status_pending");
+      case "IN_PROGRESS": return t("support.status_in_progress");
+      case "RESOLVED": return t("support.status_resolved");
+      case "CLOSED": return t("support.status_closed");
       default: return status;
     }
   };
@@ -168,8 +170,8 @@ const SupportModal = ({ isOpen, onClose }) => {
               <LifeBuoy size={24} className="animate-spin-slow" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-gray-900 leading-tight">Help &amp; Support</h2>
-              <p className="text-xs text-gray-500 font-medium">Submit queries or track your support history</p>
+              <h2 className="text-lg font-bold text-gray-900 leading-tight">{t("support.title")}</h2>
+              <p className="text-xs text-gray-500 font-medium">{t("support.subtitle")}</p>
             </div>
           </div>
           <button 
@@ -191,7 +193,7 @@ const SupportModal = ({ isOpen, onClose }) => {
             }`}
           >
             <Send size={16} />
-            Raise Query
+            {t("support.tab_raise_query")}
           </button>
           <button
             onClick={() => setActiveMainTab("queries")}
@@ -202,7 +204,7 @@ const SupportModal = ({ isOpen, onClose }) => {
             }`}
           >
             <ClipboardList size={16} />
-            My Queries
+            {t("support.tab_my_queries")}
             {queries.length > 0 && (
               <span className="ml-1 bg-[#D98C5F]/20 text-[#D98C5F] text-xs font-extrabold px-2 py-0.5 rounded-full">
                 {queries.length}
@@ -226,11 +228,11 @@ const SupportModal = ({ isOpen, onClose }) => {
                     <Check size={32} strokeWidth={3} />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900">Query Submitted!</h3>
-                    <p className="text-gray-500 text-sm mt-1">Our support team will review your query and reply shortly.</p>
+                    <h3 className="text-xl font-bold text-gray-900">{t("support.query_submitted")}</h3>
+                    <p className="text-gray-500 text-sm mt-1">{t("support.query_submitted_desc")}</p>
                   </div>
                   <div className="text-xs text-gray-400 font-semibold flex items-center gap-1.5 pt-2 animate-pulse">
-                    <span>Redirecting to My Tickets</span>
+                    <span>{t("support.redirecting_tickets")}</span>
                     <ChevronRight size={12} />
                   </div>
                 </div>
@@ -239,12 +241,12 @@ const SupportModal = ({ isOpen, onClose }) => {
                   
                   {/* Subject */}
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 block">Subject</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 block">{t("support.subject_label")}</label>
                     <input
                       type="text"
                       value={subject}
                       onChange={(e) => setSubject(e.target.value)}
-                      placeholder="e.g. Issue booking appointment or payment failure"
+                      placeholder={t("support.subject_placeholder")}
                       className="w-full bg-[#FAF9F6] border border-gray-200 focus:border-[#D98C5F]/30 focus:ring-0 rounded-2xl py-3 px-4 text-sm font-semibold outline-none transition-all"
                       disabled={submitting}
                       required
@@ -253,7 +255,7 @@ const SupportModal = ({ isOpen, onClose }) => {
 
                   {/* Phone Number */}
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 block">Contact Phone Number</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 block">{t("support.phone_label")}</label>
                     <div className="relative">
                       <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
                         <Phone size={16} />
@@ -262,7 +264,7 @@ const SupportModal = ({ isOpen, onClose }) => {
                         type="tel"
                         value={phoneNumber}
                         onChange={(e) => setPhoneNumber(e.target.value)}
-                        placeholder="e.g. +1234567890"
+                        placeholder={t("support.phone_placeholder")}
                         className="w-full bg-[#FAF9F6] border border-gray-200 focus:border-[#D98C5F]/30 focus:ring-0 rounded-2xl py-3 pl-11 pr-4 text-sm font-semibold outline-none transition-all"
                         disabled={submitting}
                         required
@@ -272,11 +274,11 @@ const SupportModal = ({ isOpen, onClose }) => {
 
                   {/* Message */}
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 block">Message Details</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 block">{t("support.message_label")}</label>
                     <textarea
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
-                      placeholder="Describe your issue or query here..."
+                      placeholder={t("support.message_placeholder")}
                       rows={4}
                       className="w-full bg-[#FAF9F6] border border-gray-200 focus:border-[#D98C5F]/30 focus:ring-0 rounded-2xl py-3 px-4 text-sm font-semibold outline-none transition-all resize-none"
                       disabled={submitting}
@@ -287,13 +289,13 @@ const SupportModal = ({ isOpen, onClose }) => {
                   {/* Suggestion */}
                   <div className="space-y-1.5">
                     <div className="flex justify-between items-center">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 block">Suggestions (Optional)</label>
-                      <span className="text-[9px] font-bold text-gray-400 uppercase">Optional</span>
+                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 block">{t("support.suggestion_label")}</label>
+                      <span className="text-[9px] font-bold text-gray-400 uppercase">{t("support.optional_badge")}</span>
                     </div>
                     <textarea
                       value={suggestion}
                       onChange={(e) => setSuggestion(e.target.value)}
-                      placeholder="Any suggestions on how we can improve?"
+                      placeholder={t("support.suggestion_placeholder")}
                       rows={2}
                       className="w-full bg-[#FAF9F6] border border-gray-200 focus:border-[#D98C5F]/30 focus:ring-0 rounded-2xl py-3 px-4 text-sm font-semibold outline-none transition-all resize-none"
                       disabled={submitting}
@@ -312,12 +314,12 @@ const SupportModal = ({ isOpen, onClose }) => {
                     {submitting ? (
                       <>
                         <Loader2 size={18} className="animate-spin" />
-                        Submitting query...
+                        {t("support.submitting_query")}
                       </>
                     ) : (
                       <>
                         <Send size={16} />
-                        Submit Contact Query
+                        {t("support.submit_btn")}
                       </>
                     )}
                   </button>
@@ -361,16 +363,16 @@ const SupportModal = ({ isOpen, onClose }) => {
               {loading && queries.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 gap-3">
                   <Loader2 className="animate-spin text-[#D98C5F]" size={32} />
-                  <p className="text-sm text-gray-500 font-bold">Loading support history...</p>
+                  <p className="text-sm text-gray-500 font-bold">{t("support.loading_history")}</p>
                 </div>
               ) : filteredQueries.length === 0 ? (
                 <div className="bg-white border border-gray-100 rounded-3xl p-10 text-center flex flex-col items-center justify-center">
                   <div className="w-14 h-14 bg-gray-50 text-gray-300 rounded-2xl flex items-center justify-center mb-4 border border-gray-100">
                     <HelpCircle size={28} />
                   </div>
-                  <h3 className="text-gray-900 font-bold text-base">No tickets here</h3>
+                  <h3 className="text-gray-900 font-bold text-base">{t("support.no_tickets_title")}</h3>
                   <p className="text-gray-500 text-xs max-w-[280px] mt-1.5 leading-relaxed">
-                    You do not have any queries listed under the **{getStatusLabel(activeStatusTab)}** status.
+                    {t("support.no_tickets_desc").replace("{status}", getStatusLabel(activeStatusTab))}
                   </p>
                 </div>
               ) : (
@@ -385,7 +387,7 @@ const SupportModal = ({ isOpen, onClose }) => {
                         <div className="space-y-0.5">
                           <h4 className="font-bold text-gray-900 text-base">{query.subject}</h4>
                           <div className="flex flex-wrap items-center gap-x-2 text-[10px] text-gray-400 font-semibold">
-                            <span>Ticket #{query.id}</span>
+                            <span>{t("support.ticket_number")} #{query.id}</span>
                             <span>•</span>
                             <span className="flex items-center gap-0.5">
                               <Clock size={10} />
@@ -415,7 +417,7 @@ const SupportModal = ({ isOpen, onClose }) => {
                           
                           {query.suggestion && (
                             <div className="mt-3 pt-3 border-t border-gray-200/50 space-y-0.5">
-                              <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest block">User Suggestion</span>
+                              <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest block">{t("support.user_suggestion")}</span>
                               <p className="text-[11px] text-gray-500 font-semibold italic">
                                 "{query.suggestion}"
                               </p>
@@ -425,8 +427,8 @@ const SupportModal = ({ isOpen, onClose }) => {
 
                         {/* Metadata details */}
                         <div className="flex flex-wrap gap-x-4 text-[10px] text-gray-400 font-bold px-1.5">
-                          <span>Phone: {query.phoneNumber}</span>
-                          {query.email && <span>Email: {query.email}</span>}
+                          <span>{t("support.phone_prefix")} {query.phoneNumber}</span>
+                          {query.email && <span>{t("support.email_prefix")} {query.email}</span>}
                         </div>
                       </div>
 
@@ -436,11 +438,11 @@ const SupportModal = ({ isOpen, onClose }) => {
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-1.5 text-emerald-700">
                               <CheckCircle2 size={14} />
-                              <span className="text-[10px] font-black uppercase tracking-wider">Admin Response</span>
+                              <span className="text-[10px] font-black uppercase tracking-wider">{t("support.admin_response")}</span>
                             </div>
                             {query.repliedAt && (
                               <span className="text-[9px] text-emerald-600/70 font-semibold">
-                                Replied on {new Date(query.repliedAt).toLocaleDateString()}
+                                {t("support.replied_on")} {new Date(query.repliedAt).toLocaleDateString()}
                               </span>
                             )}
                           </div>
@@ -453,7 +455,7 @@ const SupportModal = ({ isOpen, onClose }) => {
                           <div className="bg-gray-50 border border-gray-200/60 rounded-xl p-3 text-center">
                             <p className="text-[11px] text-gray-400 font-semibold flex items-center justify-center gap-1.5">
                               <MessageSquare size={12} />
-                              Support agent is investigating this ticket.
+                              {t("support.investigating_msg")}
                             </p>
                           </div>
                         )
@@ -472,10 +474,10 @@ const SupportModal = ({ isOpen, onClose }) => {
                         {loading ? (
                           <>
                             <Loader2 size={12} className="animate-spin" />
-                            Loading more...
+                            {t("support.loading_more")}
                           </>
                         ) : (
-                          "Load older tickets"
+                          t("support.load_older_tickets")
                         )}
                       </button>
                     </div>

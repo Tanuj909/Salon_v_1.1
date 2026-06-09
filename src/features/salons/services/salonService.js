@@ -55,7 +55,7 @@ export const getStaffByServiceId = async (serviceId) => {
 };
 
 export const getStaffProfile = async (staffId) => {
-  const response = await apiClient.get(
+  const response = await publicApiClient.get(
     ENDPOINTS.SALON.STAFF_PROFILE(staffId)
   );
   return response.data.body;
