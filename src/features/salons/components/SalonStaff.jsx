@@ -399,7 +399,7 @@ const SalonStaff = ({ staff: allStaff, onBookStaff }) => {
 
   return (
     <>
-      <section className="py-8 sm:py-12" id="reviews">
+      <section className="py-8 sm:py-12" id="staff">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
                 <Reveal>
                     <div className="text-center mb-16 sm:mb-24">

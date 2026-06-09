@@ -172,19 +172,19 @@ const HeroSection = ({ salonImg, salon, handleBookButtonClick }) => {
 
                     <Reveal delay={500}>
                         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-6 mt-0">
-                            <button
-                                onClick={handleBookButtonClick}
-                                className="w-full sm:w-auto group relative px-10 py-4 rounded-full rec-btn-primary text-[#C49B66] text-[13px] sm:text-[16px] font-black tracking-[0.2em] uppercase overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 border-0 cursor-pointer text-center"
+                            <a
+                                href="#services"
+                                className="w-full sm:w-auto group relative px-10 py-4 rounded-full rec-btn-primary text-[#C49B66] text-[13px] sm:text-[16px] font-black tracking-[0.2em] uppercase overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 border-0 cursor-pointer text-center flex items-center justify-center no-underline"
                             >
                                 <span className="relative z-10">{t("salon_details.book_appointment")}</span>
                                 <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
                                 <div className="glow-line" />
-                            </button>
+                            </a>
                             <a
-                                href="#services"
-                                className="w-full sm:w-auto relative flex items-center justify-center group px-8 py-3.5 rounded-full border border-white/40 text-white text-[11px] sm:text-[13px] font-black tracking-[0.2em] uppercase transition-all duration-500 hover:bg-white text-center overflow-hidden"
+                                href="#staff"
+                                className="w-full sm:w-auto relative flex items-center justify-center group px-8 py-3.5 rounded-full border border-white/40 text-white text-[11px] sm:text-[13px] font-black tracking-[0.2em] uppercase transition-all duration-500 hover:bg-white text-center overflow-hidden no-underline"
                             >
-                                <span className="relative z-10 transition-colors duration-300 group-hover:text-black">{t("salon_details.view_services")}</span>
+                                <span className="relative z-10 transition-colors duration-300 group-hover:text-black">{t("salon_details.view_staff")}</span>
                                 <div className="glow-line" />
                             </a>
                         </div>

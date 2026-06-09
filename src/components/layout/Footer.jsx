@@ -4,11 +4,13 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import useActiveCategories from '@/features/salons/hooks/useActiveServices';
 import TermsAndCondition from '@/components/TermsAndCondition';
+import SupportModal from '@/features/support/components/SupportModal';
 import { useLanguage } from '@/context/LanguageContext';
 
 const Footer = () => {
   const { categories } = useActiveCategories();
   const [showTerms, setShowTerms] = useState(false);
+  const [showSupport, setShowSupport] = useState(false);
   const { t } = useLanguage();
 
   const getCategoryLink = (name) => {
@@ -126,6 +128,14 @@ const Footer = () => {
             >
               {t("footer.list_business")}
             </Link>
+
+            <button
+              onClick={() => setShowSupport(true)}
+              className="footer-link-text footer-link-hover-text block text-[0.88rem] mb-3.5 no-underline transition-colors duration-200 bg-transparent border-none p-0 cursor-pointer text-center md:text-left w-full md:w-auto"
+              style={{ fontFamily: "'Georgia', serif" }}
+            >
+              {t("footer.support")}
+            </button>
           </div>
 
         </div>
@@ -151,6 +161,7 @@ const Footer = () => {
       </div>
 
       {showTerms && <TermsAndCondition onClose={() => setShowTerms(false)} />}
+      <SupportModal isOpen={showSupport} onClose={() => setShowSupport(false)} />
     </footer>
   );
 };

@@ -61,8 +61,8 @@ export default function HomeCategories() {
   const accentTitlePart = browseWords.slice(-1)[0];
 
   return (
-    <section className="py-16 md:py-24 relative overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12">
+    <section className="pt-12 pb-0 md:py-24 relative overflow-hidden">
+      <div className="max-w-[1500px] mx-auto px-4 sm:px-6 md:px-12 w-full">
         {/* Section Header */}
         <div className="text-center mb-12 sm:mb-20">
           <div className="flex items-center justify-center gap-2 sm:gap-3 mb-4">
@@ -76,18 +76,21 @@ export default function HomeCategories() {
         </div>
 
         <div 
-          className="flex overflow-x-auto md:grid md:grid-cols-5 gap-6 sm:gap-8 md:gap-12 justify-start md:justify-items-center pb-4 md:pb-0 w-full no-scrollbar"
+          className="flex overflow-x-auto lg:grid lg:grid-cols-5 gap-3 sm:gap-6 lg:gap-4 xl:gap-8 justify-start lg:justify-items-center pt-2 pb-2 lg:py-2 px-1 w-full no-scrollbar"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
+          {/* Spacer to prevent left clipping on mobile */}
+          <div className="w-2 lg:hidden flex-shrink-0" />
+
           {dynamicCategories.map((cat) => (
             <Link
               key={cat.name}
               href={cat.href}
-              className="group flex flex-col items-center no-underline flex-shrink-0"
+              className="group flex flex-col items-center no-underline flex-shrink-0 w-[125px] sm:w-[144px] md:w-[176px] lg:w-auto"
             >
               {/* Circle image with navy hover */}
               <div
-                className="relative w-36 h-36 md:w-52 md:h-52 lg:w-48 lg:h-48 xl:w-60 xl:h-60 rounded-full border-[6px] md:border-[8px] border-white/80 transition-all duration-1000 ease-out group-hover:scale-105 cat-circle-shadow group-hover:shadow-[0_30px_80px_rgba(28,49,82,0.3)] cat-circle-ring"
+                className="relative w-[125px] h-[125px] sm:w-[144px] sm:h-[144px] md:w-[176px] md:h-[176px] lg:w-[150px] lg:h-[150px] xl:w-[190px] xl:h-[190px] 2xl:w-[230px] 2xl:h-[230px] rounded-full border-[6px] md:border-[8px] border-white/80 transition-all duration-1000 ease-out group-hover:scale-105 cat-circle-shadow group-hover:shadow-[0_30px_80px_rgba(28,49,82,0.3)] cat-circle-ring"
                 style={{ borderColor: undefined }}
               >
                 <div className="absolute inset-0 rounded-full overflow-hidden">
@@ -118,6 +121,9 @@ export default function HomeCategories() {
               </div>
             </Link>
           ))}
+
+          {/* Spacer to prevent right clipping on mobile */}
+          <div className="w-2 lg:hidden flex-shrink-0" />
         </div>
       </div>
     </section>
