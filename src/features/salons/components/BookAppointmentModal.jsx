@@ -8,6 +8,9 @@ import { useSalonTimings } from "../hooks/useSalonTimings";
 import { useStaffSlots } from "../hooks/useStaffSlots";
 import { getBusinessCategoriesWithDetails, getServicesByCategoryForBusiness } from "../services/salonService";
 import { useLanguage } from "@/context/LanguageContext";
+import { useStaffProfile } from "../hooks/useStaffProfile";
+import StaffProfileModal from "./StaffProfileModal";
+import ImageSliderModal from "./ImageSliderModal";
 
 const PAYMENT_METHODS = [
     { value: "CASH", labelKey: "pay_after_service", icon: "💶" },
@@ -30,6 +33,46 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
     
     // Description info popup modal state
     const [infoService, setInfoService] = useState(null);
+
+    // Staff Profile modal states
+    const { profile, loading: profileLoading, error: profileError, fetchProfile, clearProfile } = useStaffProfile();
+    const [showStaffModal, setShowStaffModal] = useState(false);
+    const [selectedStaffMember, setSelectedStaffMember] = useState(null);
+
+    const handleViewProfile = (staffMember) => {
+        setSelectedStaffMember(staffMember);
+        setShowStaffModal(true);
+        fetchProfile(staffMember.id);
+    };
+
+    const handleCloseStaffModal = () => {
+        setShowStaffModal(false);
+        setSelectedStaffMember(null);
+        clearProfile();
+    };
+
+    // Image Slider Lightbox States
+    const [sliderImages, setSliderImages] = useState(null);
+    const [currentSliderIndex, setCurrentSliderIndex] = useState(0);
+
+    const openSlider = (images, index) => {
+        setSliderImages(images);
+        setCurrentSliderIndex(index);
+    };
+
+    const handlePrevSlider = () => {
+        if (!sliderImages) return;
+        setCurrentSliderIndex((prev) => (prev === 0 ? sliderImages.length - 1 : prev - 1));
+    };
+
+    const handleNextSlider = () => {
+        if (!sliderImages) return;
+        setCurrentSliderIndex((prev) => (prev === sliderImages.length - 1 ? 0 : prev + 1));
+    };
+
+    const handleSelectSliderIndex = (idx) => {
+        setCurrentSliderIndex(idx);
+    };
 
     const [selectedServices, setSelectedServices] = useState([]);
     const { staff: allStaff, loading: staffLoading } = useSalonStaff({
@@ -133,6 +176,31 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
             setSelectedStaff(preSelectedStaff);
         }
     }, [preSelectedStaff]);
+
+    // Fetch services automatically whenever selectedCategory is set or changed
+    useEffect(() => {
+        if (!isOpen || !salonId) return;
+        if (!selectedCategory) {
+            setCategoryServices([]);
+            return;
+        }
+
+        const fetchServices = async () => {
+            setLoadingCategoryServices(true);
+            setCategoryServicesError(null);
+            try {
+                const data = await getServicesByCategoryForBusiness(salonId, selectedCategory.id);
+                setCategoryServices(data || []);
+            } catch (err) {
+                console.error("Error fetching services for category:", err);
+                setCategoryServicesError("Failed to fetch services.");
+            } finally {
+                setLoadingCategoryServices(false);
+            }
+        };
+
+        fetchServices();
+    }, [isOpen, salonId, selectedCategory]);
 
     // Slots fetching
     const { slots: staffSlots, loading: slotsLoading, error: slotsError } = useStaffSlots({
@@ -250,20 +318,9 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
     };
 
     // Handle Category selection
-    const handleSelectCategory = async (category) => {
+    const handleSelectCategory = (category) => {
         setSelectedCategory(category);
         setStep(2); // Move to Services step
-        setLoadingCategoryServices(true);
-        setCategoryServicesError(null);
-        try {
-            const data = await getServicesByCategoryForBusiness(salonId, category.id);
-            setCategoryServices(data || []);
-        } catch (err) {
-            console.error("Error fetching services for category:", err);
-            setCategoryServicesError("Failed to fetch services.");
-        } finally {
-            setLoadingCategoryServices(false);
-        }
     };
 
     const canProceedStep1 = selectedCategory !== null;
@@ -575,11 +632,21 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                 <div className="space-y-3">
                                     {categoryServices.map((service) => {
                                         const isSelected = selectedServices.some((s) => s.id === service.id);
+                                        const sliderImages = (service.imageUrls && service.imageUrls.length > 0)
+                                            ? service.imageUrls
+                                            : (service.imageUrl ? [service.imageUrl] : []);
                                         return (
-                                            <button
+                                            <div
                                                 key={service.id}
                                                 onClick={() => toggleService(service)}
-                                                className={`w-full text-start p-3.5 sm:p-5 rounded-xl border-2 transition-all duration-300 group ${isSelected ? "border-[#628EB8] bg-[#628EB8]/5 shadow-sm" : "border-[#E0E0E0] bg-white hover:border-[#628EB8]/30 hover:bg-[#F8FAFC]"}`}
+                                                className={`w-full text-start p-3.5 sm:p-5 rounded-xl border-2 transition-all duration-300 group cursor-pointer ${isSelected ? "border-[#628EB8] bg-[#628EB8]/5 shadow-sm" : "border-[#E0E0E0] bg-white hover:border-[#628EB8]/30 hover:bg-[#F8FAFC]"}`}
+                                                role="button"
+                                                tabIndex={0}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "Enter" || e.key === " ") {
+                                                        toggleService(service);
+                                                    }
+                                                }}
                                             >
                                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 w-full">
                                                     <div className="flex items-center gap-3 sm:gap-4 min-w-0">
@@ -589,7 +656,20 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                                         </div>
 
                                                         <div className="min-w-0 text-start">
-                                                            <h4 className="font-semibold text-[#1F355E] text-xs sm:text-sm leading-snug break-words">{service.name}</h4>
+                                                            <div className="flex items-center gap-2 flex-wrap">
+                                                                <h4 className="font-semibold text-[#1F355E] text-xs sm:text-sm leading-snug break-words">{service.name}</h4>
+                                                                {sliderImages.length > 0 && (
+                                                                    <button
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            openSlider(sliderImages, 0);
+                                                                        }}
+                                                                        className="px-2 py-0.5 rounded bg-[#628EB8]/10 hover:bg-[#628EB8]/20 text-[#628EB8] text-[8px] font-bold uppercase tracking-wider transition-colors cursor-pointer flex items-center gap-1 shrink-0"
+                                                                    >
+                                                                        <span>{t("salon_details.view")}</span>
+                                                                    </button>
+                                                                )}
+                                                            </div>
                                                             {service.durationMinutes && (
                                                                 <span className="text-[#628EB8] text-[10px] sm:text-xs flex items-center gap-0.5 sm:gap-1 mt-0.5">
                                                                     <Clock size={10} /> {service.durationMinutes} {currentLanguage === "ar" ? "دقيقة" : "min"}
@@ -603,7 +683,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                                         </span>
                                                     </div>
                                                 </div>
-                                            </button>
+                                            </div>
                                         );
                                     })}
                                 </div>
@@ -648,10 +728,17 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                         {staff.map((member) => {
                                             const isSelected = selectedStaff?.id === member.id;
                                             return (
-                                                <button
+                                                <div
                                                     key={member.id}
                                                     onClick={() => setSelectedStaff(member)}
-                                                    className={`flex-shrink-0 flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all min-w-[100px] ${isSelected ? "border-[#628EB8] bg-[#628EB8]/5 shadow-sm" : "border-[#E0E0E0] bg-white hover:border-[#628EB8]/20"}`}
+                                                    className={`flex-shrink-0 flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all min-w-[100px] cursor-pointer ${isSelected ? "border-[#628EB8] bg-[#628EB8]/5 shadow-sm" : "border-[#E0E0E0] bg-white hover:border-[#628EB8]/20"}`}
+                                                    role="button"
+                                                    tabIndex={0}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === "Enter" || e.key === " ") {
+                                                            setSelectedStaff(member);
+                                                        }
+                                                    }}
                                                 >
                                                     <div className={`w-12 h-12 rounded-full flex items-center justify-center overflow-hidden ${isSelected ? "ring-2 ring-[#628EB8] ring-offset-2" : ""}`}>
                                                         {(member.userProfileImageUrl || member.profileImageUrl) ? (
@@ -666,9 +753,18 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                                         {member.userFullName || member.fullName}
                                                     </span>
                                                     {member.designation && (
-                                                        <span className="text-[8px] text-[#628EB8] truncate max-w-[80px]">{member.designation}</span>
+                                                        <span className="text-[8px] text-[#628EB8] truncate max-w-[80px] text-center">{member.designation}</span>
                                                     )}
-                                                </button>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleViewProfile(member);
+                                                        }}
+                                                        className="mt-1 px-2.5 py-1 bg-transparent hover:bg-[#1F355E] text-[#1F355E] hover:text-white border border-[#1F355E]/30 rounded-lg text-[8px] font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer"
+                                                    >
+                                                        {t("salon_details.view")}
+                                                    </button>
+                                                </div>
                                             );
                                         })}
                                     </div>
@@ -814,7 +910,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                                 <img src={selectedStaff.userProfileImageUrl || selectedStaff.profileImageUrl} alt="" className="w-8 h-8 rounded-full object-cover border border-[#628EB8]/20" />
                                             ) : (
                                                 <div className="w-8 h-8 rounded-full bg-[#1F355E] text-white flex items-center justify-center text-[10px] font-bold">
-                                                    {selectedStaff ? (selectedStaff.userFullName || selectedStaff.fullName)?.substring(0, 2).toUpperCase() : t("salon_details.any")}
+                                                    {selectedStaff ? (selectedStaff.userFullName || selectedStaff.fullName)?.substring(0, 2).toUpperCase() : <Sparkles size={12} />}
                                                 </div>
                                             )}
                                             <p className="text-sm text-[#1F355E] font-semibold">
@@ -1147,6 +1243,27 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                         </div>
                     </div>
                 </div>
+            )}
+
+            {showStaffModal && (
+                <StaffProfileModal
+                    profile={profile}
+                    member={selectedStaffMember}
+                    loading={profileLoading}
+                    error={profileError}
+                    onClose={handleCloseStaffModal}
+                />
+            )}
+
+            {sliderImages && (
+                <ImageSliderModal
+                    images={sliderImages}
+                    currentIndex={currentSliderIndex}
+                    onClose={() => setSliderImages(null)}
+                    onPrev={handlePrevSlider}
+                    onNext={handleNextSlider}
+                    onIndexSelect={handleSelectSliderIndex}
+                />
             )}
             <style jsx>{`
                 @keyframes slideUp {
