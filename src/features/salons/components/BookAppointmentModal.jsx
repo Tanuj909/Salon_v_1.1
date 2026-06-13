@@ -19,22 +19,22 @@ const PAYMENT_METHODS = [
 const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelectedService, preSelectedStaff }) => {
     const { t, language: currentLanguage } = useLanguage();
     const { submitBooking, loading: submitting, error: submitError, success, bookingResult, reset } = useCreateBooking();
-    
+
     // Category & Service states
     const [categories, setCategories] = useState([]);
     const [loadingCategories, setLoadingCategories] = useState(false);
     const [categoriesError, setCategoriesError] = useState(null);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [infoCategory, setInfoCategory] = useState(null);
-    
+
     // Custom Prices states
     const [customPrices, setCustomPrices] = useState({});
     const [loadingCustomPrices, setLoadingCustomPrices] = useState(false);
-    
+
     const [categoryServices, setCategoryServices] = useState([]);
     const [loadingCategoryServices, setLoadingCategoryServices] = useState(false);
     const [categoryServicesError, setCategoryServicesError] = useState(null);
-    
+
     // Description info popup modal state
     const [infoService, setInfoService] = useState(null);
 
@@ -158,9 +158,9 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
         if (preSelectedService && categories.length > 0) {
             const matchedCat = categories.find(
                 (c) => c.name?.toLowerCase() === preSelectedService.categoryName?.toLowerCase() ||
-                       c.id === preSelectedService.categoryId ||
-                       c.id === preSelectedService.category?.id ||
-                       c.name?.toLowerCase() === preSelectedService.category?.name?.toLowerCase()
+                    c.id === preSelectedService.categoryId ||
+                    c.id === preSelectedService.category?.id ||
+                    c.name?.toLowerCase() === preSelectedService.category?.name?.toLowerCase()
             );
             if (matchedCat) {
                 setSelectedCategory(matchedCat);
@@ -325,7 +325,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
         const hasDiscount = service.discountedPrice !== undefined && service.discountedPrice !== null && service.discountedPrice < (service.price || 0);
         const start = hasDiscount ? service.discountedPrice : (service.startPrice || service.price || 0);
         const end = service.endPrice || service.price || 0;
-        
+
         if (step <= 2) {
             if (hasDiscount) {
                 return (
@@ -340,7 +340,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
             }
             return `AED (${start} - ${end})`;
         }
-        
+
         if (!selectedStaff) {
             // "Any" staff selected
             if (hasDiscount && !showSimple) {
@@ -365,7 +365,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
     // Format totals/subtotals depending on step and chosen staff
     const getTotalsPriceString = (showSimple = false) => {
         const hasAnyDiscount = selectedServices.some(s => s.discountedPrice !== undefined && s.discountedPrice !== null && s.discountedPrice < (s.price || 0));
-        
+
         if (step <= 2) {
             if (hasAnyDiscount && !showSimple) {
                 return (
@@ -380,7 +380,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
             }
             return `AED (${totals.totalStart} - ${totals.totalEnd})`;
         }
-        
+
         if (!selectedStaff) {
             // "Any" staff selected
             if (hasAnyDiscount && !showSimple) {
@@ -475,9 +475,9 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
     const handleSubmit = async () => {
         if (paymentMethod !== "CASH") {
             setValidationError(t("salon_details.choose_payment_method_error"));
-            
+
             if (validationTimeout) clearTimeout(validationTimeout);
-            
+
             const timer = setTimeout(() => {
                 setValidationError("");
             }, 5000);
@@ -529,16 +529,16 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                         {t("salon_details.booking_success_msg")}
                     </p>
                     <div className="bg-[#628EB8]/5 border border-[#628EB8]/20 rounded-2xl p-4 my-4 text-[#1F355E] text-xs sm:text-sm font-semibold leading-relaxed">
-                         {currentLanguage === "ar" ? (
-                             <>
-                                 يرجى الوصول <strong className="font-extrabold text-[#628EB8]">قبل 5 دقائق</strong> وعرض <strong className="font-extrabold text-[#628EB8]">رمز الخدمة</strong> للحلاق.
-                             </>
-                         ) : (
-                             <>
-                                 Please arrive <strong className="font-extrabold text-[#628EB8]">5 minutes early</strong> and show your <strong className="font-extrabold text-[#628EB8]">service code</strong> to the barber.
-                             </>
-                         )}
-                     </div>
+                        {currentLanguage === "ar" ? (
+                            <>
+                                يرجى الوصول <strong className="font-extrabold text-[#628EB8]">قبل 5 دقائق</strong> وعرض <strong className="font-extrabold text-[#628EB8]">رمز الخدمة</strong> للحلاق.
+                            </>
+                        ) : (
+                            <>
+                                Please arrive <strong className="font-extrabold text-[#628EB8]">5 minutes early</strong> and show your <strong className="font-extrabold text-[#628EB8]">service code</strong> to the barber.
+                            </>
+                        )}
+                    </div>
                     {bookingResult?.bookingNumber && (
                         <div className="bg-[#F8FAFC] rounded-2xl p-4 my-6 border border-[#E0E0E0]">
                             <span className="text-[10px] uppercase tracking-[0.3em] text-[#628EB8] font-bold block mb-1">{t("salon_details.booking_number")}</span>
@@ -629,7 +629,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                             ) : categoriesError ? (
                                 <div className="text-center py-12">
                                     <p className="text-red-500 text-sm mb-3">{categoriesError}</p>
-                                    <button 
+                                    <button
                                         onClick={() => {
                                             setCategoriesError(null);
                                             setLoadingCategories(true);
@@ -673,7 +673,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                                     <span className="text-[11px] sm:text-[12px] text-[#1F355E] font-bold">
                                                         AED {category.minPrice} - {category.maxPrice}
                                                     </span>
-                                                    <span 
+                                                    <span
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             setInfoCategory(category);
@@ -703,7 +703,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                         {t("salon_details.category")}: <span className="font-bold text-[#1F355E]">{selectedCategory?.name}</span>
                                     </p>
                                 </div>
-                                <button 
+                                <button
                                     onClick={() => setStep(1)}
                                     className="text-xs font-bold text-[#628EB8] hover:text-[#1F355E] bg-white border border-[#E0E0E0] shadow-sm hover:shadow px-3.5 py-2 rounded-full transition-all duration-300 flex items-center gap-1 cursor-pointer"
                                 >
@@ -719,7 +719,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                             ) : categoryServicesError ? (
                                 <div className="text-center py-12">
                                     <p className="text-red-500 text-sm mb-3">{categoryServicesError}</p>
-                                    <button 
+                                    <button
                                         onClick={() => handleSelectCategory(selectedCategory)}
                                         className="px-4 py-2 bg-[#1F355E] text-white text-xs font-bold rounded-xl"
                                     >
@@ -880,7 +880,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                             </span>
                                             <p className="text-sm text-[#1F355E] font-bold">
                                                 {(selectedStaff.experienceYears != null && selectedStaff.experienceYears !== "")
-                                                    ? `${selectedStaff.experienceYears} ${t("salon_details.years") || "Years"}` 
+                                                    ? `${selectedStaff.experienceYears} ${t("salon_details.years") || "Years"}`
                                                     : (selectedStaff.experience != null && selectedStaff.experience !== "")
                                                         ? `${selectedStaff.experience} ${t("salon_details.years") || "Years"}`
                                                         : "—"}
@@ -1137,7 +1137,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                                                     <>
                                                                         <span className="w-1 h-1 rounded-full bg-gray-300 shrink-0" />
                                                                         <span className="text-[10px] text-[#6B6B6B] truncate flex-1 min-w-0">{s.description}</span>
-                                                                        <button 
+                                                                        <button
                                                                             onClick={(e) => {
                                                                                 e.stopPropagation();
                                                                                 setInfoService(s);
@@ -1174,7 +1174,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                             let totalPayable = totals.totalStart;
                                             let totalSavings = totals.totalEnd - totals.totalStart;
                                             let showSavings = totalSavings > 0;
-                                            
+
                                             if (selectedStaff) {
                                                 let sumCustom = 0;
                                                 let hasNone = false;
@@ -1280,13 +1280,12 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                 <button
                                     onClick={handleSubmit}
                                     disabled={submitting || !canSubmit}
-                                    className={`px-4 sm:px-8 py-2 sm:py-3 rounded-xl text-white text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] hover:shadow-lg transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap bg-[#1F355E] ${
-                                        (submitting || !canSubmit)
+                                    className={`px-4 sm:px-8 py-2 sm:py-3 rounded-xl text-white text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] hover:shadow-lg transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap bg-[#1F355E] ${(submitting || !canSubmit)
                                             ? "opacity-50 cursor-not-allowed"
                                             : paymentMethod !== "CASH"
                                                 ? "opacity-60 cursor-pointer"
                                                 : "opacity-100 cursor-pointer"
-                                    }`}
+                                        }`}
                                 >
                                     {submitting ? (
                                         <>
