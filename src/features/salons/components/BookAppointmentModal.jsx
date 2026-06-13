@@ -154,13 +154,33 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
         if (preSelectedService && categories.length > 0) {
             const matchedCat = categories.find(
                 (c) => c.name?.toLowerCase() === preSelectedService.categoryName?.toLowerCase() ||
-                       c.id === preSelectedService.categoryId
+                       c.id === preSelectedService.categoryId ||
+                       c.id === preSelectedService.category?.id ||
+                       c.name?.toLowerCase() === preSelectedService.category?.name?.toLowerCase()
             );
             if (matchedCat) {
                 setSelectedCategory(matchedCat);
+            } else if (!selectedCategory) {
+                // Fallback: search all categories to find the one containing this service
+                const findAndSetCategory = async () => {
+                    try {
+                        const promises = categories.map(async (cat) => {
+                            const services = await getServicesByCategoryForBusiness(salonId, cat.id).catch(() => []);
+                            return { cat, services };
+                        });
+                        const results = await Promise.all(promises);
+                        const match = results.find(r => r.services.some(s => s.id === preSelectedService.id));
+                        if (match) {
+                            setSelectedCategory(match.cat);
+                        }
+                    } catch (e) {
+                        console.error("Error finding category for preSelectedService:", e);
+                    }
+                };
+                findAndSetCategory();
             }
         }
-    }, [preSelectedService, categories]);
+    }, [preSelectedService, categories, salonId]);
 
     // Initialize services
     useEffect(() => {
@@ -762,7 +782,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                                         }}
                                                         className="mt-1 px-2.5 py-1 bg-transparent hover:bg-[#1F355E] text-[#1F355E] hover:text-white border border-[#1F355E]/30 rounded-lg text-[8px] font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer"
                                                     >
-                                                        {t("salon_details.view")}
+                                                        {t("salon_details.view_bio")}
                                                     </button>
                                                 </div>
                                             );
@@ -982,37 +1002,51 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                     </div>
 
                                     <div className="flex-1 space-y-4 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
-                                        {selectedServices.map((s) => (
-                                            <div key={s.id} className="flex items-start justify-between group">
-                                                <div className="flex gap-3 min-w-0 flex-1">
-                                                    <div className="w-8 h-8 rounded-lg bg-[#F8FAFC] border border-[#E0E0E0] flex items-center justify-center shrink-0 group-hover:bg-[#628EB8]/10 transition-colors">
-                                                        <Scissors size={14} className="text-[#628EB8]" />
-                                                    </div>
-                                                    <div className="min-w-0 flex-1">
-                                                        <p className="text-sm text-[#1F355E] font-semibold leading-tight truncate">{s.name}</p>
-                                                        <div className="flex items-center gap-2 mt-0.5 min-w-0">
-                                                            <span className="text-[10px] text-[#628EB8] font-medium shrink-0">{s.durationMinutes} {currentLanguage === "ar" ? "دقيقة" : "min"}</span>
-                                                            {s.description && (
-                                                                <>
-                                                                    <span className="w-1 h-1 rounded-full bg-gray-300 shrink-0" />
-                                                                    <span className="text-[10px] text-[#6B6B6B] truncate flex-1 min-w-0">{s.description}</span>
-                                                                    <button 
-                                                                        onClick={(e) => {
-                                                                            e.stopPropagation();
-                                                                            setInfoService(s);
-                                                                        }}
-                                                                        className="text-[#C5A566] font-bold hover:underline text-[9px] bg-transparent border-0 p-0 cursor-pointer shrink-0"
-                                                                    >
-                                                                        {t("salon_details.view")}
-                                                                    </button>
-                                                                </>
+                                        {selectedServices.map((s) => {
+                                            const start = s.startPrice || s.price || 0;
+                                            const end = s.endPrice || s.price || 0;
+                                            const actualPrice = !selectedStaff ? start : Math.round((start + end) / 2);
+                                            const saveAmount = end - actualPrice;
+                                            return (
+                                                <div key={s.id} className="flex items-start justify-between group">
+                                                    <div className="flex gap-3 min-w-0 flex-1">
+                                                        <div className="w-8 h-8 rounded-lg bg-[#F8FAFC] border border-[#E0E0E0] flex items-center justify-center shrink-0 group-hover:bg-[#628EB8]/10 transition-colors">
+                                                            <Scissors size={14} className="text-[#628EB8]" />
+                                                        </div>
+                                                        <div className="min-w-0 flex-1 text-start">
+                                                            <p className="text-sm text-[#1F355E] font-semibold leading-tight truncate">{s.name}</p>
+                                                            <div className="flex items-center gap-2 mt-0.5 min-w-0">
+                                                                <span className="text-[10px] text-[#628EB8] font-medium shrink-0">{s.durationMinutes} {currentLanguage === "ar" ? "دقيقة" : "min"}</span>
+                                                                {s.description && (
+                                                                    <>
+                                                                        <span className="w-1 h-1 rounded-full bg-gray-300 shrink-0" />
+                                                                        <span className="text-[10px] text-[#6B6B6B] truncate flex-1 min-w-0">{s.description}</span>
+                                                                        <button 
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                setInfoService(s);
+                                                                            }}
+                                                                            className="text-[#C5A566] font-bold hover:underline text-[9px] bg-transparent border-0 p-0 cursor-pointer shrink-0"
+                                                                        >
+                                                                            {t("salon_details.view")}
+                                                                        </button>
+                                                                    </>
+                                                                )}
+                                                            </div>
+                                                            {saveAmount > 0 && (
+                                                                <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                                                                    <span className="text-[11px] text-gray-400 line-through">AED {end}</span>
+                                                                    <span className="text-[10px] text-green-600 font-bold bg-green-50 px-1.5 py-0.5 rounded">
+                                                                        {t("salon_details.save_label")} AED {saveAmount}
+                                                                    </span>
+                                                                </div>
                                                             )}
                                                         </div>
                                                     </div>
+                                                    <p className="text-sm font-bold text-[#1F355E] ml-4 shrink-0">{getServicePriceString(s)}</p>
                                                 </div>
-                                                <p className="text-sm font-bold text-[#1F355E] ml-4 shrink-0">{getServicePriceString(s)}</p>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
 
                                     <div className="mt-6 pt-6 border-t-2 border-dashed border-[#E0E0E0]">
@@ -1020,6 +1054,21 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                             <span className="text-xs font-semibold">{t("salon_details.subtotal")}</span>
                                             <span className="text-sm font-bold">{getTotalsPriceString()}</span>
                                         </div>
+                                        {(() => {
+                                            const totalPayable = !selectedStaff 
+                                                ? totals.totalStart 
+                                                : Math.round((totals.totalStart + totals.totalEnd) / 2);
+                                            const totalSavings = totals.totalEnd - totalPayable;
+                                            if (totalSavings > 0) {
+                                                return (
+                                                    <div className="flex items-center justify-between mb-2 text-green-600 font-semibold text-xs">
+                                                        <span>{t("salon_details.total_savings")}</span>
+                                                        <span className="bg-green-50 px-2 py-0.5 rounded font-bold">{t("salon_details.save_label")} AED {totalSavings}</span>
+                                                    </div>
+                                                );
+                                            }
+                                            return null;
+                                        })()}
                                         <div className="flex items-center justify-between mb-4 text-[#1F355E]">
                                             <span className="text-sm font-black uppercase tracking-widest">{t("salon_details.total_amount")}</span>
                                             <span className="text-xl sm:text-2xl font-black font-[Cormorant_Garamond]">{getTotalsPriceString()}</span>

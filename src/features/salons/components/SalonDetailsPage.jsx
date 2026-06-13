@@ -84,6 +84,16 @@ export default function SalonDetailsPage({ salon, staff, reviews, timings, id })
     setIsBookingOpen(true);
   };
 
+  const handleBookStaffService = (staff, service) => {
+    if (!user) {
+      router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
+      return;
+    }
+    setPreSelectedStaff(staff);
+    setPreSelectedService(service);
+    setIsBookingOpen(true);
+  };
+
   const handleBookButtonClick = () => {
     if (!user) {
       router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
@@ -145,7 +155,7 @@ export default function SalonDetailsPage({ salon, staff, reviews, timings, id })
       {/* ═══════════════════════════════════════════
           SALON STAFF SECTION
       ═══════════════════════════════════════════ */}
-      <SalonStaff staff={staff} onBookStaff={handleBookStaff} />
+      <SalonStaff staff={staff} onBookStaff={handleBookStaff} onBookStaffService={handleBookStaffService} />
 
 
 

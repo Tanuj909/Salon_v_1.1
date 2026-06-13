@@ -87,7 +87,7 @@ function StaffCard({ member, index, onBook, onView }) {
             onClick={onView}
             className="flex-1 py-3 bg-transparent hover:bg-[#1C3152] text-[#1C3152] hover:text-white border border-[#1C3152]/30 hover:border-transparent rounded-xl text-[9px] font-bold uppercase tracking-wider transition-all duration-300 active:scale-95 cursor-pointer"
           >
-            {t("salon_details.view")}
+            {t("salon_details.view_bio")}
           </button>
           <button
             onClick={onBook}
@@ -102,9 +102,9 @@ function StaffCard({ member, index, onBook, onView }) {
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────
-const SalonStaff = ({ staff: allStaff, onBookStaff }) => {
+const SalonStaff = ({ staff: allStaff, onBookStaff, onBookStaffService }) => {
   const { t } = useLanguage();
-  const { profile, loading: profileLoading, error: profileError, fetchProfile, clearProfile } = useStaffProfile();
+  const { profile, customPrices, loading: profileLoading, error: profileError, fetchProfile, clearProfile } = useStaffProfile();
   const [showModal, setShowModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
 
@@ -169,10 +169,18 @@ const SalonStaff = ({ staff: allStaff, onBookStaff }) => {
       {showModal && (
         <StaffProfileModal
           profile={profile}
+          customPrices={customPrices}
           member={selectedMember}
           loading={profileLoading}
           error={profileError}
           onClose={handleCloseModal}
+          onBookService={(service) => {
+            handleCloseModal();
+            // Pass custom price to the book service action if present!
+            const customPrice = customPrices?.[service.id] ?? customPrices?.[String(service.id)];
+            const serviceWithPrice = { ...service, price: customPrice };
+            onBookStaffService?.(selectedMember, serviceWithPrice);
+          }}
         />
       )}
     </>

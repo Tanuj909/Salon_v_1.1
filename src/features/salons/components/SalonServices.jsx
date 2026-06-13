@@ -199,7 +199,10 @@ function ServiceCard({ service, index, onBookNow, salon, onOpenSlider, onOpenDes
 
     return (
         <Reveal delay={index * 80}>
-            <div className="group w-full max-w-[340px] mx-auto service-card-bg rounded-[18px] border border-[#E2E8F0] overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 h-full flex flex-col relative">
+            <div 
+                onClick={() => onOpenDescription(service)}
+                className="group w-full max-w-[340px] mx-auto service-card-bg rounded-[18px] border border-[#E2E8F0] overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 h-full flex flex-col relative cursor-pointer"
+            >
 
                 {/* Header */}
                 <div className="service-card-header-bg p-4 sm:p-[0.9rem_1.25rem] shrink-0">
@@ -241,7 +244,8 @@ function ServiceCard({ service, index, onBookNow, salon, onOpenSlider, onOpenDes
                         {serviceImage && (
                             <div
                                 className="w-[72px] h-[72px] rounded-2xl overflow-hidden shrink-0 shadow-lg border border-[#E2E8F0] cursor-pointer transition-transform duration-200 hover:scale-105 active:scale-95 relative group/img"
-                                onClick={() => {
+                                onClick={(e) => {
+                                    e.stopPropagation();
                                     if (sliderImages.length > 0) {
                                         onOpenSlider(sliderImages, 0);
                                     }
@@ -302,7 +306,10 @@ function ServiceCard({ service, index, onBookNow, salon, onOpenSlider, onOpenDes
                     {/* CTA Button & Footer */}
                     <div className="mt-auto">
                         <button
-                            onClick={() => onBookNow?.(service)}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onBookNow?.(service);
+                            }}
                             className="rec-btn-primary w-full p-[14px] rounded-xl border-0 text-sm font-bold cursor-pointer tracking-[0.04em] transition-all duration-300 hover:shadow-xl active:scale-[0.98]"
                         >
                             {t("salon_details.book_service")}

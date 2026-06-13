@@ -61,6 +61,13 @@ export const getStaffProfile = async (staffId) => {
   return response.data.body;
 };
 
+export const getStaffCustomPrices = async (staffId) => {
+  const response = await apiClient.get(
+    `/staff/${staffId}/custom-prices`
+  );
+  return response.data;
+};
+
 export const getBusinessCategoriesWithDetails = async (businessId) => {
   const response = await publicApiClient.get(
     ENDPOINTS.SALON.CATEGORIES_WITH_DETAILS(businessId)

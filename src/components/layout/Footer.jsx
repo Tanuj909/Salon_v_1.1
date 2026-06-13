@@ -105,7 +105,7 @@ const Footer = () => {
             <h4 className="text-base font-bold mb-6 tracking-[0.02em] footer-main-text">{t("footer.categories")}</h4>
 
             {/* Dynamic Category Links */}
-            {['Men', 'Women', 'Kids', 'Pets'].map((catName) => (
+            {['Men', 'Women', 'Unisex', 'Kids', 'Pets'].map((catName) => (
               <Link
                 key={catName}
                 href={getCategoryLink(catName)}

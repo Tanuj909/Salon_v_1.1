@@ -45,7 +45,7 @@ const SnapchatIcon = ({ size = 18, className = "" }) => (
   </svg>
 );
 
-export default function StaffProfileModal({ profile, member, loading, error, onClose }) {
+export default function StaffProfileModal({ profile, customPrices = {}, member, loading, error, onClose, onBookService }) {
   const { t } = useLanguage();
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -76,6 +76,7 @@ export default function StaffProfileModal({ profile, member, loading, error, onC
     averageRating: profile?.averageRating ?? member?.averageRating ?? 0,
     totalReviews: profile?.totalReviews ?? member?.totalReviews ?? 0,
     totalBookings: profile?.totalBookings ?? member?.totalBookings ?? 0,
+    experienceYears: profile?.experienceYears ?? member?.experienceYears ?? null,
     workStartTime: profile?.workStartTime || member?.workStartTime || "09:00:00",
     workEndTime: profile?.workEndTime || member?.workEndTime || "18:00:00",
     weeklyOffDays: profile?.weeklyOffDays || member?.weeklyOffDays || ["SUNDAY"],
@@ -191,14 +192,19 @@ export default function StaffProfileModal({ profile, member, loading, error, onC
               </div>
               <div className="h-px bg-gray-200/60" />
               <div className="flex items-center justify-between text-xs sm:text-sm">
-                <span className="font-extrabold text-[#1C3152] uppercase tracking-wider">{t("salon_details.total_reviews") || "Total Reviews"}:</span>
-                <span className="font-black text-[#1C3152]">{displayMember.totalReviews}</span>
+                <span className="font-extrabold text-[#1C3152] uppercase tracking-wider">{t("salon_details.experience") || "Experience"}:</span>
+                <span className="font-black text-[#1C3152]">{displayMember.experienceYears != null ? `${displayMember.experienceYears} ${t("salon_details.years") || "Years"}` : "—"}</span>
               </div>
               <div className="h-px bg-gray-200/60" />
               <div className="flex items-center justify-between text-xs sm:text-sm">
+                <span className="font-extrabold text-[#1C3152] uppercase tracking-wider">{t("salon_details.total_reviews") || "Total Reviews"}:</span>
+                <span className="font-black text-[#1C3152]">{displayMember.totalReviews}</span>
+              </div>
+              {/* <div className="h-px bg-gray-200/60" />
+              <div className="flex items-center justify-between text-xs sm:text-sm">
                 <span className="font-extrabold text-[#1C3152] uppercase tracking-wider">{t("salon_details.total_bookings") || "Total Bookings"}:</span>
                 <span className="font-black text-[#1C3152]">{displayMember.totalBookings}</span>
-              </div>
+              </div> */}
               <div className="h-px bg-gray-200/60" />
               <div className="flex items-center justify-between text-xs sm:text-sm">
                 <span className="font-extrabold text-[#1C3152] uppercase tracking-wider">{t("salon_details.availability") || "Available"}:</span>
@@ -229,29 +235,34 @@ export default function StaffProfileModal({ profile, member, loading, error, onC
                   {t("salon_details.specialized_services")}
                 </span>
                 <div className="space-y-3">
-                  {displayMember.specializedServices.map((service) => (
-                    <div
-                      key={service.id}
-                      className="flex items-center justify-between p-4 bg-gradient-to-br from-[#F4F7FB] to-white hover:from-[#F4F7FB] hover:to-[#F4F7FB] border border-[#E2E8F0]/80 hover:border-[#1C3152]/30 rounded-2xl transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-0.5"
-                    >
-                      <div className="flex flex-col min-w-0 pr-4 text-left">
-                        <span className="text-sm font-extrabold text-[#1C3152] truncate">{service.name}</span>
-                        {service.description && (
-                          <span className="text-[11px] text-gray-500 line-clamp-1 mt-0.5">{service.description}</span>
-                        )}
-                        {service.durationMinutes && (
-                          <span className="inline-block self-start mt-2 px-2 py-0.5 bg-[#1C3152]/5 text-[#1C3152] rounded text-[8px] font-bold uppercase tracking-wider">
-                            {service.durationMinutes} {t("salon_details.mins")}
+                  {displayMember.specializedServices.map((service) => {
+                    const customPrice = customPrices?.[service.id] ?? customPrices?.[String(service.id)];
+                    const displayPriceText = customPrice !== undefined ? `AED ${customPrice}` : "None";
+                    return (
+                      <div
+                        key={service.id}
+                        onClick={() => onBookService?.(service)}
+                        className="flex items-center justify-between p-4 bg-gradient-to-br from-[#F4F7FB] to-white hover:from-[#F4F7FB] hover:to-[#F4F7FB] border border-[#E2E8F0]/80 hover:border-[#1C3152]/30 rounded-2xl transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-0.5 cursor-pointer"
+                      >
+                        <div className="flex flex-col min-w-0 pr-4 text-left">
+                          <span className="text-sm font-extrabold text-[#1C3152] truncate">{service.name}</span>
+                          {service.description && (
+                            <span className="text-[11px] text-gray-500 line-clamp-1 mt-0.5">{service.description}</span>
+                          )}
+                          {service.durationMinutes && (
+                            <span className="inline-block self-start mt-2 px-2 py-0.5 bg-[#1C3152]/5 text-[#1C3152] rounded text-[8px] font-bold uppercase tracking-wider">
+                              {service.durationMinutes} {t("salon_details.mins")}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex-shrink-0 text-right">
+                          <span className="text-sm sm:text-base font-extrabold text-[#1C3152] bg-white border border-[#E2E8F0]/60 px-3 py-1.5 rounded-xl shadow-sm">
+                            {displayPriceText}
                           </span>
-                        )}
+                        </div>
                       </div>
-                      <div className="flex-shrink-0 text-right">
-                        <span className="text-sm sm:text-base font-extrabold text-[#1C3152] bg-white border border-[#E2E8F0]/60 px-3 py-1.5 rounded-xl shadow-sm">
-                          AED {service.price}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}

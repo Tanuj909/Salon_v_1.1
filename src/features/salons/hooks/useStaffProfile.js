@@ -1,10 +1,9 @@
-"use client";
-
 import { useState } from "react";
-import { getStaffProfile } from "../services/salonService";
+import { getStaffProfile, getStaffCustomPrices } from "../services/salonService";
 
 export const useStaffProfile = () => {
   const [profile, setProfile] = useState(null);
+  const [customPrices, setCustomPrices] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -13,8 +12,15 @@ export const useStaffProfile = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await getStaffProfile(staffId);
-      setProfile(data);
+      const [profileData, customPricesData] = await Promise.all([
+        getStaffProfile(staffId),
+        getStaffCustomPrices(staffId).catch(err => {
+          console.warn("Failed to load custom prices, using fallback:", err);
+          return {};
+        })
+      ]);
+      setProfile(profileData);
+      setCustomPrices(customPricesData || {});
     } catch (err) {
       console.error("Error fetching staff profile:", err?.response?.status, err?.response?.data || err.message);
       setError("Failed to load staff profile.");
@@ -25,8 +31,9 @@ export const useStaffProfile = () => {
 
   const clearProfile = () => {
     setProfile(null);
+    setCustomPrices({});
     setError(null);
   };
 
-  return { profile, loading, error, fetchProfile, clearProfile };
+  return { profile, customPrices, loading, error, fetchProfile, clearProfile };
 };
