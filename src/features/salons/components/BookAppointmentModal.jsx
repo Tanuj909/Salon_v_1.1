@@ -6,7 +6,7 @@ import { useCreateBooking } from "../../profile/hooks/useCreateBooking";
 import { useSalonStaff } from "../hooks/useSalonStaff";
 import { useSalonTimings } from "../hooks/useSalonTimings";
 import { useStaffSlots } from "../hooks/useStaffSlots";
-import { getBusinessCategoriesWithDetails, getServicesByCategoryForBusiness } from "../services/salonService";
+import { getBusinessCategoriesWithDetails, getServicesByCategoryForBusiness, getStaffCustomPrices } from "../services/salonService";
 import { useLanguage } from "@/context/LanguageContext";
 import { useStaffProfile } from "../hooks/useStaffProfile";
 import StaffProfileModal from "./StaffProfileModal";
@@ -26,6 +26,10 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
     const [categoriesError, setCategoriesError] = useState(null);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [infoCategory, setInfoCategory] = useState(null);
+    
+    // Custom Prices states
+    const [customPrices, setCustomPrices] = useState({});
+    const [loadingCustomPrices, setLoadingCustomPrices] = useState(false);
     
     const [categoryServices, setCategoryServices] = useState([]);
     const [loadingCategoryServices, setLoadingCategoryServices] = useState(false);
@@ -238,6 +242,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
             setPaymentMethod("");
             setCustomerNotes("");
             setValidationError("");
+            setCustomPrices({});
             if (validationTimeout) {
                 clearTimeout(validationTimeout);
                 setValidationTimeout(null);
@@ -280,20 +285,56 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
         }
     }, [selectedStaff, todayStr]);
 
+    // Fetch custom prices when selectedStaff changes
+    useEffect(() => {
+        if (!selectedStaff) {
+            setCustomPrices({});
+            return;
+        }
+
+        const fetchPrices = async () => {
+            setLoadingCustomPrices(true);
+            try {
+                const data = await getStaffCustomPrices(selectedStaff.id);
+                setCustomPrices(data || {});
+            } catch (err) {
+                console.error("Error fetching custom prices for staff in modal:", err);
+                setCustomPrices({});
+            } finally {
+                setLoadingCustomPrices(false);
+            }
+        };
+
+        fetchPrices();
+    }, [selectedStaff]);
+
     // Calculate totals
     const totals = useMemo(() => {
-        const totalStart = selectedServices.reduce((sum, s) => sum + (s.startPrice || s.price || 0), 0);
+        const totalStart = selectedServices.reduce((sum, s) => {
+            const hasDiscount = s.discountedPrice !== undefined && s.discountedPrice !== null && s.discountedPrice < (s.price || 0);
+            const priceVal = hasDiscount ? s.discountedPrice : (s.startPrice || s.price || 0);
+            return sum + priceVal;
+        }, 0);
         const totalEnd = selectedServices.reduce((sum, s) => sum + (s.endPrice || s.price || 0), 0);
         const duration = selectedServices.reduce((sum, s) => sum + (s.durationMinutes || 0), 0);
         return { totalStart, totalEnd, duration };
     }, [selectedServices]);
 
     // Format individual service price depending on step and chosen staff
-    const getServicePriceString = (service) => {
-        const start = service.startPrice || service.price || 0;
+    const getServicePriceString = (service, showSimple = false) => {
+        const hasDiscount = service.discountedPrice !== undefined && service.discountedPrice !== null && service.discountedPrice < (service.price || 0);
+        const start = hasDiscount ? service.discountedPrice : (service.startPrice || service.price || 0);
         const end = service.endPrice || service.price || 0;
         
         if (step <= 2) {
+            if (hasDiscount) {
+                return (
+                    <span>
+                        <span className="line-through text-gray-400 mr-1.5 text-xs font-normal">AED {service.price}</span>
+                        <span>AED {service.discountedPrice}</span>
+                    </span>
+                );
+            }
             if (start === end) {
                 return `AED ${start}`;
             }
@@ -301,18 +342,39 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
         }
         
         if (!selectedStaff) {
-            // "Any" staff selected - show start pricing only
+            // "Any" staff selected
+            if (hasDiscount && !showSimple) {
+                return (
+                    <span>
+                        <span className="line-through text-gray-400 mr-1.5 text-xs font-normal">AED {service.price}</span>
+                        <span>AED {service.discountedPrice}</span>
+                    </span>
+                );
+            }
             return `AED ${start}`;
         } else {
-            // Specific stylist selected - show average pricing
-            const avg = Math.round((start + end) / 2);
-            return `AED ${avg}`;
+            // Specific stylist selected - show custom price or None
+            const customPrice = customPrices?.[service.id] ?? customPrices?.[String(service.id)];
+            if (customPrice !== undefined && customPrice !== null) {
+                return `AED ${customPrice}`;
+            }
+            return "None";
         }
     };
 
     // Format totals/subtotals depending on step and chosen staff
-    const getTotalsPriceString = () => {
+    const getTotalsPriceString = (showSimple = false) => {
+        const hasAnyDiscount = selectedServices.some(s => s.discountedPrice !== undefined && s.discountedPrice !== null && s.discountedPrice < (s.price || 0));
+        
         if (step <= 2) {
+            if (hasAnyDiscount && !showSimple) {
+                return (
+                    <span>
+                        <span className="line-through text-gray-400 mr-1.5 text-xs sm:text-sm font-normal">AED {totals.totalEnd}</span>
+                        <span>AED {totals.totalStart}</span>
+                    </span>
+                );
+            }
             if (totals.totalStart === totals.totalEnd) {
                 return `AED ${totals.totalStart}`;
             }
@@ -320,12 +382,32 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
         }
         
         if (!selectedStaff) {
-            // "Any" staff selected - show start pricing only
+            // "Any" staff selected
+            if (hasAnyDiscount && !showSimple) {
+                return (
+                    <span>
+                        <span className="line-through text-gray-400 mr-1.5 text-xs sm:text-sm font-normal">AED {totals.totalEnd}</span>
+                        <span>AED {totals.totalStart}</span>
+                    </span>
+                );
+            }
             return `AED ${totals.totalStart}`;
         } else {
-            // Specific stylist selected - show average pricing
-            const avg = Math.round((totals.totalStart + totals.totalEnd) / 2);
-            return `AED ${avg}`;
+            // Specific stylist selected - sum custom prices
+            let total = 0;
+            let hasNone = false;
+            for (const s of selectedServices) {
+                const customPrice = customPrices?.[s.id] ?? customPrices?.[String(s.id)];
+                if (customPrice !== undefined && customPrice !== null) {
+                    total += Number(customPrice);
+                } else {
+                    hasNone = true;
+                }
+            }
+            if (hasNone) {
+                return "None";
+            }
+            return `AED ${total}`;
         }
     };
 
@@ -789,6 +871,32 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                         })}
                                     </div>
                                 )}
+
+                                {selectedStaff && (
+                                    <div className="mt-4 p-4 bg-[#F8FAFC] border border-[#E0E0E0] rounded-2xl flex items-center justify-between gap-6 text-start max-w-sm animate-[tooltipFadeIn_0.2s_ease-out]">
+                                        <div className="flex-1 text-start">
+                                            <span className="text-[9px] uppercase tracking-widest text-[#628EB8] font-bold block mb-1">
+                                                {t("salon_details.experience") || "Experience"}
+                                            </span>
+                                            <p className="text-sm text-[#1F355E] font-bold">
+                                                {(selectedStaff.experienceYears != null && selectedStaff.experienceYears !== "")
+                                                    ? `${selectedStaff.experienceYears} ${t("salon_details.years") || "Years"}` 
+                                                    : (selectedStaff.experience != null && selectedStaff.experience !== "")
+                                                        ? `${selectedStaff.experience} ${t("salon_details.years") || "Years"}`
+                                                        : "—"}
+                                            </p>
+                                        </div>
+                                        <div className="w-px h-10 bg-[#E0E0E0]" />
+                                        <div className="flex-1 text-start">
+                                            <span className="text-[9px] uppercase tracking-widest text-[#628EB8] font-bold block mb-1">
+                                                {t("salon_details.average_rating") || "Rating"}
+                                            </span>
+                                            <p className="text-sm text-[#1F355E] font-bold flex items-center gap-1">
+                                                <span className="text-yellow-500">★</span> {(selectedStaff.averageRating != null && selectedStaff.averageRating !== "") ? Number(selectedStaff.averageRating).toFixed(1) : "—"}
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Date Selection Pills */}
@@ -992,7 +1100,6 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                     </div>
                                 </div>
 
-                                {/* Right Side: Service Receipt Summary */}
                                 <div className="bg-white border-2 border-[#1F355E]/5 rounded-3xl p-6 relative overflow-hidden shadow-xl flex flex-col text-start">
                                     <div className="absolute top-0 left-0 w-full h-1 bg-[#1F355E]" />
 
@@ -1003,10 +1110,19 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
 
                                     <div className="flex-1 space-y-4 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
                                         {selectedServices.map((s) => {
-                                            const start = s.startPrice || s.price || 0;
+                                            const hasDiscount = s.discountedPrice !== undefined && s.discountedPrice !== null && s.discountedPrice < (s.price || 0);
+                                            const start = hasDiscount ? s.discountedPrice : (s.startPrice || s.price || 0);
                                             const end = s.endPrice || s.price || 0;
-                                            const actualPrice = !selectedStaff ? start : Math.round((start + end) / 2);
-                                            const saveAmount = end - actualPrice;
+                                            let actualPrice = start;
+                                            let hasCustom = false;
+                                            if (selectedStaff) {
+                                                const customPrice = customPrices?.[s.id] ?? customPrices?.[String(s.id)];
+                                                if (customPrice !== undefined && customPrice !== null) {
+                                                    actualPrice = Number(customPrice);
+                                                    hasCustom = true;
+                                                }
+                                            }
+                                            const saveAmount = selectedStaff ? (hasCustom ? end - actualPrice : 0) : (end - start);
                                             return (
                                                 <div key={s.id} className="flex items-start justify-between group">
                                                     <div className="flex gap-3 min-w-0 flex-1">
@@ -1043,7 +1159,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                                             )}
                                                         </div>
                                                     </div>
-                                                    <p className="text-sm font-bold text-[#1F355E] ml-4 shrink-0">{getServicePriceString(s)}</p>
+                                                    <p className="text-sm font-bold text-[#1F355E] ml-4 shrink-0">{getServicePriceString(s, true)}</p>
                                                 </div>
                                             );
                                         })}
@@ -1052,14 +1168,33 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                     <div className="mt-6 pt-6 border-t-2 border-dashed border-[#E0E0E0]">
                                         <div className="flex items-center justify-between mb-2 text-[#628EB8]">
                                             <span className="text-xs font-semibold">{t("salon_details.subtotal")}</span>
-                                            <span className="text-sm font-bold">{getTotalsPriceString()}</span>
+                                            <span className="text-sm font-bold">AED {totals.totalEnd}</span>
                                         </div>
                                         {(() => {
-                                            const totalPayable = !selectedStaff 
-                                                ? totals.totalStart 
-                                                : Math.round((totals.totalStart + totals.totalEnd) / 2);
-                                            const totalSavings = totals.totalEnd - totalPayable;
-                                            if (totalSavings > 0) {
+                                            let totalPayable = totals.totalStart;
+                                            let totalSavings = totals.totalEnd - totals.totalStart;
+                                            let showSavings = totalSavings > 0;
+                                            
+                                            if (selectedStaff) {
+                                                let sumCustom = 0;
+                                                let hasNone = false;
+                                                for (const s of selectedServices) {
+                                                    const customPrice = customPrices?.[s.id] ?? customPrices?.[String(s.id)];
+                                                    if (customPrice !== undefined && customPrice !== null) {
+                                                        sumCustom += Number(customPrice);
+                                                    } else {
+                                                        hasNone = true;
+                                                    }
+                                                }
+                                                if (hasNone) {
+                                                    showSavings = false;
+                                                } else {
+                                                    totalPayable = sumCustom;
+                                                    totalSavings = totals.totalEnd - totalPayable;
+                                                    showSavings = totalSavings > 0;
+                                                }
+                                            }
+                                            if (showSavings) {
                                                 return (
                                                     <div className="flex items-center justify-between mb-2 text-green-600 font-semibold text-xs">
                                                         <span>{t("salon_details.total_savings")}</span>
@@ -1071,7 +1206,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                         })()}
                                         <div className="flex items-center justify-between mb-4 text-[#1F355E]">
                                             <span className="text-sm font-black uppercase tracking-widest">{t("salon_details.total_amount")}</span>
-                                            <span className="text-xl sm:text-2xl font-black font-[Cormorant_Garamond]">{getTotalsPriceString()}</span>
+                                            <span className="text-xl sm:text-2xl font-black font-[Cormorant_Garamond]">{getTotalsPriceString(true)}</span>
                                         </div>
 
                                         <div className="flex items-center gap-2 p-3 bg-green-50 rounded-xl border border-green-100">
@@ -1105,7 +1240,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                 {currentLanguage === "ar" ? "الإجمالي:" : "Total:"}
                             </span>
                             <span className="font-[Cormorant_Garamond] text-[13px] sm:text-xl font-bold text-[#1F355E] whitespace-nowrap">
-                                {getTotalsPriceString()}
+                                {getTotalsPriceString(true)}
                             </span>
                         </div>
                     )}

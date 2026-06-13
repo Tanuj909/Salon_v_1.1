@@ -66,6 +66,7 @@ export const ENDPOINTS = {
   BOOKINGS: {
     CREATE: "/bookings",
     MY_BOOKINGS: "/bookings/my",
+    CURRENT: "/bookings/my/current",
     MY_BUSINESS: (businessId) => `/bookings/my/business/${businessId}`,
     CANCEL: (id) => `/bookings/my/${id}/cancel`,
   },

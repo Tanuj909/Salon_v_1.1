@@ -13,7 +13,8 @@ export const translations = {
       console: "Console",
       support: "Support",
       logout: "Logout",
-      login: "Login"
+      login: "Login",
+      current_bookings: "Current Bookings"
     },
     login: {
       welcome_back: "Welcome Back",
@@ -916,7 +917,8 @@ export const translations = {
       console: "لوحة التحكم",
       support: "الدعم",
       logout: "تسجيل الخروج",
-      login: "تسجيل الدخول"
+      login: "تسجيل الدخول",
+      current_bookings: "الحجوزات الحالية"
     },
     login: {
       welcome_back: "مرحباً بعودتك",

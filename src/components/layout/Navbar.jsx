@@ -8,6 +8,7 @@ import { useMyBusiness } from '@/features/business/hooks/useMyBusiness';
 import MessageModal from '@/features/business/components/MessageModal';
 import AgreementsModal from '@/features/business/components/AgreementsModal';
 import SupportModal from '@/features/support/components/SupportModal';
+import CustomerCurrentBookingsModal from '@/features/profile/components/CustomerCurrentBookingsModal';
 import { useLanguage } from '@/context/LanguageContext';
 
 export default function Navbar() {
@@ -16,6 +17,7 @@ export default function Navbar() {
   const [isMessagesOpen, setIsMessagesOpen] = useState(false);
   const [isAgreementsOpen, setIsAgreementsOpen] = useState(false);
   const [isSupportOpen, setIsSupportOpen] = useState(false);
+  const [isCurrentBookingsOpen, setIsCurrentBookingsOpen] = useState(false);
 
   const [isScrolled, setIsScrolled] = useState(false);
   const { user, loading, logout } = useAuthContext();
@@ -185,6 +187,18 @@ export default function Navbar() {
                         <span className="material-symbols-outlined text-lg">account_circle</span>
                         {t('navbar.profile')}
                       </Link>
+                      {user?.role === 'CUSTOMER' && (
+                        <button
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium navbar-link-text hover:bg-[#D98C5F]/10 hover:text-[#D98C5F] transition-colors text-left cursor-pointer"
+                          onClick={() => {
+                            setIsCurrentBookingsOpen(true);
+                            setIsProfileOpen(false);
+                          }}
+                        >
+                          <span className="material-symbols-outlined text-lg">calendar_today</span>
+                          {t('navbar.current_bookings') || "Current Bookings"}
+                        </button>
+                      )}
                       {['ADMIN', 'SUPER_ADMIN', 'STAFF', 'RECEPTIONIST'].includes(user?.role) && (
                         <Link
                           href="https://fastbookingservice.com/admin"
@@ -389,6 +403,19 @@ export default function Navbar() {
               </button>
             )}
 
+            {user && user.role === 'CUSTOMER' && (
+              <button
+                className="flex items-center gap-3 navbar-link-text font-medium hover:text-[#D98C5F] transition-all px-4 py-3.5 rounded-2xl hover:bg-[#D98C5F]/10 text-base w-full text-left cursor-pointer animate-in fade-in duration-200"
+                onClick={() => {
+                  setIsCurrentBookingsOpen(true);
+                  setIsMenuOpen(false);
+                }}
+              >
+                <span className="material-symbols-outlined text-xl">calendar_today</span>
+                {t('navbar.current_bookings') || "Current Bookings"}
+              </button>
+            )}
+
             <div className="h-px w-full bg-gray-100 my-2" />
 
             <Link
@@ -445,6 +472,11 @@ export default function Navbar() {
       <SupportModal
         isOpen={isSupportOpen}
         onClose={() => setIsSupportOpen(false)}
+      />
+
+      <CustomerCurrentBookingsModal
+        isOpen={isCurrentBookingsOpen}
+        onClose={() => setIsCurrentBookingsOpen(false)}
       />
 
     </nav>

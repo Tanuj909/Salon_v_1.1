@@ -8,6 +8,13 @@ export const getMyBookings = async (page = 0, size = 10, sort = "bookingDate,asc
   return response.data;
 };
 
+export const getCustomerCurrentBookings = async (page = 0, size = 20) => {
+  const response = await apiClient.get(ENDPOINTS.BOOKINGS.CURRENT, {
+    params: { page, size },
+  });
+  return response.data;
+};
+
 export const getMyBusinessBookings = async (businessId, page = 0, size = 10, sort = "bookingDate,asc") => {
   const response = await apiClient.get(ENDPOINTS.BOOKINGS.MY_BUSINESS(businessId), {
     params: { page, size, sort },
