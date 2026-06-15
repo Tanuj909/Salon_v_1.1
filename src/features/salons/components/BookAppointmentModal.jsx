@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect, useMemo } from "react";
 import { X, Calendar, Clock, User, Scissors, CreditCard, MessageSquare, CheckCircle, AlertCircle, Loader2, ChevronRight, Sparkles } from "lucide-react";
 import { useCreateBooking } from "../../profile/hooks/useCreateBooking";
@@ -353,12 +352,20 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
             }
             return `AED ${start}`;
         } else {
-            // Specific stylist selected - show custom price or None
+            // Specific stylist selected - show custom price or fall back to service price
             const customPrice = customPrices?.[service.id] ?? customPrices?.[String(service.id)];
             if (customPrice !== undefined && customPrice !== null) {
                 return `AED ${customPrice}`;
             }
-            return "None";
+            if (hasDiscount && !showSimple) {
+                return (
+                    <span>
+                        <span className="line-through text-gray-400 mr-1.5 text-xs font-normal">AED {service.price}</span>
+                        <span>AED {service.discountedPrice}</span>
+                    </span>
+                );
+            }
+            return `AED ${start}`;
         }
     };
 
@@ -367,7 +374,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
         const hasAnyDiscount = selectedServices.some(s => s.discountedPrice !== undefined && s.discountedPrice !== null && s.discountedPrice < (s.price || 0));
 
         if (step <= 2) {
-            if (hasAnyDiscount && !showSimple) {
+            if (hasAnyDiscount && totals.totalStart < totals.totalEnd && !showSimple) {
                 return (
                     <span>
                         <span className="line-through text-gray-400 mr-1.5 text-xs sm:text-sm font-normal">AED {totals.totalEnd}</span>
@@ -383,7 +390,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
 
         if (!selectedStaff) {
             // "Any" staff selected
-            if (hasAnyDiscount && !showSimple) {
+            if (hasAnyDiscount && totals.totalStart < totals.totalEnd && !showSimple) {
                 return (
                     <span>
                         <span className="line-through text-gray-400 mr-1.5 text-xs sm:text-sm font-normal">AED {totals.totalEnd}</span>
@@ -393,19 +400,31 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
             }
             return `AED ${totals.totalStart}`;
         } else {
-            // Specific stylist selected - sum custom prices
+            // Specific stylist selected - sum custom prices, fallback to default prices if not defined
             let total = 0;
-            let hasNone = false;
+            let totalEnd = 0;
+            let hasAnyDiscount = false;
             for (const s of selectedServices) {
                 const customPrice = customPrices?.[s.id] ?? customPrices?.[String(s.id)];
                 if (customPrice !== undefined && customPrice !== null) {
                     total += Number(customPrice);
+                    totalEnd += Number(customPrice);
                 } else {
-                    hasNone = true;
+                    const hasDiscount = s.discountedPrice !== undefined && s.discountedPrice !== null && s.discountedPrice < (s.price || 0);
+                    const start = hasDiscount ? s.discountedPrice : (s.startPrice || s.price || 0);
+                    const end = s.endPrice || s.price || 0;
+                    total += start;
+                    totalEnd += end;
+                    if (hasDiscount) hasAnyDiscount = true;
                 }
             }
-            if (hasNone) {
-                return "None";
+            if (hasAnyDiscount && total < totalEnd && !showSimple) {
+                return (
+                    <span>
+                        <span className="line-through text-gray-400 mr-1.5 text-xs sm:text-sm font-normal">AED {totalEnd}</span>
+                        <span>AED {total}</span>
+                    </span>
+                );
             }
             return `AED ${total}`;
         }
@@ -1122,7 +1141,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                                     hasCustom = true;
                                                 }
                                             }
-                                            const saveAmount = selectedStaff ? (hasCustom ? end - actualPrice : 0) : (end - start);
+                                            const saveAmount = end - actualPrice;
                                             return (
                                                 <div key={s.id} className="flex items-start justify-between group">
                                                     <div className="flex gap-3 min-w-0 flex-1">
@@ -1177,22 +1196,19 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
 
                                             if (selectedStaff) {
                                                 let sumCustom = 0;
-                                                let hasNone = false;
                                                 for (const s of selectedServices) {
                                                     const customPrice = customPrices?.[s.id] ?? customPrices?.[String(s.id)];
                                                     if (customPrice !== undefined && customPrice !== null) {
                                                         sumCustom += Number(customPrice);
                                                     } else {
-                                                        hasNone = true;
+                                                        const hasDiscount = s.discountedPrice !== undefined && s.discountedPrice !== null && s.discountedPrice < (s.price || 0);
+                                                        const start = hasDiscount ? s.discountedPrice : (s.startPrice || s.price || 0);
+                                                        sumCustom += start;
                                                     }
                                                 }
-                                                if (hasNone) {
-                                                    showSavings = false;
-                                                } else {
-                                                    totalPayable = sumCustom;
-                                                    totalSavings = totals.totalEnd - totalPayable;
-                                                    showSavings = totalSavings > 0;
-                                                }
+                                                totalPayable = sumCustom;
+                                                totalSavings = totals.totalEnd - totalPayable;
+                                                showSavings = totalSavings > 0;
                                             }
                                             if (showSavings) {
                                                 return (
