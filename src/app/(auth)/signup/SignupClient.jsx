@@ -177,9 +177,6 @@ export default function SignupClient() {
                        onChange={(e) => setForm({ ...form, otp: e.target.value })}
                      />
                    </div>
-                   <p className="text-[11px] text-[#C49B66] font-semibold ml-1 mt-1">
-                     * Please check OTP in spam/junk folder as well
-                   </p>
                  </div>
   
                   {/* Password */}
@@ -197,6 +194,17 @@ export default function SignupClient() {
                         className="w-full pl-12 pr-4 py-4 bg-[#1C3152]/5 border-transparent rounded-2xl text-sm focus:ring-2 focus:ring-[#1C3152]/10 transition-all placeholder-[#1C3152]/20 outline-none rec-section-heading font-medium"
                         onChange={(e) => setForm({ ...form, password: e.target.value })}
                       />
+                    </div>
+                  </div>
+
+                  {/* OTP spam/junk folder warning banner */}
+                  <div className="md:col-span-2">
+                    <div className="relative overflow-hidden bg-[#1C3152] border border-[#C49B66]/20 rounded-2xl py-1.5 px-4 flex items-center justify-center gap-2">
+                      <span className="material-symbols-outlined text-[13px] text-[#C49B66] shrink-0 animate-pulse">info</span>
+                      <p className="text-[11px] text-[#C49B66] font-bold tracking-wider uppercase whitespace-nowrap">
+                        * Please check OTP in spam/junk folder as well
+                      </p>
+                      <div className="glow-line" />
                     </div>
                   </div>
                </div>

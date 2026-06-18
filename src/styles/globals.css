@@ -202,3 +202,32 @@ a {
 .input-base:focus {
   border-color: var(--footer-bg);
 }
+
+/* =========================
+   Shine & Flash Animations
+   ========================= */
+
+@keyframes glow-sweep {
+  0% { left: -100%; }
+  50% { left: 100%; }
+  100% { left: 100%; }
+}
+
+.glow-line {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    rgba(255, 255, 255, 0.4),
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transform: skewX(-25deg);
+  animation: glow-sweep 3s infinite ease-in-out;
+  pointer-events: none;
+}

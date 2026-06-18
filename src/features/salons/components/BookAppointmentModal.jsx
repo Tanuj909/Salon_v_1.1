@@ -836,23 +836,25 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                 ) : (
                                     <div className="flex gap-3 overflow-x-auto pb-2">
                                         {/* "Any" option */}
+                                        {/* "Any" option */}
                                         <button
                                             onClick={() => setSelectedStaff(null)}
-                                            className={`flex-shrink-0 flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all min-w-[100px] ${!selectedStaff ? "border-[#628EB8] bg-[#628EB8]/5 shadow-sm" : "border-[#E0E0E0] bg-white hover:border-[#628EB8]/20"}`}
+                                            className={`flex-shrink-0 flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all min-w-[100px] relative overflow-hidden ${!selectedStaff ? "border-[#628EB8] bg-[#628EB8]/5 shadow-sm" : "border-[#E0E0E0] bg-white hover:border-[#628EB8]/20"}`}
                                         >
                                             <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg ${!selectedStaff ? "bg-[#628EB8] text-white" : "bg-[#F8FAFC] text-[#1F355E] border border-[#E0E0E0]"}`}>
                                                 <Sparkles size={18} />
                                             </div>
                                             <span className="text-[10px] font-bold uppercase tracking-wider text-[#1F355E]">{t("salon_details.any")}</span>
+                                            {!selectedStaff && <div className="glow-line" />}
                                         </button>
-
+ 
                                         {staff.map((member) => {
                                             const isSelected = selectedStaff?.id === member.id;
                                             return (
                                                 <div
                                                     key={member.id}
                                                     onClick={() => setSelectedStaff(member)}
-                                                    className={`flex-shrink-0 flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all min-w-[100px] cursor-pointer ${isSelected ? "border-[#628EB8] bg-[#628EB8]/5 shadow-sm" : "border-[#E0E0E0] bg-white hover:border-[#628EB8]/20"}`}
+                                                    className={`flex-shrink-0 flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all min-w-[100px] cursor-pointer relative overflow-hidden ${isSelected ? "border-[#628EB8] bg-[#628EB8]/5 shadow-sm" : "border-[#E0E0E0] bg-white hover:border-[#628EB8]/20"}`}
                                                     role="button"
                                                     tabIndex={0}
                                                     onKeyDown={(e) => {
@@ -885,38 +887,40 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                                     >
                                                         {t("salon_details.view_bio")}
                                                     </button>
+                                                    {isSelected && <div className="glow-line" />}
                                                 </div>
                                             );
                                         })}
                                     </div>
-                                )}
-
-                                {selectedStaff && (
-                                    <div className="mt-4 p-4 bg-[#F8FAFC] border border-[#E0E0E0] rounded-2xl flex items-center justify-between gap-6 text-start max-w-sm animate-[tooltipFadeIn_0.2s_ease-out]">
-                                        <div className="flex-1 text-start">
-                                            <span className="text-[9px] uppercase tracking-widest text-[#628EB8] font-bold block mb-1">
-                                                {t("salon_details.experience") || "Experience"}
-                                            </span>
-                                            <p className="text-sm text-[#1F355E] font-bold">
-                                                {(selectedStaff.experienceYears != null && selectedStaff.experienceYears !== "")
-                                                    ? `${selectedStaff.experienceYears} ${t("salon_details.years") || "Years"}`
-                                                    : (selectedStaff.experience != null && selectedStaff.experience !== "")
-                                                        ? `${selectedStaff.experience} ${t("salon_details.years") || "Years"}`
-                                                        : "—"}
-                                            </p>
-                                        </div>
-                                        <div className="w-px h-10 bg-[#E0E0E0]" />
-                                        <div className="flex-1 text-start">
-                                            <span className="text-[9px] uppercase tracking-widest text-[#628EB8] font-bold block mb-1">
-                                                {t("salon_details.average_rating") || "Rating"}
-                                            </span>
-                                            <p className="text-sm text-[#1F355E] font-bold flex items-center gap-1">
-                                                <span className="text-yellow-500">★</span> {(selectedStaff.averageRating != null && selectedStaff.averageRating !== "") ? Number(selectedStaff.averageRating).toFixed(1) : "—"}
-                                            </p>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
+                                    )}
+ 
+                                 {selectedStaff && (
+                                     <div className="mt-4 p-4 bg-[#F8FAFC] border border-[#E0E0E0] rounded-2xl flex items-center justify-between gap-6 text-start max-w-sm animate-[tooltipFadeIn_0.2s_ease-out] relative overflow-hidden">
+                                         <div className="flex-1 text-start">
+                                             <span className="text-[9px] uppercase tracking-widest text-[#628EB8] font-bold block mb-1">
+                                                 {t("salon_details.experience") || "Experience"}
+                                             </span>
+                                             <p className="text-sm text-[#1F355E] font-bold">
+                                                 {(selectedStaff.experienceYears != null && selectedStaff.experienceYears !== "")
+                                                     ? `${selectedStaff.experienceYears} ${t("salon_details.years") || "Years"}`
+                                                     : (selectedStaff.experience != null && selectedStaff.experience !== "")
+                                                         ? `${selectedStaff.experience} ${t("salon_details.years") || "Years"}`
+                                                         : "—"}
+                                             </p>
+                                         </div>
+                                         <div className="w-px h-10 bg-[#E0E0E0]" />
+                                         <div className="flex-1 text-start">
+                                             <span className="text-[9px] uppercase tracking-widest text-[#628EB8] font-bold block mb-1">
+                                                 {t("salon_details.average_rating") || "Rating"}
+                                             </span>
+                                             <p className="text-sm text-[#1F355E] font-bold flex items-center gap-1">
+                                                 <span className="text-yellow-500">★</span> {(selectedStaff.averageRating != null && selectedStaff.averageRating !== "") ? Number(selectedStaff.averageRating).toFixed(1) : "—"}
+                                             </p>
+                                         </div>
+                                         <div className="glow-line" />
+                                     </div>
+                                 )}
+                             </div>
 
                             {/* Date Selection Pills */}
                             <div className="text-start">
@@ -1126,6 +1130,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                                         <h4 className="font-bold text-[#1F355E] text-sm uppercase tracking-widest">{t("salon_details.order_summary")}</h4>
                                         <Sparkles size={16} className="text-[#628EB8]" />
                                     </div>
+                                    <div className="glow-line" />
 
                                     <div className="flex-1 space-y-4 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
                                         {selectedServices.map((s) => {
@@ -1248,7 +1253,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                 <div className="px-3.5 py-4 sm:px-8 sm:py-5 bg-white border-t border-[#E0E0E0] flex items-center justify-between gap-3 shrink-0">
                     {/* Total Pill */}
                     {selectedServices.length > 0 && (
-                        <div className="flex items-center gap-1.5 sm:gap-3 whitespace-nowrap min-w-0">
+                        <div className="flex items-center gap-1.5 sm:gap-3 whitespace-nowrap min-w-0 relative overflow-hidden bg-[#628EB8]/5 border border-[#628EB8]/15 px-3 py-1.5 rounded-xl">
                             <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-[#628EB8] font-bold hidden sm:inline">
                                 {selectedServices.length} {selectedServices.length === 1 ? t("salon_details.service_count") : t("salon_details.services_count")}
                             </span>
@@ -1258,6 +1263,7 @@ const BookAppointmentModal = ({ isOpen, onClose, salonId, salonName, preSelected
                             <span className="font-[Cormorant_Garamond] text-[13px] sm:text-xl font-bold text-[#1F355E] whitespace-nowrap">
                                 {getTotalsPriceString(true)}
                             </span>
+                            <div className="glow-line" />
                         </div>
                     )}
                     {selectedServices.length === 0 && <span />}

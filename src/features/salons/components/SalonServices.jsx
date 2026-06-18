@@ -153,7 +153,7 @@ function CategoryCard({ category, index, onClick }) {
                         <div className="flex justify-between items-center text-[12px]">
                             <span className="text-[#6B6B6B]">{t("salon_details.price_range")}</span>
                             <span className="font-bold text-[#1C3152]">
-                                AED {category.minPrice} - {category.maxPrice}
+                                AED ({category.minPrice} - {category.maxPrice})
                             </span>
                         </div>
                         <div className="flex justify-between items-center text-[12px] mt-1">
@@ -294,7 +294,9 @@ function ServiceCard({ service, index, onBookNow, salon, onOpenSlider, onOpenDes
                         </span>
                         <div>
                             <span className="text-[16px] font-bold text-[#C49B66] font-[Cormorant_Garamond,serif]">
-                                {service.startPrice && service.endPrice && service.startPrice !== service.endPrice ? (
+                                {service.discountedPrice !== undefined && service.discountedPrice !== null && service.discountedPrice < (service.price || 0) ? (
+                                    `AED (${service.discountedPrice} - ${service.price})`
+                                ) : service.startPrice && service.endPrice && service.startPrice !== service.endPrice ? (
                                     `AED (${service.startPrice} - ${service.endPrice})`
                                 ) : (
                                     `AED ${service.price || service.startPrice}`
